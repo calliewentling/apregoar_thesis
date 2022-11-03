@@ -1,0 +1,833 @@
+/* Variable Definition */
+:root {
+    --primary-color: rgba(155, 185, 193);
+    --secondary-color: #666;
+    --dark-color: black;
+    --light-color: white;
+    --shadow-color: rgba(0,0,0,0.3);
+    
+    --brightlight-color: rgb(255, 255, 0,1);
+    --highlight-color: rgba(255, 255, 150, 1);
+    --lowlight-color: rgb(69, 108, 131);
+    padding: 10px;
+
+    --card-height: 100px;
+    --card-width: 300px;
+    --card-margin: 10px;
+    --card-box-shadow: -10px 5px 20px;
+    --card-box-shadow-hover: -10px 10px 20px rgba(0,0,0,0.4);
+    --card-border-radius: 5px;
+    --card-border: 3px solid;
+
+    --card-title-height: 30px;
+    --card-title-width: (100%);
+    --card-title-font-size: 16px;
+    --card-title-padding: 5px;
+
+    --card-details-margin: 5px 5px 5px 0px;
+    --card-details-width: 90%;
+}
+
+.button1 {
+    background-color: var(--secondary-color);
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    box-shadow: -10px 5px 20px var(--shadow-color); 
+}
+.button1:hover {
+    box-shadow: -10px 10px 20px rgba(0,0,0,0.4);
+    font-weight: bold;
+}
+.button2 {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 10px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    box-shadow: -10px 5px 20px var(--shadow-color); 
+}
+.button2:hover {
+    box-shadow: -10px 10px 20px rgba(0,0,0,0.4);
+    font-weight: bold;
+}
+
+.buttonHide {
+    background-color: black;
+    color: grey;
+}
+
+.map {
+    height: 400px;
+    width: 97%;
+    position: center;
+    margin: 10px;
+    box-shadow: -10px 5px 20px var(--shadow-color);
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+.map:-webkit-full-screen {
+    height: 100%;
+    margin: 0;
+}
+.map:-ms-fullscreen {
+height: 100%;
+}
+.map:fullscreen {
+height: 100%;
+}
+.map .ol-rotate {
+top: 3em;
+}
+
+.wrapper {
+    position:relative;
+}
+#progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(0,60,136,0.4);
+    width: 0;
+    transition: width 250ms;
+}
+
+
+/*POPUP DEFINITIONS */
+.ol-popup {
+    position: absolute;
+    background-color: var(--primary-color);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    border: 2px solid var(--brightlight-color);
+    bottom: 12px;
+    left: -50px;
+    min-width: 280px;
+}
+
+.popup-ititle {
+    background-color: white;
+    padding: 10px;
+    color: black;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.popup-stitle{
+    padding: 10px;
+    color: white;
+    font-size: 12px;
+}
+
+.popup-scroll{
+    height: 30px;
+    display:absolute;
+    position: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    background-color:var(--secondary-color);
+    padding: 10px;
+}
+
+.popup-direction, .popup-count{
+    display:inline;
+}
+
+.popup-direction {
+    cursor:pointer;
+}
+
+.popup-direction:hover {
+    font-size: 12px;
+}
+
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+  .ol-popup:after {
+    border-top-color: var(--secondary-color);
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+  }
+  .ol-popup:before {
+    border-top-color: var(--brightlight-color);
+    border-width: 12px;
+    left: 48px;
+    margin-left: -12px;
+  }
+  .ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    color: black;
+    top: 2px;
+    right: 8px;
+  }
+  .ol-popup-closer:after {
+    content: "✖";
+  }
+  
+  
+
+/* MULTICHECK BOX */
+
+.MultiCheckBox {
+    border:1px solid #e2e2e2;
+    padding: 5px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.MultiCheckBox .k-icon{ 
+    font-size: 15px;
+    float: right;
+    font-weight: bolder;
+    margin-top: -7px;
+    height: 10px;
+    width: 14px;
+    color:#787878;
+} 
+
+.MultiCheckBoxDetail {
+    display:none;
+    position:relative; /*cgw updated! Originally absolute (must scroll to find if filter is already scrolled). Fixed gets lost if scrolled. Sticky & static makes incur spaces to accommodate the list but its clear where it is and returns after*/
+    border:1px solid #e2e2e2;
+    background-color:#ffffff;
+    overflow-y:hidden;
+}
+
+.MultiCheckBoxDetailBody {
+    overflow-y:scroll;
+}
+
+    .MultiCheckBoxDetail .cont  {
+        clear:both;
+        overflow: hidden;
+        padding: 2px;
+    }
+
+    .MultiCheckBoxDetail .cont:hover  {
+        background-color:#cfcfcf;
+    }
+
+    .MultiCheckBoxDetailBody > div > div {
+        float:left; 
+    }
+
+.MultiCheckBoxDetail>div>div:nth-child(1) {
+
+}
+
+.MultiCheckBoxDetailHeader {
+    overflow:hidden;
+    position:relative;
+    height: 28px;
+    background-color:#3d3d3d;
+}
+
+    .MultiCheckBoxDetailHeader>input {
+        position: absolute;
+        top: 4px;
+        left: 3px;
+    }
+
+    .MultiCheckBoxDetailHeader>div {
+        position: absolute;
+        top: 5px;
+        left: 24px;
+        color:#fff;
+    }
+
+    /* Distributing screen */
+    .split {
+        
+        height: 100%;
+        width: 50%;
+        position: fixed;
+        z-index: 1;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
+    .left {
+        left: 0;
+    }
+
+    .right {
+        right: 0;
+    }
+
+    .top {
+        top: 0;
+        height: 60%;
+        position: fixed;
+        /*overflow: hidden;*/
+    }
+
+    .bottom {
+        bottom: 0;
+        height: 40%;
+        position: fixed;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    .filterSection{
+        box-shadow: -10px 5px 20px var(--shadow-color);
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    /* Filter Elements in a Line */
+    .filterLine {
+        white-space: nowrap;
+        overflow-x: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .filterItem {
+        display: inline-block;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    /*BUTTON OPTIONS AREA*/
+    .inlineSection {
+        align-items: left;
+        justify-content: left;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 20px;
+    }
+
+    .inlineSection > * {
+        margin: 0 20px 0 0;
+        width: 200px;
+    }
+
+    /* 
+    Skeleton Loading 
+    https://www.foolishdeveloper.com/2021/09/skeleton-screen-loading-animation.html
+    */
+    .resultsArea {
+        height: 320px;
+        width: 97%;
+        position: center;
+        margin: 10px;
+        box-shadow: -10px 5px 20px var(--shadow-color);
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .cardArea {
+        display: block;
+        position: relative;
+        margin-left: 50px;
+        border-radius: 5px;
+    }
+
+    .cardArea .cardCount{
+        font: bold 12px Sans-Serif;
+        line-height: .7;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        background: var(--primary-color);
+        color: #fff;
+        padding: 10px 10px;
+        transform-origin:  0 0px;
+        transform: rotate(90deg);
+        position: absolute;
+        width: 130px;
+        height: 50px;
+        border: 1px solid #d9d9d9;
+        border-radius: 5px;
+        /*top: 0;
+        left: 15px;*/
+    }
+
+    .resultsStory {
+        align-items: left;
+        justify-content: left;
+        background: #d9d9d9;
+        overflow-x: auto;
+        white-space: nowrap;
+        height: 150px;
+    }
+
+    .story-card {
+        width: var(--card-width);
+        height: var(--card-height);
+        margin: var(--card-margin);
+        box-shadow: var(--card-box-shadow) var(--shadow-color);
+        border-radius: var(--card-border-radius);
+        border: var(--card-border) var(--light-color);
+        overflow: hidden;
+        background: var(--dark-color);
+        color: var(--light-color);
+        display: inline-block; /*previously: flex*/
+        flex-direction: column; /*column*/
+        align-items: center;
+        justify-content: space-between;
+        transition: box-shadow 0.2s ease-in;
+        cursor: pointer;
+    }
+
+    .story-card:hover {
+        box-shadow: var(--card-box-shadow-hover);
+        font-weight: bold;
+    }
+
+    .story-card .story-title {
+        height: var(--card-title-height);
+        width: var(--card-title-width);
+        font-size: var(--card-title-font-size);
+        padding: var(--card-title-padding);
+        text-align: left;
+        position: relative;
+        background: var(--primary-color);
+    }
+
+    .story-card .story-details{
+        text-align: center;
+        margin: var(--card-details-margin);
+        width: var(--card-details-width);
+    }
+
+    .story-card .story-details .pub-date {
+        margin-bottom: 5px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .story-card .story-details .story-section {
+        font-size: 10px;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .story-card .story-details .story-tags {
+        margin-top: 5px;
+        font-size: 12px;
+        color: var(--secondary-color);
+    }
+
+    .resultsInstance {
+        /*display: flex;*/
+        align-items: left;
+        justify-content: left;
+        /*height: 135px;*/
+        background: #d9d9d9;
+        overflow-x: auto;
+        white-space: nowrap;
+        height: 150px;
+    }
+
+   
+    .instance-card {
+        width: var(--card-width);
+        height: var(--card-height);
+        margin: var(--card-margin);
+        box-shadow: var(--card-box-shadow) var(--shadow-color);
+        border-radius: var(--card-border-radius);
+        border: var(--card-border) var(--light-color);
+        overflow: hidden;
+        background: var(--primary-color);
+        color: var(--light-color);
+        display: inline-block; /*previously: flex*/
+        flex-direction: column; /*column*/
+        align-items: center;
+        justify-content: space-between;
+        transition: box-shadow 0.2s ease-in;
+        cursor: pointer;
+    }
+
+    .instance-card:hover {
+        box-shadow: var(--box-shadow-hover);
+        font-weight: bold;
+    }
+
+    .instance-card .instance-title {
+        height: var(--card-title-height);
+        width: var(--card-title-width);
+        font-size: var(--card-title-font-size);
+        padding: var(--card-title-padding);
+        text-align: left;
+        position: relative;
+        background: var(--light-color);
+        color: var(--dark-color);
+    }
+
+    .instance-card .instance-details{
+        text-align: center;
+        margin: var(--card-details-margin);
+        width: var(--card-details-width);
+    }
+
+    .instance-card .instance-details .instance-timeframe {
+        font-size: 10px;
+    }
+
+    .instance-card .instance-details .instance-dateframe {
+        font-size: 12px;
+        color: var(--light-color);
+        font-weight: bold;
+    }
+
+    .instance-card .instance-details .instance-stitle {
+        margin-top: 5px;
+        font-size: 10px;
+        color: var(--secondary-color);
+    }
+
+
+    /*SKELETON LOAD OF CARDS*/
+    .story-card.skeleton {
+        cursor: wait;
+    }
+
+    .story-card.skeleton .hide-text {
+        color: transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .story-card.skeleton .hide-text::before {
+        content: "";
+        background: linear-gradient(to right, #e2e2e2 25%, #d5d5d5 50%, #e2e2e2 100%);
+        animation-name: gradiente-animation;
+        animation-duration: 2s;
+        animation-iteration-count: infinate;
+        filter: blur(5px);
+    }
+
+    .instance-card.skeleton {
+        cursor: wait;
+    }
+
+    .instance-card.skeleton .hide-text{
+        color: transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    
+
+    .map.skeleton {
+        filter: blur(5px);
+        cursor: wait;
+    }
+    
+    /*
+    .resultsArea.skeleton {
+        background: linear-gradient(to right, #e2e2e2 25%, #d5d5d5 50%, #e2e2e2 100%);
+        animation-name: gradiente-animation;
+        animation-duration: 1s;
+        animation-iteration-count: infinate;
+    }
+    @keyframes gradient-animation {
+        from {
+          left: 0%;
+        }
+        to {
+          left: 100%;
+        }
+    }
+    */
+    
+
+
+    /*LOADING DETAIL OVERLAY*/
+    .dO {
+        border-radius: 5px;
+        border: 10px solid var(--light-color);
+        position: relative;
+        width: 97%;
+        /*
+        top: 10%;
+        left: 10%;
+        max-height: 80%;
+        */
+        font-size: 14px;
+        background-color: rgba(0,0,0,.75);
+        box-shadow: var(--card-box-shadow) var(--shadow-color);
+        color: var(--light-color);
+        margin: 10px;
+        overflow-y: auto;
+    }
+
+
+    .dO .close{
+        font-size: 20px;
+        height: 30px;
+        font-weight: bold;
+        padding-right: 10px;
+        text-align: right;
+        background-color: var(--primary-color);
+        color: var(--dark-color);
+        cursor:pointer;
+    }
+
+    .dO .close:hover{
+        font-size:30px;
+    }
+
+    .dO .dO-title {
+        text-align: center;
+        top: 2%;
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--light-color);
+        background-color:var(--primary-color);
+    }
+
+    .dO .dO-story{
+        color: var(--primary-color);
+    }
+
+    .dO .dO-story .dO-author {
+        padding-top: 10px;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+    }
+
+    .dO .dO-story .dO-section {
+        text-align: center;
+        color: white;
+    }
+
+    .dO .dO-story .dO-pubdate {
+        text-align: center;
+        color: white;
+    }
+
+    .dO .dO-story .dO-tags {
+        padding: 10px;
+        font-style: italic;
+        text-align: left;
+    }
+
+    .dO .dO-story .dO-summary {
+        padding: 10px;
+        font-size: 16px;
+        text-align: justify;
+
+    }
+
+    .dO-instance {
+        background-color: var(--primary-color);
+        color: white;
+        margin: 15px;
+        border-radius: 4px;
+        box-shadow: -10px 5px 20px var(--primary-color);
+    }
+
+    .dO-instance .dO-ititle {
+        color: black;
+        height: 30px;
+        border-radius: 4px;
+        background-color:white;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor:pointer;
+    }
+
+    .dO-ititle:hover{
+        box-shadow: -10px 10px 20px rgba(0,0,0,0.4);
+        font-weight: bold;
+    }
+
+    .dO-instance .dO-dateframe {
+        padding-top:10px;
+        padding-right: 10px;
+        text-align: right;
+        font-weight: bold;
+        color: var(--secondary-color);
+    }
+
+    .dO-instance .dO-timeframe{
+        text-align: right;
+        padding-right: 10px;
+        color: var(--secondary-color);
+    }
+
+    .dO-instance .dO-tdesc{
+        padding-right: 10px;
+        color: var(--secondary-color);
+        font-size: 14px;
+        text-align: right;
+        font-style: italic;
+    }
+
+    .dO-instance .dO-pdesc{
+        padding: 10px;
+        color: white;
+        font-size: 14px;
+
+    }
+
+    .dO .dO-buttonA {
+        display: flex;
+        padding: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    
+
+    .dO-buttonA2:hover {
+        box-shadow: -10px 5px 20px var(--light-color);
+        bottom: 5px;
+    }
+
+    .brightlight {
+        border: 3px solid var(--brightlight-color);
+        box-shadow: -10px 5px 20px var(--brightlight-color);
+    }
+
+    .highlight {
+        border: 3px solid var(--highlight-color);
+    }
+
+    .lowlight {
+        border: 3px solid var(--lowlight-color);
+    }
+    
+    .mapStory {
+        position: relative;
+        padding: 1%;
+        width: 98%;
+        height: 300px;
+        margin: 10px;
+    }
+
+    .mapStory:-webkit-full-screen {
+        height: 100%;
+        margin: 0;
+    }
+    .mapStory:-ms-fullscreen {
+    height: 100%;
+    }
+    .mapStory:fullscreen {
+    height: 100%;
+    }
+    .mapStory .ol-rotate {
+    top: 3em;
+    }
+
+
+    /* INSTANCE CARD DEETS*/
+    .instance-deets {
+        border-radius: 5px;
+        position: fixed;
+        width: 80%;
+        max-height: 80%;
+        top: 10%;
+        left: 10%;
+        font-size: 14px;
+        background-color: var(--primary-color);
+        box-shadow: -10px 5px 20px var(--shadow-color);
+        color: white;
+        margin: 10px;
+        overflow-y: auto;
+    }
+
+    .instance-deets .close{
+        font-size: 20px;
+        height: 30px;
+        font-weight: bold;
+        padding-right: 10px;
+        text-align: right;
+        background-color: white;
+        color: black;
+        cursor:pointer;
+    }
+
+    .instance-deets .close:hover{
+        font-size:30px;
+    }
+
+    .instance-deets .deets-title {
+        text-align: center;
+        top: 2%;
+        font-size: 20px;
+        font-weight: bold;
+        color: black;
+        background-color:white;
+    }
+    .instance-deets .deets-dateframe {
+        text-align: center;
+    }
+    .instance-deets .deets-timeframe {
+        text-align: center;
+    }
+
+    .instance-deets .deets-tdesc {
+        padding: 10px;
+        font-style: italic;
+        text-align: left;
+    }
+
+    .instance-deets .deets-pdesc {
+        padding: 10px;
+        font-size: 16px;
+        text-align: justify;
+
+    }
+
+    .instance-deets .deets-button {
+        text-align: center;
+        font-size: 16px;
+        padding: 10px;
+        height: 40px;
+        width: 100%;
+        bottom: 1%;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .story-deets .deets-button:hover {
+        font-size: 20px;
+        padding: 5px;
+    }
+
+    /*FILTER OVERLAY*/
+    .filterOverlay {
+        border-radius: 5px;
+        position: fixed;
+        width: 80%;
+        max-height: 80%;
+        top: 10%;
+        left: 10%;
+        font-size: 14px;
+        background-color: white;
+        box-shadow: -10px 5px 20px var(--shadow-color);
+        color: black;
+        margin: 10px;
+        overflow-y: auto;
+        padding: 10px;
+
+    }

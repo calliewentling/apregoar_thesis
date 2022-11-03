@@ -1,0 +1,320 @@
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css" rel="stylesheet"> 
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js"></script>
+
+
+
+<style>
+    /*https://www.w3schools.com/howto/howto_css_split_screen.asp*/
+    /*Control the left side*/
+    .left {
+        left: 0;
+        width: 30%;
+        position: fixed;
+        z-index: 1;
+        overflow-x: hidden;
+    }
+    /*Control the right side*/
+    .center {
+        right: 30%;
+        width: 30%;
+        position: fixed;
+        z-index: 1;
+        overflow-x: hidden;
+    }
+
+    /*Control the right side*/
+    .right {
+        right: 0;
+        width: 30%;
+        position: fixed;
+        z-index: 1;
+        overflow-x: hidden;
+    }
+
+    .calculation-box {
+        height: 100px;
+        width: 150px;
+        position: absolute;
+        bottom: 40px;
+        right: 10px;
+        background-color: rgb(255, 255, 255);
+        padding: 15px;
+        text-align: center;
+    }
+
+    .p {
+        font-family: 'Open Sans';
+        margin: 0;
+        font-size: 12px;
+    }
+    
+
+
+</style>
+    
+
+
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css" type="text/css">
+<!--<link href="../../static/css/publish.css" rel="stylesheet"> -->
+
+{% extends "publisher/templates/publisher_template.html" %}
+
+{% block title %}Localize{% endblock %}
+
+{% block main %}
+
+
+<!--<script src="{{ url_for('static', filename='js/create.js') }}"></script> -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Raleway'>
+<link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+    
+        <h1>Localizar as Notícias</h1>
+        <h3>{{ story["title"] }}</h3>
+
+        <div>
+            <p> Definir uma instância (tempo e sítio) da notícia
+                <a 
+                    href="#" 
+                    data-toggle="tooltip" 
+                    title="Cada instância é uma oportunidade de elaborar onde e quando uma coisa está a acontacer. Cada notícia pode ter algumas notícias, e cada instância pode ter alguns sítios (polígonos). Escreve um ou mas polígonos aqui, dar um nome (não precisa de ser oficial) e uma descrição. Definir as datas do início e o fim, um tipo de interval temporal, e afinal um descrição.">
+                    <span class="material-icons">info</span>
+                </a>
+            </p>
+        </div>
+        
+        <div id="eGazMap" style="display:block">
+            <div class="wrapper">
+                <div id="map" class="map"></div>
+                <div id="progress"></div>
+                </div>
+                <div id="deletedFeatures" style="display:none"></div>
+            </div>
+            
+        </div>
+        <br> 
+        <div class="card" id="save_instance" >             
+            <h3>Localização/ões</h3>
+            <form method="POST" action="review">
+                <div id="totalGazSummary">
+                    
+                    <!--Summary of associated places-->
+                    <p id="totalNumGaz" style="color:red;font-size:24px;">0 </p>
+                    <p>localizações associadas</p>
+                    <em id="alertPoly" style="color:rgb(117, 5, 5)">Associar e/ou desenhar pelo menos um localização de notícia.</em>
+                    <br><br>
+                    <p id = "totalUGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
+                    <p> áreas desinhadas. </p>
+                    <p id = "totalEGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
+                    <p> áreas existentes. </p>
+                </div>
+                <br>
+                <!-- Name of instance place group -->
+                <div id="selectName">
+                    <input type="text" id="pName" name="pName" placeholder="Nome do sítio" required>
+                    <span class="error" aria-live="polite"></span>
+                </div>
+                <div id="selectDesc">
+                    <input type="text" id="pDesc" name="pDesc" placeholder="Descrição do sítio">
+                </div>
+
+                <!-- DESIGN NEW (UGAZ) -->
+                <h3>Desenhar uns localizações novos</h3>
+                
+                <div id="newUgaz" style="display:block">
+                    <!-- TOGGLE -->
+                    <div class="container1">
+                        <label class="switch">
+                            <input id ="tswitch" type="checkbox" onclick = "toggleLocalization()">
+                            <span class="slider round"></span>
+                        </label>
+                        <div id="toggleMode"><p>Ativar modo do desenho</p></div>
+                    </div>
+                    <em>Pode desenhar um ou mais polígonos para representar a localização customizada onde a notícia acontece (no passado, presente, ou futuro). Pode modificar os polígonos depois ou deleter e começer outra vez.</em>
+                    <!-- UGAZ INFO -->
+                    <div id="poiGaz" style="display:block">
+                        <button type="button" onclick="searchGeoNames()">GeoNames</button>
+                        <br>
+                        
+                        <select id='select_geonames' name="selectGeonames" multiple style="display:none"></select>
+                        <div id="geonamesComment"></div>
+                    </div>
+                    <div id="buttonZoomGeonames" style="display:none">
+                        <button type="button" onclick="zoomGeonames()">Zoom</button>
+                    </div>
+
+                    <div id="poiNominatim" style="display:block">
+                        <button type="button" class="btn btn-primary" onclick="searchNominatim()">OSM Gazetteer</button>
+                        <br>
+                        <select id='guide_nominatim' name="guideNominatim" multiple style="display:none"></select> 
+                    </div>
+                    <div id="buttonZoomNominatim" style="display:none">
+                        <button type="button" onclick="zoomNominatim()">Zoom</button>
+                    </div>
+
+                    
+                    <div style="display:none">
+                        <p>Número dos polígonos:</p>
+                        <div id="calculated-area" style="color:red"></div> 
+                        <div id="selectGeom" style="color:red" ></div>
+                    </div>
+                    <!--<label for="type">Geometry type &nbsp;</label> -->
+                    <select id="type" style="display:none">
+                        <option value="Polygon" select="selected">Polygon</option>
+                    </select>   
+                    <!--<label for="type">Select type &nbsp;</label> -->
+                    <select id="clickType" style="display:none">
+                        <option value="click" select="selected">Click</option>
+                        <option value="singleclick">Single-click</option>
+                        <option value="pointermove">Hover</option>
+                        <option value="altclick">Alt+Click</option>
+                        <option value="none">None</option>
+                    </select> 
+                </div>
+                <br>
+
+                <!-- EGAZ --> 
+                <h3>Escolher sítios existentes</h3> 
+                <div>
+                    <button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar áreas existentes</button>
+                    <br><br>
+                    <div id="searchTermDisplay" style="display:none"></div>
+                </div>
+                
+                <div class="containerG grid">
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_personal')">Sítios Pessoais</button>
+                        <br>
+                        <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                    </div>
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_empresa')">Sítios Empresiais</button>
+                        <br>
+                        <select id='select_ugaz_empresa' name="selectUgazEmpresa" multiple style="display:none"></select>
+                    </div>
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_all')">Sítios (Totais)</button>
+                        <br>
+                        <select id='select_ugaz_all' name="selectUgazAll" multiple style="display:none"></select>
+                    </div>
+                </div>
+                <br><br><br>
+                <div class="containerG grid">
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_freguesia')">Freguesias</button>
+                        <br>
+                        <select id='select_egaz_freguesia' name="selectEgazFreguesia" multiple style="display:none"></select>
+                    </div>
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_concelho')">Concelhos</button>
+                        <br>
+                        <select id='select_egaz_concelho' name="selectEgazConcelho" multiple style="display:none"></select>
+                    </div>
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_extra')">Grupos Administrativos</button>
+                        <br>
+                        <select id='select_egaz_extra' name="selectEgazExtra" multiple style="display:none"></select>
+                    </div>
+                </div>
+                <div class="containerG grid">
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_green')">Espaço Verde</button>
+                        <br>
+                        <select id='select_egaz_green' name="selectEgazGreen" multiple style="display:none"></select>
+                    </div>
+                    <div class="itemG">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_archive')">Archivo</button>
+                        <br>
+                        <select id='select_egaz_archive' name="selectEgazArchive" multiple style="display:none"></select>
+                    </div>
+                </div>
+                <div class="containerG grid">
+                    <div class = "itemG">
+                        <button type="button" class="btn btn-primary" onclick="searchNominatim()">OSM Gazetteer</button>
+                        <br>                
+                        <select id='select_nominatim' name="selectNominatim" multiple style="display:none"></select>
+                    </div>
+                </div>
+                    
+                    
+                <br><br>
+                <button type="button" class="btn btn-primary" onclick="initGaz()">Prever</button>
+
+                <!-- TEMPORAL -->
+                <h3>Associar uma altura</h3>
+                <div>
+                    <label for="allday_y">Todo o dia</label><input type="radio" id="allday_y" name="allDay" value="allday_y" onClick="timeDefD()" checked="checked">
+                    <label for="allday_n">Horas específicas</label><input type="radio" id="allday_n" name="allDay" value="allday_n" onClick="timeDefH()">
+                    <label for="allday_p">Persistente (sim datas específicas) </label><input type="radio" id="allday_p" name="allDay" value="allday_p" onClick="timeDefP()">
+                        
+                </div>
+                <div>
+                    <input type="date" id="tBegin" name="tBegin" required> <input type="date" id="tEnd" name="tEnd"  required>
+                </div>
+                <br>
+                <div>
+                    <input type="text" id="tDesc" name="tDesc" placeholder="Temporal description">
+                </div>
+
+                <br>
+                <h3 id="validation" style="display:none">Validação</h3>
+                <div id="successAnnouncement" style="display:none"></div>
+                <div id="formButton" style="display:none"></div>
+            </form>
+        </div>
+        <br>
+        <div class="card">
+            
+        </div>
+        <br>
+        
+        <br>
+        <div class="card">
+            <button type="button" class="btn btn-primary" onclick = submitInstance()> Associar instáncia</button>
+            <div id="btnReturn"></div>
+            <br>
+            <button type="button" class="btn btn-primary" onclick=limparTudo()>Limpar tudo</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    //////// STORY INFO ///////
+    // Loading story info
+    var sID = '{{ sID }}';
+    console.log("sID is: ");
+    console.log(sID);
+    var mapStoryFilter = "s_id="+sID;
+    console.log("Map Story filter: ",mapStoryFilter);
+    var mapEAGazFilter = "";
+    const eGazAll = "{{ eGazF }}";
+    var uID = '{{ story.u_id }}';
+    console.log("uID is: ");
+    console.log(uID);
+    var pubName = '{{ story.publication }}';
+    console.log("pubName is: ");
+    console.log(pubName);
+</script>
+<script src="{{ url_for('static', filename='js/localize.js') }}"></script>
+
+
+
+{% endblock %}

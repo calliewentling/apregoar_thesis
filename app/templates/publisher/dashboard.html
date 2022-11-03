@@ -1,0 +1,100 @@
+{% extends "publisher/templates/publisher_template.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h1>Publisher dashboard</h1>
+      <hr>
+
+      
+      <div class="card">
+        <div class="card-body" id="welcome"></div>
+        <script>
+          username = "{{ username }}";
+          const welcomeU = document.getElementById('welcome');
+          welcomeU.innerHTML = `<h2>Welcome, ${username}</h2>`;
+        </script>
+        <div class="align-right">
+          <a href="{{ url_for('sign_outU', login_source='publisher')}}"><button type="button" class="btn btn-primary">Sign out</button></a>
+        </div>
+      </div> 
+
+      <div class="card">
+        <div class="card-body">
+          <h4>Publicar uma notícia nova</h4>
+          <a href="/publisher/addstory"><button class="btn btn-primary"> Publicar </button></a> 
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h3> Os meus notícias</h3>
+
+          {% for uStory in userStories %}
+            {% for sID, attributes in uStory.items() %}
+
+            <script>
+              var storyID = "{{ sID }}";
+              console.log(storyID);
+              //Apparently document.write is considered bad practice. Replace in the future with something better
+              document.write('<p> <a href="/publisher/'+storyID+'/review"> {{ attributes["title"] }} </a>- <i> {{ attributes["date"] }} </i></p>');
+            </script>
+            
+            {% endfor %}
+          {% endfor %}
+
+          <h2> As notícias de {{ organization }}</h2>
+          {% if orgStories|length > 0 %}
+            {% for oStory in orgStories %}
+              {% for sID, attributes in oStory.items() %}
+                <p>{{ attributes["title"] }} - <i> {{ attributes["date"] }} </i></p>
+              {% endfor %}
+            {% endfor %}
+          {% else %}
+            <p><i>Ãinda sem notícias associadas</i></p>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h3>Localizações das notícias</h3>
+          <p>Pode ver a distribuição de todas as notícias aqui.</p>
+            <!-- THIS IS THE PUBLISHER NOTICIAS MAP -->
+            <div id="instanceMap" style="display:block">
+              <div class="wrapper">
+                <div id="map" class="map"></div>
+                <div id="progress"></div>
+                <!--<div id="info">&nbsp;</div>-->
+                <div id="popup" class="ol-popup">
+                  <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                  <div id="popup-instances"></div>
+                  <div id="popup-story"></div>
+                </div>
+              </div>
+              <div id="info"></div>
+            </div>
+        
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  var userID = "{{ uID }}";
+  console.log("User ID: ");
+  console.log(userID);
+  var mapStoryFilter = "u_id="+userID;
+  console.log("Map filter: ")
+  console.log(mapStoryFilter);
+</script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
+{% endblock %}

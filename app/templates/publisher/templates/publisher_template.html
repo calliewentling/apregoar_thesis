@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Import the Bootstrap stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <!-- Import our custom stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/map_style.css') }}">
+
+
+  <title>{% block title %}{% endblock title %}</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/css/ol.css" type="text/css">
+
+  <!-- codefixup.com/multiselect-dropdown-with-checkbox-->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/example-styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/demo-styles.css') }}">
+
+  <!-- maptiler -->
+  <!--<script src="https://cdn.maptiler.com/ol/v6.0.0/ol.js"></script>
+  <script src="https://cdn.maptiler.com/ol-mapbox-style/v5.0.2/olms.js"></script>
+  <link rel="stylesheet" href="https://cdn.maptiler.com/ol/v6.0.0/ol.css">
+  
+  <script src="https://unpkg.com/elm-pep"></script>-->
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+    <a class="navbar-brand" href="/">Apregoar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/publisher/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/publisher/publication">Publicação</a>
+        </li>
+      </ul>
+    </div>
+  
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('publisher_dashboard')}}">Jornais</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="">Geradores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('explore') }}">Exploradores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('render_profile') }}">Profile</a>
+        </li>
+      </ul>
+    </div>
+  
+  </nav>
+
+  <div hidden id="spinner"></div>
+
+  <div class="row">
+
+    <div class="col-sm-4">
+      {% with errors = get_flashed_messages(category_filter=["success"]) %}
+        {% if errors %}
+          {%- for message in errors %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <span>{{ message }}</span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          {% endfor -%}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="col-sm-4">
+      {% with errors = get_flashed_messages(category_filter=["warning"]) %}
+        {% if errors %}
+          {%- for message in errors %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+              <span>{{ message }}</span>
+              <button type = "button" value="Go Back From Whence You Came!" onclick="history.back(-1)">Voltar</button>
+              <!--  Create a button that goes to the pages of similarly titled stories -->
+            </div>
+          {% endfor -%}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="col-sm-4">
+      {% with errors = get_flashed_messages(category_filter=["danger"]) %}
+        {% if errors %}
+          {%- for message in errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <span>{{ message }}</span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          {% endfor -%}
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+  <!-- Import OpenLayers JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
+
+  <main>
+    {% block main %}
+    {% endblock main %}
+  </main>
+
+    <!-- Import jquery 3.3.1 slim min -->
+  <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}"></script>
+  <!-- Import Bootstrap bundle -->
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  
+  <!-- Import our custom JavaScript -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+  <!-- codefixup.com/multiselect-dropdown-with-checkbox-->
+  <script src="{{ url_for('static', filename='js/jquery-2.2.4.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jquery.multi-select.js') }}"></script>
+  
+  <script src="https://cdn.polyfill.io/v3/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL,TextDecoder,Number.isInteger"></script>
+  {% block script %}{% endblock %}
+  
+
+</body>
+
+</html>

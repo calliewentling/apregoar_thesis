@@ -1,0 +1,128 @@
+{% extends "publisher/templates/publisher_template.html" %}
+
+{% block title %}Review{% endblock %}
+
+{% block main %}
+
+  <!--<script src="{{ url_for('static', filename='js/create.js') }}"></script>-->
+
+  <div class="container">
+    <div class="row">
+      <div class="col">
+  
+        <h1> {{ story["title"] }} </h1>
+        <hr>
+
+        <!-- SUMMARY  -->
+        <div class ="card">
+          <div class = "card-body">
+            <h2>{{ story["section"] }}, {{ story["pub_date"] }}</h2>
+            <h3>{{ story["publication"] }} </h3>
+            <p>{{ story["summary"] }}</p>
+            <div class="align-right">
+              <p><i>{{ story["tags"] }}</i> </p>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- INSTANCES -->
+        <div class="card">
+          <div class = "card-body">
+            <h2>Instâncias</h2> 
+
+            <!-- TOGGLE -->
+            <div class="container1">
+              <label class="switch">
+                <input id ="tswitch" type="checkbox" onclick = "toggleMap()">
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <!-- EDIT INSTANCES -->
+            <div id="instanceList" style="display:none">
+              <!-- MANAGE INSTANCES -->
+              <script>
+                var storyID = "{{ sID }}"; //Replace with a function to get the actual s_id
+                deleteStoryID = "deleteStory"+storyID;
+                console.log(storyID);
+                //Apparently document.write is considered bad practice. Replace in the future with something better
+                document.write('<p> <a href="/publisher/'+storyID+'/localize"> <button type="button" class="btn btn-primary">Associar localização</button></a>');
+              </script>
+              <br>
+              <!-- DELETE INSTANCES/STORY -->
+              <form action="review" method="POST">
+                {% if instances|length > 0 %}
+                  {% for instance in instances %}
+                    {% for iID, attributes in instance.items() %}
+                      {% set instanceID = "instance" ~ iID %}
+                      <label class="cozycheck">
+                        <input id = "{{ instanceID }}" name = "{{ instanceID }}" type="checkbox" class = "listInstances"> {{ attributes["p_name"] }} <i> {{ attributes["timeframe"] }} </i>
+                      </label>                      
+                    {% endfor %}
+                  {% endfor %}
+                {% else %}
+                  <p><i>No instances associated with this story</i></p>
+                {% endif %}
+                <br>
+                <label id="deleteStoryArea" class="cozycheck">
+                </label>
+                <button type="submit" class="btn btn-primary" id="submitDeleteI">Eliminar</button>
+              </form>
+            </div>
+            <!-- VIEW INSTANCS  -->
+            <div id="instanceMap" style="display:block">
+              <div class="wrapper">
+                <div id="map" class="map"></div>
+                <div id="popup" class="ol-popup">
+                  <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                  <div id="popup-instances"></div>
+                  <div id="popup-story" display="none"></div>
+                </div>
+                <div id="progress"></div>
+
+              </div>
+              
+              <div id="info">&nbsp;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  
+  <script>
+    function toggleMap(){
+      //Get the checkbox
+      var tswitch = document.getElementById("tswitch");
+      //Get output text
+      var instanceList = document.getElementById("instanceList");
+
+      //If the checkbox is checked, display the output text
+      if (tswitch.checked == true){
+        instanceList.style.display = "block";
+        instanceMap.style.display = "none";
+      } else {
+        instanceList.style.display = "none";
+        instanceMap.style.display = "block";
+      }
+    }
+    var mapEAGazFilter = "";
+    var mapStoryFilter = "s_id="+storyID;
+    console.log("Map filter: ")
+    console.log(mapStoryFilter);
+
+    var deleteStory = document.getElementById("deleteStoryArea");
+    deleteStoryArea.innerHTML = '<input id = '+deleteStoryID+' name = '+ deleteStoryID+' type="checkbox" onclick=temCerteza() class = "deleteStory"> Eliminar notícia e todas as instâncias associadas.';
+
+    function temCerteza(){
+      console.log("Entered temCerteza")
+    }
+
+    
+  </script>
+  <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
+{% endblock %}
