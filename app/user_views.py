@@ -73,7 +73,7 @@ def sign_upU(login_source):
                     cur.close()
                 else:
                     print("User added to database")
-                    return redirect(url_for("sign_inU"))
+                    return redirect(url_for("sign_inU", login_source = "publisher"))
             else:
                 feedback=f"O username já existe. Seleciona um novo username, se faz favor."
                 return render_template("user/sign_up.html", feedback=feedback)
@@ -82,8 +82,6 @@ def sign_upU(login_source):
 @app.route("/<login_source>/sign_in", methods=["GET", "POST"])
 def sign_inU(login_source):
     print("sign_inU")
-
-    
     
     if request.method == "POST":
         req = request.form
