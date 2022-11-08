@@ -30,6 +30,7 @@ import shapely.wkt
 from shapely.geometry import Polygon, MultiPolygon
 from flask import request, redirect, jsonify, make_response, render_template, session as fsession, redirect, url_for
 from app import engine, session, text
+from werkzeug.utils import secure_filename
 #import geopandas as gpd
 #import geojson
 
@@ -696,34 +697,59 @@ def emptyAttribute(attr,s_id,con):
 @app.route("/publisher/<s_id>/localize", methods=["GET", "POST"])
 def localize(s_id):
     print({s_id})
-    try:
-        with engine.connect() as conn:
-            SQL = text("SELECT * FROM apregoar.stories WHERE s_id = :x")
-            SQL = SQL.bindparams(x=s_id)
-            result = conn.execute(SQL)
-    except:
-        conn.close()
-        print("Error in extracting desired story from database")
-        feedback=f"Erro"
-        flash(feedback,"danger")
-    else:
-        conn.close()
-        story = {}
-        for row in result:
-            story = row
-        print(story)
-        #egaz_area = []
-        #egaz_freguesia = []
-        #egaz_concelho = []
-        #egaz_extra = []
-        if story:               
-            return render_template("publisher/localize.html", story=story, sID = s_id)
-                #return render_template("publisher/localize.html", story=story, sID = s_id, eGazF=egaz_freguesia, eGazC=egaz_concelho, eGazA = egaz_area, eGazX = egaz_extra)
-        else:
-            feedback = f"No valid story selected"
-            flash(feedback, "danger")
     
-    return render_template("publisher/dashboard.html")
+    if request.method == 'POST':
+        print("request method is post")
+        # check if hte post request has the file part
+        if 'file' not in request.files:
+            print('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        print("file: ",file)
+        # if the user does not select a file, the broswer submits an # emplty file without a filename.
+        if file.filename == '':
+            print('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(request.filename):
+            filename = secure_filename(file.filename)
+            print("filename: ",filename)
+            flash('Success!')
+            return redirect(request.url)
+        else:
+            print("We got to the else")
+        print("about to return")
+        return  make_response(filename, 200)
+        
+    else:
+
+        try:
+            with engine.connect() as conn:
+                SQL = text("SELECT * FROM apregoar.stories WHERE s_id = :x")
+                SQL = SQL.bindparams(x=s_id)
+                result = conn.execute(SQL)
+        except:
+            conn.close()
+            print("Error in extracting desired story from database")
+            feedback=f"Erro"
+            flash(feedback,"danger")
+        else:
+            conn.close()
+            story = {}
+            for row in result:
+                story = row
+            print(story)
+            #egaz_area = []
+            #egaz_freguesia = []
+            #egaz_concelho = []
+            #egaz_extra = []
+            if story:               
+                return render_template("publisher/localize.html", story=story, sID = s_id)
+                    #return render_template("publisher/localize.html", story=story, sID = s_id, eGazF=egaz_freguesia, eGazC=egaz_concelho, eGazA = egaz_area, eGazX = egaz_extra)
+            else:
+                feedback = f"No valid story selected"
+                flash(feedback, "danger")
+    
+        return render_template("publisher/dashboard.html")
 
 @app.route("/publisher/<s_id>/gazetteer", methods=["GET", "POST"])
 def loadGaz(s_id):
@@ -1187,6 +1213,51 @@ def save_instance(s_id):
                             print("checkpoint")
                             n_id = cur.fetchone()[0]
                             print("n_id after new entry save: ", n_id)
+
+                            #Find related geometries
+                            cur.execute("""
+                                SELECT
+                                    ngaz.n_id AS n_id,
+                                    egaz.e_id AS e_id,
+                                    ST_Contains(ST_Makevalid(ngaz.geom), ST_Makevalid(egaz.geom)) AS contains_e,
+                                    ST_Within(ST_Makevalid(ngaz.geom), ST_Makevalid(egaz.geom)) AS within_e,
+                                    ST_Overlaps(ST_Makevalid(ngaz.geom), ST_Makevalid(egaz.geom)) AS overlaps_e,
+                                    ST_Touches(ST_Makevalid(ngaz.geom), ST_Makevalid(egaz.geom)) AS touches_e
+                                FROM 
+                                    apregoar.ngazetteer ngaz, 
+                                    apregoar.egazetteer egaz
+                                WHERE
+                                    ngaz.n_id = %(n_id)s AND
+                                    ST_Intersects(ST_Makevalid(ngaz.geom), ST_Makevalid(egaz.geom))
+                                ;""",
+                                {'n_id':n_id}
+                            )
+                            records = cur.fetchall()
+                            for row in records:
+                                g_rel = ""
+                                egaz_id = row[1]
+                                print("row[1]: ",row[1])
+                                print("Type of boolean (row[3]): ",type(row[3]))
+                                print("row: ",row)
+                                if row[2] == True:
+                                    g_rel = "contains_e"
+                                elif row[3] == True:
+                                    g_rel = "within_e"
+                                elif row[4] == True:
+                                    g_rel = "overlaps_e"
+                                elif row[5] == True:
+                                    g_rel = "touches_e"
+                                else:
+                                    print("No ST_Intersect relation here")
+                                    break
+                                print("entry: ",n_id,",",egaz_id,",",g_rel)
+                                cur.execute("""
+                                    INSERT INTO apregoar.spatial_assoc_n (n_id, e_id, relation) 
+                                    VALUES (%(n_id)s, %(e_id)s, %(relation)s)
+                                    ;""",
+                                    {'n_id':n_id, 'e_id':egaz_id, 'relation':g_rel}
+                                )
+                                print("1 relation added")
                             
                         #Relate instance and new place
                         cur.execute("""
@@ -1200,9 +1271,6 @@ def save_instance(s_id):
                         #for result in results:
                         #    print("i_id, n_id",result["i_id"]+result["n_id"])
                         print("Nominatim place successfully related to instance")
-
-                        
-                        
 
 
                 #Associate any existing administrative gazetteers
@@ -1251,3 +1319,9 @@ def save_instance(s_id):
         print("Successful save of instance and related places") 
     res = make_response(jsonify(req), 200) 
     return res
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'shp'}
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+

@@ -393,12 +393,12 @@ if (doc_source == "historias"){
     //document.querySelector('h1').style.color = pubColor;
     ///// LOADING IFRAME ////
     const viewHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-    //console.log("viewHeight: ",viewHeight);
+    console.log("viewHeight: ",viewHeight);
     //const instanceAreaH = document.getElementById("map").style.height;
     //console.log("instanceAreaH: ",instanceAreaH);
     var iframeH = document.getElementById("iframeH");
     document.getElementById('noArticle').style.height = "510px";
-    //iframeH.style.height = (viewHeight - 100)+"px";
+    iframeH.style.height = (viewHeight * .59)+"px";
     var timePast = false;
     setTimeout(function() {
         timePast = true;

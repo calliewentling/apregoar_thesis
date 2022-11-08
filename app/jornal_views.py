@@ -93,12 +93,13 @@ def historia(s_id):
                 print("geonoticia w instances: ", geonoticia)
                 num_instances = len(instances)
                 print("num_instances: ",num_instances)
+                print("publication id: ",geonoticia["publication_id"][0])
 
                 #Extract jornal info from database
                 try: 
                     with engine.connect() as conn:
                         SQL = text("SELECT * FROM apregoar.publications WHERE publication_id = :x")
-                        SQL = SQL.bindparams(x=geonoticia["publication_id"])
+                        SQL = SQL.bindparams(x=geonoticia["publication_id"][0])
                         result = conn.execute(SQL)
                 except:
                     print("problem with extraction of publication information")
@@ -111,10 +112,12 @@ def historia(s_id):
                             "p_colors": row["colors"],
                             "p_sections": row["main_sections"],
                         }
+                    print("publication: ",publication)
                     #Add a way to view related instances
                     try:
                         with engine.connect() as conn:
-                            SQL = text("SELECT egazetteer.name, egazetteer.type, egazetteer.e_id, egaz_filter.total_count FROM (SELECT DISTINCT(COALESCE(instance_egaz.e_id,spatial_assoc.e_id)) AS e_id FROM apregoar.instances LEFT JOIN apregoar.instance_ugaz ON instances.i_id = instance_ugaz.i_id LEFT JOIN apregoar.spatial_assoc ON instance_ugaz.p_id = spatial_assoc.p_id LEFT JOIN apregoar.instance_egaz ON instances.i_id = instance_egaz.i_id WHERE s_id = :x) egaz_id LEFT JOIN apregoar.egazetteer ON egaz_id.e_id = egazetteer.e_id LEFT JOIN apregoar.egaz_filter ON egaz_id.e_id = egaz_filter.e_id")
+                            #SQL = text("SELECT egazetteer.name, egazetteer.type, egazetteer.e_id, egaz_filter.total_count FROM (SELECT DISTINCT(COALESCE(instance_egaz.e_id,spatial_assoc.e_id)) AS e_id FROM apregoar.instances LEFT JOIN apregoar.instance_ugaz ON instances.i_id = instance_ugaz.i_id LEFT JOIN apregoar.spatial_assoc ON instance_ugaz.p_id = spatial_assoc.p_id LEFT JOIN apregoar.instance_egaz ON instances.i_id = instance_egaz.i_id WHERE s_id = :x) egaz_id LEFT JOIN apregoar.egazetteer ON egaz_id.e_id = egazetteer.e_id LEFT JOIN apregoar.egaz_filter ON egaz_id.e_id = egaz_filter.e_id")
+                            SQL = text("SELECT egazetteer.name, egazetteer.type, egazetteer.e_id, egaz_filter.total_count FROM (SELECT DISTINCT(COALESCE(instance_egaz.e_id,COALESCE(spatial_assoc.e_id, spatial_assoc_n.e_id))) AS e_id FROM apregoar.instances LEFT JOIN apregoar.instance_ugaz ON instances.i_id = instance_ugaz.i_id LEFT JOIN apregoar.spatial_assoc ON instance_ugaz.p_id = spatial_assoc.p_id LEFT JOIN apregoar.instance_ngaz ON instances.i_id = instance_ngaz.i_id LEFT JOIN apregoar.spatial_assoc_n ON instance_ngaz.n_id = spatial_assoc_n.n_id LEFT JOIN apregoar.instance_egaz ON instances.i_id = instance_egaz.i_id WHERE s_id = :x ) egaz_id LEFT JOIN apregoar.egazetteer ON egaz_id.e_id = egazetteer.e_id  LEFT JOIN apregoar.egaz_filter ON egaz_id.e_id = egaz_filter.e_id")                             
                             SQL = SQL.bindparams(x=s_id)
                             result = conn.execute(SQL)
                             print("result: ",result)
@@ -128,32 +131,46 @@ def historia(s_id):
                         p2 = []
                         p3 = []
                         p4 = []
+                        names = []
                         for row in result:
                             ## New method
-                            nearby = {
-                                "name": row["name"].upper(),
-                                "type": row["type"],
-                                "e_id": row["e_id"],
-                                "count": row["total_count"],
-                            }
-                            if row["type"] == "freguesia":
-                                nearby["priority"] = 1
-                                p1.append(nearby)
-                            elif row["type"] == "conselho":
-                                nearby["priority"] = 2
-                                p2.append(nearby)
-                            elif row["type"] == "concelho":
-                                nearby["priority"] = 2
-                                p2.append(nearby)
-                            elif row["type"] == "distrito":
-                                nearby["priority"] = 4
-                                p4.append(nearby)
-                            elif row["type"] == "":
-                                nearby["priority"] = 4
-                                p4.append(nearby)
-                            else:
-                                nearby["priority"] = 3
-                                p3.append(nearby)
+                            print("row: ", row)
+                            if row["name"] is not None:
+                                nearby = {
+                                    "name": row["name"].upper(),
+                                    "type": row["type"],
+                                    "e_id": row["e_id"],
+                                    "count": row["total_count"],
+                                }
+                                if "archiv" in row["type"]:
+                                    print("archive item")
+                                else:
+                                    if " - " in row["name"]:
+                                        nearby["name"] = nearby["name"].split(" - ")[0]
+                                    print("name: ",nearby["name"])
+                                    if nearby["name"] not in names:
+                                        names.append(nearby["name"])
+                                        if row["type"] == "espaço_verde":
+                                            nearby["priority"] = 1
+                                            p1.append(nearby)
+                                        elif row["type"] == "freguesia":
+                                            nearby["priority"] = 2
+                                            p2.append(nearby)
+                                        elif row["type"] == "conselho":
+                                            nearby["priority"] = 3
+                                            p3.append(nearby)
+                                        elif row["type"] == "concelho":
+                                            nearby["priority"] = 3
+                                            p3.append(nearby)
+                                        elif row["type"] == "distrito":
+                                            nearby["priority"] = 4
+                                            p4.append(nearby)
+                                        elif row["type"] == "":
+                                            nearby["priority"] = 4
+                                            p4.append(nearby)
+                                        else:
+                                            nearby["priority"] = 4
+                                            p4.append(nearby)
                         for n in p1:
                             nearbys.append(n)
                         for n in p2:
