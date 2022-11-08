@@ -126,10 +126,28 @@ wmsSourceStory.on('imageloaderror', function () {
 
 //General Zoom Function
 let layerExtent;
+let ymax = 39.83801908704823;
+let xmax = -7.74577887999189;
+let ymin = 38.40907442337447;
+let xmin = -9.517104891617194;
+//Extent order: [xmin, ymin, xmax, ymax]
 function zoomGaz(vectorSource){
-    console.log("layerExtent (in zoomGaz): ",vectorSource.getExtent());
+    console.log("vectorSource (in zoomGaz): ",vectorSource.getExtent());
     var layerExtent = ol.extent.extend(sourceNominatimPoly.getExtent(),vectorSource.getExtent());
-    //var layerExtent = vectorSource.getExtent();
+    console.log("layerExtent wtih Nominatim: ", layerExtent);
+    /*if (layerExtent[0] > xmin){
+        layerExtent[0] = xmin;
+    }
+    if (layerExtent[1] > ymin){
+        layerExtent[1] = ymin;
+    }
+    if (layerExtent[2] < xmax){
+        layerExtent[2] = xmax;
+    }
+    if (layerExtent[3] < ymax){
+        layerExtent[3] = ymax
+    }
+    console.log("updatd layer extent: ", layerExtent);*/
     mapGaz.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
     return layerExtent;
 }

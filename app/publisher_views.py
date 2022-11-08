@@ -48,6 +48,33 @@ app.secret_key = '2b3c4ee1b3eea60976f2d55163bbd0f88613657a9260e7de60d4b97c042734
 users = {} #is this necessary
 
 
+def delete_i_derivs(delete_inst, con):
+    print("Entering instance derivative delete sequence for: ", delete_inst)
+    result_val = ""
+    try:
+        with con:
+            with con.cursor() as cur:
+                cur.execute("DELETE FROM apregoar.instance_ugaz WHERE i_id = ANY (%s);", (delete_inst,))
+                print("Passed delete from instance_ugaz")
+                cur.execute("DELETE FROM apregoar.instance_egaz WHERE i_id = ANY (%s);", (delete_inst,))
+                print("Passed delete from instance_egaz")
+                cur.execute("DELETE FROM apregoar.instance_ngaz WHERE i_id = ANY (%s);",(delete_inst,))
+                print("Passed delete from instance_ngaz")        
+                cur.execute("DELETE FROM apregoar.instances WHERE i_id = ANY (%s);", (delete_inst,))
+                print("Passed delete from instances")
+    except psycopg2.Error as e:
+        print("e.pgerror:  ",e.pgerror)
+        print("e.diag.message_primary: ", e.diag.message_primary)
+        print("Error in deleting instance derivatives")
+        con.rollback()
+        result_val = "failure"
+    else:
+        con.commit()
+        print("success!")
+        result_val = "success"
+    print("result_val inside instance: ",result_val)
+    return result_val
+
 @app.before_request
 def before_request_func():
     #print("Test of before request")
@@ -312,94 +339,79 @@ def addstory():
 @app.route("/publisher/<s_id>/review", methods=["GET","POST"])
 def review_e(s_id):
     print({s_id})
-    if request.method =="POST":
+    ### DELETING INSTANCES/STORIES
+    if request.method =="POST": 
         delete_req = request.form.to_dict()
         print(delete_req)
         delete_inst = []
         delete_story = []
         con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
         for key in delete_req.keys():
+            #Deleting a story and all instances
             if "deleteStory" in key:
                 key = int(key[11:])
                 delete_story.append(key)
                 print("key type: ",type(key))
-                print("We're deleting a story (ID: ",key,")! Continue dev here!")
+                print("We're deleting a story (ID: ",key,")!")
+                s_id = key
                 print("The story key of the page = ",s_id)
                 #Delete story and related instances
                 try:
-                    with con:
-                        with con.cursor() as cur:
-                            print("Arrived in Delete entire story")
-                            SQL = "SELECT i_id FROM apregoar.instances WHERE s_id = %(s_id)s"
-                            result = cur.execute(SQL, {
-                                's_id': s_id
-                            })
-                            print("Did we make it here?")
-                            delete_i = []
-                            if result:
-                                for i in result:
-                                    print("i: ",i)
-                                    delete_i.append(i["i_id"])
-                                print("Related instances: ", delete_i, " Totalling: ", len(delete_i))
-                                print("Associated places not deleted... yet!")
-                                #Testing here
-                                SQL2 = "DELETE FROM apregoar.instances WHERE s_id = %(s_id)s"
-                                cur.execute(SQL2, {
-                                    's_id': s_id,
-                                })
-                                print("Instances deleted")
-                            SQL3 = "DELETE FROM apregoar.stories WHERE s_id = %(s_id)s"
-                            cur.execute(SQL3, {
-                                's_id': s_id
-                            })
-                            print("Story deleted")
-                
-                except: 
-                    con.rollback()
-                    con.close()
-                    print("Error in finding story, related instances and places")
-                    feedback=f"Erro na eliminação"
-                    flash(feedback,"danger")
+                    with engine.connect() as conn:
+                        SQL = text("SELECT i_id FROM apregoar.instances WHERE s_id = :x")
+                        SQL = SQL.bindparams(x=s_id)
+                        result = conn.execute(SQL)
+                except:
+                    print("Error in finding instances related to story")
                 else:
-                    con.commit()
-                    num_i_d=str(len(delete_i))
-                    print("Successfully deleted story and ",len(delete_i),"associated instances")
-                    feedback = "Notícia e "+num_i_d+" instâncias reletadas eliminadas"
-                    flash(feedback, "success")
-                    #We should go to the next scenario
-                    return redirect(url_for("publisher_dashboard")) 
+                    delete_i = []
+                    #INSTANCES FOUND
+                    if result:
+                        print("It appears that there are instances")
+                        for i in result:
+                            #print("i: ",i)
+                            delete_i.append(i["i_id"])
+                        print("Related instances: ", delete_i, " Totalling: ", len(delete_i))
+                        result_val = delete_i_derivs(delete_i, con)
+                        print("Status of deleting instance and derivatives: ",result_val)
+                    #NO INSTANCES FOUND
+                    else: 
+                        print("It appears there are no instances")
+                    #DELETE STORY
+                    try:
+                        with con:
+                            with con.cursor() as cur:
+                                cur.execute("DELETE FROM apregoar.sectioning WHERE story_id = %s;", (s_id,))
+                                print("Passed delete from sectioning")
+                                cur.execute("DELETE FROM apregoar.tagging WHERE story_id = %s;", (s_id,))
+                                print("Passed delete from tagging")
+                                cur.execute("DELETE FROM apregoar.publicationing WHERE story_id = %s;", (s_id,))
+                                print("Passed delete from publicationing")
+                                cur.execute("DELETE FROM apregoar.authoring WHERE story_id = %s;", (s_id,))
+                                print("Passed delete from authoring")
+                                cur.execute("DELETE FROM apregoar.stories WHERE s_id = %s;", (s_id,))
+                                print("Story ",s_id," prepped for deletion")
+                    except: 
+                        con.rollback()
+                        #con.close()
+                        print("Error deleting story")
+                        return redirect(url_for("publisher_dashboard"))
+                    else:
+                        con.commit()
+                        con.close()
+                        print("Successfully deleted story and ",len(delete_i),"associated instances")
+                        #We should go to the next scenario
+                        return redirect(url_for("publisher_dashboard")) 
                 
-            else: #Assuming that we're deleting an instance
-                key = int(key[8:]) #Extract instance key (ignore "instance", capture number)
-                delete_inst.append(key)
-                print("Instance for deletion: ",delete_inst)
-        try:
-            with con:
-                with con.cursor() as cur:
-                    print("Entering delete sequences for: ", delete_inst)
-                    cur.execute("DELETE FROM apregoar.instance_ugaz WHERE i_id = ANY (%s);", (delete_inst,))
-                    print("Passed delete from instance_ugaz")
-                    cur.execute("DELETE FROM apregoar.instance_egaz WHERE i_id = ANY (%s);", (delete_inst,))
-                    print("Passed delete from instance_egaz")
-                    cur.execute("DELETE FROM apregoar.instance_ngaz WHERE i_id = ANY (%s);",(delete_inst,))
-                    print("Passed delete from instance_ngaz")        
-                    cur.execute("DELETE FROM apregoar.instances WHERE i_id = ANY (%s);", (delete_inst,))
-                    print("Passed delete from instances")   
-                               
-        except psycopg2.Error as e:
-            #If not submitted, attempt to create again
-            print("e.pgerror:",e.pgerror)
-            print("e.diag.message_primary",e.diag.message_primary)
-            feedback = f"Excepção: a instância não ficou apagada. Erro: "+str(e.pgerror)+", "+e.diag.message_primary
-            flash(feedback, "danger")
-            con.rollback()
-            con.close() 
-        else:
-            con.commit()
-            con.close()
-            numInstDel = str(len(delete_inst))
-            feedback = numInstDel+" instâncias eliminadas"
-            flash(feedback, "success")
+            else: #ASSUMING ONLY DELETING SPECIFIC INSTANCES
+                if "instance" in key:
+                    key = int(key[8:]) #Extract instance key (ignore "instance", capture number)
+                    delete_inst.append(key)
+                    print("Instance for deletion: ",delete_inst)
+        result_val = delete_i_derivs(delete_inst, con)
+        print("Status of individual instance delete: ",result_val)
+                #con.close()
+        
                     
 
     # Normal behavior: load review

@@ -37,6 +37,7 @@ from operator import itemgetter
 ### DEFINE VIEW OF INDIVIDUAL STORIES WITH MOCK MAP DISPLAY
 ##############################################
 
+
 @app.route("/jornal/<s_id>/historia", methods=["GET","POST"])
 def historia(s_id):
     print(s_id)
@@ -191,6 +192,9 @@ def historia(s_id):
                 return render_template("jornal/historia.html", num_instances=0, instance=[], geonoticia=geonoticia, nearbys = [], publication = publication)
             return render_template("jornal/historia.html", num_instances=0, instance=[], geonoticia=geonoticia, nearbys = [], publication = {})
     return render_template("user/index.html", notice="A história não  existe")
+
+
+
 
 #This an interim to capture the e_id passed from JS. It assigns the e_id as a session variable and passes it to a prettier URL that renders the jornal map
 @app.route("/<publication>/mapa/<e_id>", methods=["GET","POST"])
