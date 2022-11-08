@@ -87,32 +87,36 @@ def historia(s_id):
                 "publication": row["publication"].replace('"','\\\"').replace("'","\\\'"),
                 "publication_id": row["publication_id"],
             }
-            if iExist == True: #ensure instances exist
-                geonoticia["instances"] = instances
-                print()
-                print("geonoticia w instances: ", geonoticia)
-                num_instances = len(instances)
-                print("num_instances: ",num_instances)
-                print("publication id: ",geonoticia["publication_id"][0])
 
-                #Extract jornal info from database
-                try: 
-                    with engine.connect() as conn:
-                        SQL = text("SELECT * FROM apregoar.publications WHERE publication_id = :x")
-                        SQL = SQL.bindparams(x=geonoticia["publication_id"][0])
-                        result = conn.execute(SQL)
-                except:
-                    print("problem with extraction of publication information")
-                    conn.close()
-                else:
-                    for row in result:
-                        publication = {
-                            "p_name": row["publication_name"],
-                            "p_id": row["publication_id"],
-                            "p_colors": row["colors"],
-                            "p_sections": row["main_sections"],
-                        }
-                    print("publication: ",publication)
+            #Extract jornal info from database
+            try: 
+                with engine.connect() as conn:
+                    SQL = text("SELECT * FROM apregoar.publications WHERE publication_id = :x")
+                    SQL = SQL.bindparams(x=geonoticia["publication_id"][0])
+                    result = conn.execute(SQL)
+            except:
+                print("problem with extraction of publication information")
+                conn.close()
+            else:
+                for row in result:
+                    publication = {
+                        "p_name": row["publication_name"],
+                        "p_id": row["publication_id"],
+                        "p_colors": row["colors"],
+                        "p_sections": row["main_sections"],
+                    }
+                print("publication: ",publication)
+
+                if iExist == True: #ensure instances exist
+                    geonoticia["instances"] = instances
+                    print()
+                    print("geonoticia w instances: ", geonoticia)
+                    num_instances = len(instances)
+                    print("num_instances: ",num_instances)
+                    #print("publication id: ",geonoticia["publication_id"][0])
+
+                
+
                     #Add a way to view related instances
                     try:
                         with engine.connect() as conn:
@@ -184,6 +188,7 @@ def historia(s_id):
                         print("publication: ",publication)
                         return render_template("jornal/historia.html", num_instances=num_instances, instance=instance, geonoticia =geonoticia, nearbys = nearbys, publication = publication)   
                     return render_template("jornal/historia.html", num_instances=num_instances, instance=instance, geonoticia =geonoticia, nearbys = [], publication = publication)
+                return render_template("jornal/historia.html", num_instances=0, instance=[], geonoticia=geonoticia, nearbys = [], publication = publication)
             return render_template("jornal/historia.html", num_instances=0, instance=[], geonoticia=geonoticia, nearbys = [], publication = {})
     return render_template("user/index.html", notice="A história não  existe")
 
