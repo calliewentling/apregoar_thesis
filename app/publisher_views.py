@@ -447,7 +447,7 @@ def review_e(s_id):
                 instances = []
                 print("Returned result: ",result)
                 for row in result:
-                    if row["i_id"] != None:
+                    if row["i_id"] != None: 
                         if row["t_begin"] is None:
                             instance = {
                                 row["i_id"] : {
