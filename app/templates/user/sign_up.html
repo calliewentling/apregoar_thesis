@@ -31,22 +31,36 @@
 
         <div class="form-group">
           <label>Username</label>
-          <input type="text" class="form-control" id="username" name="username" placeholder="Select a username">
+          <input type="text" class="form-control" id="username" name="username" placeholder="Definir o username">
         </div>
         
         <div class="form-group">
           <label>Email</label>
-          <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email">
+          <input type="email" class="form-control" id="email" name="email" placeholder="Entrar o email">
         </div>
               
         <div class="form-group">
-          <label>Affiliation</label>
-          <input type="text" class="form-control" id="affiliation" name="affiliation" placeholder="Enter your affiliation">
+          <label>Publicação</label>
+
+          <label for="createNewPub">Criar uma publicação nova</label>
+          <input type="checkbox" id="createNewPub" name="createNewPub" value="createNewPub" onclick="toggleNamePub()">
+          
+          <select id="selectExistingPub" name="selectExistingPub">
+            {% for pub in publications %}
+              <option value="{{ pub.p_id }}">{{ pub.p_name }}</option>
+            {% endfor %}
+          </select>          
+
+          <div id="nameNewPub" style="display:none">
+            <label>Nova publicação:</label>
+            <input type="text" id="affiliation" name="affiliation" placeholder="Entrar a sua publicação">
+          </div>
+          
         </div>
 
         <div class="form-group">
           <label>Password</label>
-          <input type="password" class="form-control" id="password" name="password" placeholder="Create a password">
+          <input type="password" class="form-control" id="password" name="password" placeholder="Criar uma senha">
         </div>
         <button type="submit" class="btn btn-primary">Sign up</button>
 
@@ -56,6 +70,25 @@
       </form>
     </div>
   </div>
+
 </div>
 
+<script>
+  var nameNewPub = document.getElementById("nameNewPub");
+  var selectExistingPub = document.getElementById("selectExistingPub");
+  var createNewPub = document.getElementById("createNewPub");
+  function toggleNamePub(){
+    console.log("checkbox ",createNewPub.checked);
+    if (createNewPub.checked){
+      nameNewPub.style.display = "block";
+      selectExistingPub.style.display = "none";
+    } else {
+      nameNewPub.style.display = "none";
+      selectExistingPub.style.display = "block";
+    }
+  }
+</script>
+
+
 {% endblock %}
+

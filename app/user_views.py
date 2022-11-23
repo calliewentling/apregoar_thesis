@@ -22,18 +22,32 @@ def sign_upU(login_source):
         req = request.form
         missing = list()
 
+        newPub = request.form.get("createNewPub")
+        print("newPub: ",newPub)
+
         for k, v in req.items():
             if v =="":
-                missing.append(k)
+                if k == "affiliation":
+                    if newPub == "createNewPub":
+                        missing.append(k)
+                else:
+                    missing.append(k)
+        print("missing: ",missing)
         if missing:
-            feedback = f"Missing fields for {', '.join(missing)}"
+            feedback = f"Falta campos para {', '.join(missing)}"
+            print(feedback)
             return render_template("publisher/sign_up.html", feedback=feedback)
-
+        
         username = request.form.get("username")
         password = request.form.get("password")
         email = request.form.get("email")
         organization = request.form.get("affiliation")
         
+        
+
+        
+
+
         try:
             with engine.connect() as conn:
                 print(username)
@@ -63,20 +77,86 @@ def sign_upU(login_source):
                             )
                             u_id = cur.fetchone()[0]
                             print("New user id: ",u_id)
-                            con.commit()
-                            cur.close()
+                            
                 except:
                     print("Error in saving new user")
                     feedback=f"Erro"
-                    conn.rollback()
-                    cur.close()
+                    con.rollback()
+                    con.close()
                 else:
                     print("User added to database")
+                    if newPub == "createNewPub":
+                        print("New publication to add to database")
+                        try:
+                            with con:
+                                with con.cursor() as cur:
+                                    cur.execute("""
+                                        INSERT INTO apregoar.publications (publication_name)
+                                        VALUES (%(publication_name)s)
+                                        RETURNING publication_id
+                                        ;""",
+                                        {'publication_name':organization}
+                                    )
+                                    p_id = cur.fetchone()[0]
+                                    print("New publication id: ",p_id)
+                        except:
+                            print("error adding new publication")
+                            con.rollback()
+                            con.close()
+                            return render_template("user/sign_up.html")
+                    else:
+                        print("using a pre-existing publication")
+                        p_id = int(request.form.get("selectExistingPub"))
+                        print("p_id: ",p_id)
+                    try:
+                        with con:
+                            with con.cursor() as cur:
+                                print("associating affiliation to user")
+                                cur.execute("""
+                                    INSERT INTO apregoar.user_affil (u_id, p_id)
+                                    VALUES (%(u_id)s,%(p_id)s)
+                                    ;""",
+                                    {'u_id':int(u_id), 'p_id':int(p_id)}
+                                )
+                                print("associated affiliation to user")
+                                #u_id_conf = cur.fetchone()[0]
+                                #print("u_id_conf: ",u_id_conf)
+                    except psycopg2.Error as e:
+                        print("e: ",e)
+                        print("e.pgerror:  ",e.pgerror)
+                        print("e.diag.message_primary: ", e.diag.message_primary)
+                        print("error associating user to publication")
+                        con.rollback()
+                        con.close()
+                        return render_template("publisher/sign_up.html")
+                    else:
+                        print("Success in publisher affiliation to user!")
+                        con.commit()
+                        con.close()
                     return redirect(url_for("sign_inU", login_source = "publisher"))
             else:
                 feedback=f"O username já existe. Seleciona um novo username, se faz favor."
                 return render_template("user/sign_up.html", feedback=feedback)
-    return render_template("user/sign_up.html")
+    try:
+        with engine.connect() as conn:
+            SQL = text("SELECT * FROM apregoar.publications")
+            result = conn.execute(SQL)
+    except:
+        publications = []
+        print("no publications loaded")
+        return render_template("user/sign_up.html", publications = publications)
+    else:
+        publications = []
+        for r in result:
+            pub = {
+                'p_id': r["publication_id"],
+                'p_name': r["publication_name"],
+            }
+            publications.append(pub)
+        
+        #publications = json.dumps(publications, ensure_ascii=False)
+        print("publications: ",publications)
+    return render_template("user/sign_up.html", publications = publications)
 
 @app.route("/<login_source>/sign_in", methods=["GET", "POST"])
 def sign_inU(login_source):
