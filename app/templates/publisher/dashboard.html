@@ -33,30 +33,37 @@
       <div class="card">
         <div class="card-body">
           <h3> Os meus notícias</h3>
-
-          {% for uStory in userStories %}
-            {% for sID, attributes in uStory.items() %}
-
-            <script>
-              var storyID = "{{ sID }}";
-              console.log(storyID);
-              //Apparently document.write is considered bad practice. Replace in the future with something better
-              document.write('<p> <a href="/publisher/'+storyID+'/review"> {{ attributes["title"] }} </a>- <i> {{ attributes["date"] }} </i></p>');
-            </script>
-            
-            {% endfor %}
-          {% endfor %}
-
-          <h2> As notícias de {{ organization }}</h2>
-          {% if orgStories|length > 0 %}
-            {% for oStory in orgStories %}
-              {% for sID, attributes in oStory.items() %}
-                <p>{{ attributes["title"] }} - <i> {{ attributes["date"] }} </i></p>
+          <div class="scrollResults">
+            {% for uStory in userStories %}
+              {% for sID, attributes in uStory.items() %}
+              <script>
+                var storyID = "{{ sID }}";
+                console.log(storyID);
+                //Apparently document.write is considered bad practice. Replace in the future with something better
+                document.write('<p> <a href="/publisher/'+storyID+'/review"> {{ attributes["title"] }} </a>- <i> {{ attributes["date"] }} </i></p>');
+              </script>
+              <br>
               {% endfor %}
             {% endfor %}
-          {% else %}
-            <p><i>Ainda sem notícias associadas</i></p>
-          {% endif %}
+          </div>
+          <br>
+          
+          <br>
+          {% for orgName, orgStories in allOrgStories.items() %}
+            <h3>{{ orgName }}</h3>
+            <div class="scrollResults">
+              {% for orgStory in orgStories %}
+                {% for orgStoryID, orgStoryDeets in orgStory.items() %}
+                  <p>{{ orgStoryDeets.title }} - {{ orgStoryDeets.date }}</p>
+                {% endfor %}
+              {% endfor %}
+            </div>
+            <br>
+          {% endfor %}
+            
+          
+          
+          
 
         </div>
       </div>

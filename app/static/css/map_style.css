@@ -93,3 +93,13 @@ top: 3em;
     content: '>';
 }
 
+div.scrollResults {
+    margin:4px, 4px;
+    padding:4px;
+    background-color: rgb(246, 240, 240);
+
+    height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-align:justify;
+}

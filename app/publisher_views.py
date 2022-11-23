@@ -270,17 +270,20 @@ def sign_out():
 @app.route("/publisher/dashboard")
 def publisher_dashboard():
     if not fsession.get("username") is None:
-        print(fsession["username"])
+        print("User recognized")
+        print("user: ",fsession["username"])
+        print("p_ids: ",fsession["p_ids"], type(fsession["p_ids"]))
 
         try:
             with engine.connect() as conn:
-                SQL = text("SELECT * FROM apregoar.stories WHERE u_id = :x")
+                #SQL = text("SELECT * FROM apregoar.stories WHERE u_id = :x AND publication = :y")
+                SQL = text("SELECT * FROM apregoar.stories WHERE u_id = :x ORDER BY pub_date DESC")
                 SQL = SQL.bindparams(x=fsession["u_id"])
                 result = conn.execute(SQL)
         except:
             print("Error in identifying stories from user")
-            feedback=f"Erro"
-            flash(feedback, "danger")
+            feedback = f"Erro no login"
+            return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"])
         else:
             user_stories = []
             for row in result:
@@ -293,35 +296,38 @@ def publisher_dashboard():
                 user_stories.append(u_story)
         finally: conn.close()
 
-        try:
-            with engine.connect() as conn:
-                SQL = text("SELECT * FROM apregoar.stories WHERE publication = :x")
-                SQL = SQL.bindparams(x=fsession["org"])
-                result = conn.execute(SQL)
-        except:
-            print("Error in identifying stories from user publication")
-            feedback=f"Erro"
-            flash(feedback,"danger")
-        else:
-            org_stories = []
-            o_story = {}
-            for row in result:
-                o_story = {
-                    row["s_id"] : {
-                        "title": row["title"],
-                        "date": row["pub_date"]
-                    } 
-                }
-                org_stories.append(o_story)
-            print()
-            print("last added story: ",o_story)
-            print("all stories associated with this organization: ",org_stories)
-            print()
-            return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories, orgStories = org_stories)
+        if len(fsession["p_ids"]) > 0:
+            all_org_stories = {}
+            for p_id in fsession["p_ids"]:
+                print("p_id: ",p_id)
+                try:
+                    with engine.connect() as conn:
+                        SQL = text("SELECT * FROM apregoar.stories LEFT JOIN apregoar.publicationing ON stories.s_id = publicationing.story_id LEFT JOIN apregoar.publications ON publicationing.p_id = publications.publication_id WHERE p_id = :y")
+                        SQL = SQL.bindparams(y=p_id)
+                        result = conn.execute(SQL)
+                except:
+                    print("Error in identifying stories from user publication")            
+                else:
+                    org_stories = []
+                    for row in result:
+                        pub_name = row["publication_name"]
+                        print("pub_name: ",pub_name)
+                        o_story = {
+                            row["s_id"] : {
+                                "title": row["title"],
+                                "date": row["pub_date"]
+                            }
+                        }
+                        #print("o_story: ",o_story)
+                        org_stories.append(o_story)
+                    all_org_stories[row["publication_name"]] = org_stories
+                print("all_org_stories: ",all_org_stories)
+            return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories, allOrgStories = all_org_stories)
+        return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories)    
     else:
         print("No username found in fsession")
         feedback=f"Não há um user ativo."
-        flash(feedback,"danger")
+        #flash(feedback,"danger")
         return redirect(url_for("sign_inU", login_source = "publisher"))
 
 @app.route("/publisher/publication")

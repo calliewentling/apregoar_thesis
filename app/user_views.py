@@ -36,17 +36,13 @@ def sign_upU(login_source):
         if missing:
             feedback = f"Falta campos para {', '.join(missing)}"
             print(feedback)
-            return render_template("publisher/sign_up.html", feedback=feedback)
+            publications = load_pubs()
+            return render_template("user/sign_up.html", publications = publications, feedback=feedback)
         
         username = request.form.get("username")
         password = request.form.get("password")
         email = request.form.get("email")
-        organization = request.form.get("affiliation")
-        
-        
-
-        
-
+        organization = request.form.get("affiliation").lower()
 
         try:
             with engine.connect() as conn:
@@ -77,7 +73,6 @@ def sign_upU(login_source):
                             )
                             u_id = cur.fetchone()[0]
                             print("New user id: ",u_id)
-                            
                 except:
                     print("Error in saving new user")
                     feedback=f"Erro"
@@ -103,7 +98,9 @@ def sign_upU(login_source):
                             print("error adding new publication")
                             con.rollback()
                             con.close()
-                            return render_template("user/sign_up.html")
+                            publications = load_pubs()
+                            feedback = f"Erro na associação da organização"
+                            return render_template("user/sign_up.html",publications = publications, feedback = feedback)
                     else:
                         print("using a pre-existing publication")
                         p_id = int(request.form.get("selectExistingPub"))
@@ -128,7 +125,9 @@ def sign_upU(login_source):
                         print("error associating user to publication")
                         con.rollback()
                         con.close()
-                        return render_template("publisher/sign_up.html")
+                        feedback = f"Erro na associação da organização"
+                        publications = load_pubs()
+                        return render_template("user/sign_up.html", publications = publications, feedback=feedback)
                     else:
                         print("Success in publisher affiliation to user!")
                         con.commit()
@@ -136,7 +135,12 @@ def sign_upU(login_source):
                     return redirect(url_for("sign_inU", login_source = "publisher"))
             else:
                 feedback=f"O username já existe. Seleciona um novo username, se faz favor."
-                return render_template("user/sign_up.html", feedback=feedback)
+                return render_template("user/sign_up.html", publications = publications, feedback=feedback)
+    
+    #WHEN FIRST LOADING THE PAGE
+    publications = load_pubs()
+    return render_template("user/sign_up.html", publications = publications)
+def load_pubs():
     try:
         with engine.connect() as conn:
             SQL = text("SELECT * FROM apregoar.publications")
@@ -145,7 +149,7 @@ def sign_upU(login_source):
         publications = []
         print("no publications loaded")
         return render_template("user/sign_up.html", publications = publications)
-    else:
+    else:    
         publications = []
         for r in result:
             pub = {
@@ -153,10 +157,10 @@ def sign_upU(login_source):
                 'p_name': r["publication_name"],
             }
             publications.append(pub)
-        
         #publications = json.dumps(publications, ensure_ascii=False)
         print("publications: ",publications)
-    return render_template("user/sign_up.html", publications = publications)
+        return publications
+    
 
 @app.route("/<login_source>/sign_in", methods=["GET", "POST"])
 def sign_inU(login_source):
@@ -170,7 +174,7 @@ def sign_inU(login_source):
         print("Entered password: ", password)
         try:
             with engine.connect() as conn:
-                SQL = text("SELECT * FROM apregoar.users WHERE username = :x and password = :y")
+                SQL = text("SELECT users.u_id, users.organization, users.username, users.email, array_agg(user_affil.p_id) AS p_ids FROM apregoar.users LEFT JOIN apregoar.user_affil ON users.u_id = user_affil.u_id WHERE username = :x and password = :y GROUP BY users.u_id, organization, username, email")
                 SQL = SQL.bindparams(x=username, y=password)
                 print(SQL)
                 result = conn.execute(SQL)   
@@ -186,7 +190,8 @@ def sign_inU(login_source):
                         "username": row['username'],
                         "affiliation": row['organization'],
                         "email": row['email'],
-                        "u_id": row['u_id']
+                        "u_id": row['u_id'],
+                        "p_ids": row['p_ids']
                     }
                 }
                 print("users dict: ",user)
@@ -202,8 +207,9 @@ def sign_inU(login_source):
                 fsession['u_id'] = user[username]["u_id"]
                 fsession['org'] = user[username]["affiliation"]
                 fsession['email'] = user[username]["email"]
+                fsession['p_ids'] = user[username]["p_ids"]
                 print("fsession: ",fsession)
-                #session.modified = True
+                session.modified = True
                 print("Session user assigned")
                 if login_source == "publisher":
                     return redirect(url_for("publisher_dashboard"))
@@ -222,6 +228,7 @@ def sign_outU(login_source):
     fsession.pop("email", None)
     fsession.pop("u_id", None)
     fsession.pop("org", None)
+    fsession.pop("p_ids",None)
     print("fsession: ",fsession)
     return redirect(url_for("sign_inU", login_source = login_source))
 
