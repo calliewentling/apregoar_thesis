@@ -25,7 +25,6 @@ def sign_upU(login_source):
         for k, v in req.items():
             if v =="":
                 missing.append(k)
-        
         if missing:
             feedback = f"Missing fields for {', '.join(missing)}"
             return render_template("publisher/sign_up.html", feedback=feedback)
