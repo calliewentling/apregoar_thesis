@@ -32,7 +32,7 @@
             <h2>Instâncias</h2> 
 
             <!-- TOGGLE -->
-            <div class="container1">
+            <div id="toggleDiv" class="container1">
               <label class="switch">
                 <input id ="tswitch" type="checkbox" onclick = "toggleMap()">
                 <span class="slider round"></span>
@@ -94,20 +94,41 @@
   <!-- JAVASCRIPT -->
   
   <script>
-    function toggleMap(){
+    var instances = '{{ instances|tojson }}';
+    instances = JSON.parse(instances);
+    console.log("instances: ",instances);
+    console.log("type of instances: ", typeof instances);
+    console.log("instances length: ",instances.length);
+
+    if (instances.length<1){
+      toggleMap(noInst=true);
+    }
+
+    function toggleMap(noInst){
+      console.log("entering toggleMap(noIns = ",noInst,")");
       //Get the checkbox
       var tswitch = document.getElementById("tswitch");
       //Get output text
+      var instanceMap = document.getElementById("instanceMap");
       var instanceList = document.getElementById("instanceList");
-
+      var toggleDiv = document.getElementById("toggleDiv");
       //If the checkbox is checked, display the output text
-      if (tswitch.checked == true){
+      if (noInst==true){
+        console.log("noInst = true");
+        instanceList.style.display = "block";
+        console.log("instanceList visible");
+        instanceMap.style.display = "none";
+        console.log("instanceMap hidden");
+        toggleDiv.style.display = "none";
+        console.log("toggleDiv hidden");
+      } else if (tswitch.checked == true){
         instanceList.style.display = "block";
         instanceMap.style.display = "none";
       } else {
         instanceList.style.display = "none";
         instanceMap.style.display = "block";
       }
+      console.log("leaving toggleMap")
     }
     var mapEAGazFilter = "";
     var mapStoryFilter = "s_id="+storyID;

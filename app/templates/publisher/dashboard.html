@@ -36,13 +36,8 @@
           <div class="scrollResults">
             {% for uStory in userStories %}
               {% for sID, attributes in uStory.items() %}
-              <script>
-                var storyID = "{{ sID }}";
-                console.log(storyID);
-                //Apparently document.write is considered bad practice. Replace in the future with something better
-                document.write('<p> <a href="/publisher/'+storyID+'/review"> {{ attributes["title"] }} </a>- <i> {{ attributes["date"] }} </i></p>');
-              </script>
-              <br>
+                <p><a href="{{ '/publisher/' + sID|string + '/review'}}"> {{ attributes["title"] }} </a> - <i> {{ attributes["date"] }}</i></p>
+                <br>
               {% endfor %}
             {% endfor %}
           </div>
@@ -54,7 +49,9 @@
             <div class="scrollResults">
               {% for orgStory in orgStories %}
                 {% for orgStoryID, orgStoryDeets in orgStory.items() %}
-                  <p>{{ orgStoryDeets.title }} - {{ orgStoryDeets.date }}</p>
+                  {% set storyRef = '/publisher/' + orgStoryID|string + '/review' %}
+                  <p><a href = "{{ storyRef }}"> {{ orgStoryDeets.title }} </a> - {{ orgStoryDeets.date }}</p>
+                  <br>
                 {% endfor %}
               {% endfor %}
             </div>

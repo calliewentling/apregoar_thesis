@@ -451,7 +451,6 @@ def review_e(s_id):
                 return render_template("publisher/review.html", story=story, sID = s_id, instances=[])
             else:
                 instances = []
-                print("Returned result: ",result)
                 for row in result:
                     if row["i_id"] != None: 
                         if row["t_begin"] is None:
@@ -478,7 +477,7 @@ def review_e(s_id):
                         instances.append(instance)
                     else:
                         break
-                print(instances)
+                print("instances: ",instances)
                 return render_template("publisher/review.html", story=story, sID = s_id, instances=instances) #
         else:
             feedback = f"No valid story selected"

@@ -1,5 +1,5 @@
 //// Initialize loader ////
-const spinner = document.getElementById("spinner");
+//const spinner = document.getElementById("spinner");
 
 /**
 * Elements that make up the popup.
@@ -185,7 +185,7 @@ wmsSourceStory.on('imageloaderror', function() {
 
 //Zoom to instances
 const vectorSource = new ol.source.Vector();
-spinner.removeAttribute('hidden');
+//spinner.removeAttribute('hidden');
 var wfs_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=apregoar:geonoticias&cql_filter='+mapStoryFilter+'&outputFormat=application/json';
 fetch(wfs_url).then(function (response) {
     json = response.json();
@@ -200,7 +200,7 @@ fetch(wfs_url).then(function (response) {
         vectorSource.addFeatures(features);
         layerExtent = vectorSource.getExtent();
         map.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
-        spinner.setAttribute('hidden', '');
+        //spinner.setAttribute('hidden', '');
     }   
 });
 ///
