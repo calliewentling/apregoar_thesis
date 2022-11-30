@@ -11,6 +11,8 @@ console.log("publication: ",publication);
  var numStoryFeatures;
  let vSource;
  let vectorLayer;
+ let resultsStory;
+ let stories;
 
 pubColor = setColors();
 
@@ -23,7 +25,7 @@ const attributions =
 */
 var docTitle = document.title;
 //console.log(docTitle);
-const container = document.getElementById('popup');
+const containerPop = document.getElementById('popup');
 const storyContent = document.getElementById('popup-story');
 const instContent = document.getElementById('popup-instances');
 const closer = document.getElementById('popup-closer');
@@ -34,7 +36,7 @@ const popupinstancecount = document.getElementById('popup-instance-count');
 * Create an overlay to anchor the popup to the map.
 */
 const overlay = new ol.Overlay({
-    element: container,
+    element: containerPop,
     autoPan: true,
     autoPanAnimation: {
         duration: 250,
@@ -226,7 +228,7 @@ let getInfo;
 
 
 const displayFeatureInfo = function (pixel, popupFeatures, type) {
-    console.log("Entering displayFeatureInfo");
+    console.log("Entering displayFeatureInfo(pixel=",pixel,", popFeatures=",popupFeatures,", type=",type,")");
     if (popupFeatures.length>0) {
         console.log("popupFeatures.length>0");
         popupInstances = [];
@@ -250,6 +252,7 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
 
             //console.log("tBegin type: "+typeof(tBegin)+', value: '+tBegin);
             var tType = popupFeatures[f]["A"]["t_type"];
+            console.log("tType = ",tType);
             if (tType == "allday_y"){
                 if (tBegin == tEnd){
                     var vizDate = '<p><em>'+tBegin.toDateString()+'</em></p>';
@@ -276,8 +279,8 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
             var storyBlock = 
                 '<h3>' + title + '</h3>' +
                 '<em>' + pubDate.toDateString() + '</em>'+
-                '<p> <b>' + section + '</b>' + tags + '</p>' +  
-                '<a href="' + webLink +'"> Notícia </a>';
+                '<p> <b>' + section + '</b>: ' + tags + '</p>' +  
+                '<a href="/jornal/' + sID +'/historia"> Notícia </a>';
         
             /* Publisher: Story Review Popup */
             var instanceBlock = 
@@ -293,22 +296,22 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
                 '<p>'+title+' ('+pubDate.toDateString()+')</p>';
 
             //Constructing geojson reference
+            console.log("type = ",type);
+            popupInstances[f] = {
+                "iID": iID,
+                "tDesc": tDesc,
+                "pDesc": pDesc,
+                "pName": pName,
+            }
             if (type == "article") {
-                popupInstances[f] = {
-                    "iID": iID,
-                    "tDesc": tDesc,
-                    "pDesc": pDesc,
-                    "pName": pName,
-                    "instanceBlock": instanceBlock
-                }
+                popupInstances[f]["instanceBlock"] = instanceBlock;
+
+            } else if (type == "explore"){
+                popupInstances[f]["instanceBlock"] = storyBlock; //change this
+
             } else {
-                popupInstances[f] = {
-                    "iID": iID,
-                    "tDesc": tDesc,
-                    "pDesc": pDesc,
-                    "pName": pName,
-                    "instanceBlock": tagBlock
-                }
+                console.log("type != article");
+                popupInstances[f]["instanceBlock"] = tagBlock;
             }
         }
         //console.log("popupInstances");
@@ -334,6 +337,13 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
         var infoFeature = [];
         for (var i=0; i<popupFeatures.length; ++i){
             infoFeature.push(popupFeatures[i].get('p_name'));
+        }
+        if (popupFeatures.length == 1){
+            pageahead.style.display = "none";
+            pagebehind.style.display = "none";
+        } else {
+            pageahead.style.display = "block";
+            pagebehind.style.display = "block";
         }
     } 
     featureOverlay.getSource().clear();
@@ -361,9 +371,11 @@ const highlightInstance = function (pixel) {
 let popupFeatures;
 let popupTags;
 map.on('click', function (evt) {
+    console.log("Entering map on click");
     coordinate = evt.coordinate;
     featureFocus.getSource().clear();
-    console.log("currentZIndex: ",currentZIndex)
+    console.log("Cleared feature focus source");
+    console.log("currentZIndex: ",currentZIndex);
     //popupFeatures = vSource.getFeaturesAtCoordinate(coordinate);
     if (currentZIndex > 1){
         popupFeatures = tagSource.getFeaturesAtCoordinate(coordinate);
@@ -372,16 +384,21 @@ map.on('click', function (evt) {
     } else {
         popupFeatures = vSource.getFeaturesAtCoordinate(coordinate);
         console.log("popupFeatures: ",popupFeatures);
-        displayFeatureInfo(evt.pixel, popupFeatures, type="article");
+        if (doc_source == "historias"){
+            
+            displayFeatureInfo(evt.pixel, popupFeatures, type="article");
+        } else if (doc_source == "jornal_map"){
+            displayFeatureInfo(evt.pixel, popupFeatures, type="explore");
+        }
+        
     }
+    console.log("Leaving map on click");
 });
-currentZIndex = 1;
-
-
-
+let currentZIndex;
 
 /** VIEWING INDIVIDUAL STORIES FOR A JORNAL ENTRY */
 if (doc_source == "historias"){
+    currentZIndex = 1;
     console.log("doc_source: ",doc_source);
     console.log("geonoticia: ",geonoticia);
     //Basic story info
@@ -471,6 +488,7 @@ if (doc_source == "historias"){
     };
 } /** VIEWING JORNAL MAP */
 else if (doc_source == "jornal_map"){
+    currentZIndex = 1;
     console.log("jornal_map");
     console.log("jVals: ",jVals); 
     const baseFilters = {
@@ -491,8 +509,13 @@ else if (doc_source == "jornal_map"){
         "pubDateFilterMax":false,
         "boundaryPolys":[],
         "boundaryDefinition":"containPartial",
+        "e_ids": [],
     };
     var allFilters = baseFilters;
+    if (eID > 0){
+        allFilters["e_ids"] = [eID];
+    }
+    console.log("allFilters: ",allFilters);
     vSource = new ol.source.Vector();
     vectorLayer = new ol.layer.Vector({
         source: vSource,
@@ -610,6 +633,8 @@ else if (doc_source == "jornal_map"){
         console.log("Leaving adjustRange");
     }
 
+    resultsStory = document.getElementById("resultsStory"); 
+
 
     filterAllVals();
     /*
@@ -624,6 +649,127 @@ else if (doc_source == "jornal_map"){
         },
     });
     map.addLayer(vectorLayer);  */
+
+    /// MULTICHECKBOXES
+    $(document).ready(function () {
+        $("#checksTags").CreateMultiCheckBox({ width: '230px', defaultText : 'Tags', height:'250px', multiName: "checkTags" });
+        $("#checksAuthors").CreateMultiCheckBox({ width: '230px', defaultText : 'Escritores', height:'250px', multiName: "checkAuthors"});
+    });
+
+    $(document).ready(function () {
+        $(document).on("click", ".MultiCheckBox", function () {
+            var detail = $(this).next();
+            detail.show();
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetailHeader input", function (e) {
+            //This should be accessed to remove everything from selection;
+            e.stopPropagation();
+            var hc = $(this).prop("checked");
+            $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", hc);
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetailHeader", function (e) {
+            //console.log("This enters a check all scenario");
+            var inp = $(this).find("input");
+            var chk = inp.prop("checked");
+            inp.prop("checked", !chk);
+            $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", !chk);
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetail .cont input", function (e) {
+            e.stopPropagation();
+            $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
+
+            var val = ($(".MultiCheckBoxDetailBody input:checked").length == $(".MultiCheckBoxDetailBody input").length)
+            $(".MultiCheckBoxDetailHeader input").prop("checked", val);
+        });
+
+        $(document).on("click", ".MultiCheckBoxDetail .cont", function (e) {
+            var inp = $(this).find("input");
+            var chk = inp.prop("checked");
+            inp.prop("checked", !chk);
+
+            var multiCheckBoxDetail = $(this).closest(".MultiCheckBoxDetail");
+            var multiCheckBoxDetailBody = $(this).closest(".MultiCheckBoxDetailBody");
+            multiCheckBoxDetail.next().UpdateSelect();
+            
+
+            var val = ($(".MultiCheckBoxDetailBody input:checked").length == $(".MultiCheckBoxDetailBody input").length)
+            $(".MultiCheckBoxDetailHeader input").prop("checked", val);
+            
+        });
+
+        $(document).mouseup(function (e) {
+            var container = $(".MultiCheckBoxDetail"); //Are we defining multiple containers?
+            if (!container.is(e.target) && container.has(e.target).length === 0) {
+                container.hide();
+            }
+        });
+    });
+    var defaultMultiCheckBoxOption = { width: '220px', defaultText: "Selecionar", height: '200px' }
+    jQuery.fn.extend({
+        CreateMultiCheckBox: function (options) {
+
+            var localOption = {};
+            localOption.width = (options != null && options.width != null && options.width != undefined) ? options.width : defaultMultiCheckBoxOption.width;
+            localOption.defaultText = (options != null && options.defaultText != null && options.defaultText != undefined) ? options.defaultText : defaultMultiCheckBoxOption.defaultText;
+            localOption.height = (options != null && options.height != null && options.height != undefined) ? options.height : defaultMultiCheckBoxOption.height;
+            this.hide();
+            this.attr("multiple", "multiple");
+            //console.log("this: ",this[0].id);
+            var divSel = $("<div class='MultiCheckBox' id='"+this[0].id+"Vals'>" + localOption.defaultText + "<span class='k-icon k-i-arrow-60-down'><svg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' class='svg-inline--fa fa-sort-down fa-w-10 fa-2x'><path fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z' class=''></path></svg></span></div>").insertBefore(this);
+            divSel.css({ "width": localOption.width });
+
+            var detail = $("<div class='MultiCheckBoxDetail'><div class='MultiCheckBoxDetailHeader'><input type='checkbox' class='mulinput' value='-1982' /><div>Tudo</div></div><div class='MultiCheckBoxDetailBody'></div></div>").insertAfter(divSel);
+            detail.css({ "width": parseInt(options.width) + 10, "max-height": localOption.height });
+            var multiCheckBoxDetailBody = detail.find(".MultiCheckBoxDetailBody");
+
+            this.find("option").each(function () {
+                var val = $(this).attr("value");
+
+                if (val == undefined)
+                    val = '';
+
+                multiCheckBoxDetailBody.append("<div class='cont'><div><input type='checkbox' class='mulinput' value='" + val + "' /></div><div>" + $(this).text() + "</div></div>");
+            });
+
+            multiCheckBoxDetailBody.css("max-height", (parseInt($(".MultiCheckBoxDetail").css("max-height")) - 28) + "px");
+
+        },
+        UpdateSelect: function () {
+            var arr = [];
+            var filterName = this[0].id.replace("checks","");
+            var filterMultiName = this[0].id+'Vals';
+            const filterMulti = document.getElementById(filterMultiName);
+
+            this.prev().find(".mulinput:checked").each(function () {
+                arr.push($(this).val());
+            });
+
+            this.val(arr);
+            console.log("arr ",arr);
+            allFilters[filterName] = arr;
+
+            // Gathering values of inputs & updating dropdown viz based on selections
+            filterVals = [];
+            /*this.prev().find(".mulinput:checked").each(function() {
+                filterVals.push($(this).attr("value"));
+            })*/
+            const attrFilters = document.getElementById("attrFilters");
+            if (arr.length < 1) {
+                filterVals = filterName;
+            } else if (arr.length > 3) {
+                filterVals = "("+arr.length+" "+ filterName.toLowerCase() +" selecionados)"
+            } else {
+                filterVals = arr
+            }
+            //attrFilters.innerHTML = filterVals;
+            filterMulti.innerHTML= filterVals+"<span class='k-icon k-i-arrow-60-down'><svg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' class='svg-inline--fa fa-sort-down fa-w-10 fa-2x'><path fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z' class=''></path></svg></span>";
+        },
+    });
 } /** ERROR */
 else {
     console.log("how did we get here?");
@@ -764,6 +910,7 @@ function filterAllVals(){
             stories = resp["stories"];
             instances = resp["instances"];
             iIDs = resp["iIDs"];
+            refreshStoryCards(stories=stories);
             if (instances.length > 0){
                 iIDFilter = "i_id IN ("+iIDs+")";
                 cqlFilter = iIDFilter.replace(/%/gi,"%25").replace(/'/gi,"%27").replace(/ /gi,"%20");
@@ -777,6 +924,7 @@ function filterAllVals(){
             }
         })
     })
+    
     console.log("Leaving filterAllVals");
 };
 
@@ -797,126 +945,88 @@ function removeSkeleton(){
 };
 
 
-/// MULTICHECKBOXES
-$(document).ready(function () {
-    $("#checksTags").CreateMultiCheckBox({ width: '230px', defaultText : 'Tags', height:'250px', multiName: "checkTags" });
-    $("#checksAuthors").CreateMultiCheckBox({ width: '230px', defaultText : 'Escritores', height:'250px', multiName: "checkAuthors"});
-});
 
-$(document).ready(function () {
-    $(document).on("click", ".MultiCheckBox", function () {
-        var detail = $(this).next();
-        detail.show();
+
+function refreshStoryCards(stories){
+    console.log("Entering refreshStoryCards()");
+    console.log("stories: ",stories);
+    //Removing old cards
+    var prevStoryCards = document.querySelectorAll(".story-card");
+    prevStoryCards.forEach(card => {
+        card.remove();
     });
+    //Preparing new story cards
+    for(i=0; i<stories.length; i++){
+        var sID = stories[i]["s_id"];
+        var sCard = document.createElement('div');
+        sCard.className = 'story-card skeleton';
+        sCard.id = "sID_"+stories[i]["s_id"];
 
-    $(document).on("click", ".MultiCheckBoxDetailHeader input", function (e) {
-        //This should be accessed to remove everything from selection;
-        e.stopPropagation();
-        var hc = $(this).prop("checked");
-        $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", hc);
-        $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
-    });
+        var sCardTitle = document.createElement('div');
+        sCardTitle.className = 'story-title hide-text';
+        sCardTitle.innerHTML = stories[i]["title"];
+        sCard.appendChild(sCardTitle);
 
-    $(document).on("click", ".MultiCheckBoxDetailHeader", function (e) {
-        //console.log("This enters a check all scenario");
-        var inp = $(this).find("input");
-        var chk = inp.prop("checked");
-        inp.prop("checked", !chk);
-        $(this).closest(".MultiCheckBoxDetail").find(".MultiCheckBoxDetailBody input").prop("checked", !chk);
-        $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
-    });
+        var sCardDetails = document.createElement('div');
+        sCardDetails.className='story-details';
+        sCard.appendChild(sCardDetails);
 
-    $(document).on("click", ".MultiCheckBoxDetail .cont input", function (e) {
-        e.stopPropagation();
-        $(this).closest(".MultiCheckBoxDetail").next().UpdateSelect();
-
-        var val = ($(".MultiCheckBoxDetailBody input:checked").length == $(".MultiCheckBoxDetailBody input").length)
-        $(".MultiCheckBoxDetailHeader input").prop("checked", val);
-    });
-
-    $(document).on("click", ".MultiCheckBoxDetail .cont", function (e) {
-        var inp = $(this).find("input");
-        var chk = inp.prop("checked");
-        inp.prop("checked", !chk);
-
-        var multiCheckBoxDetail = $(this).closest(".MultiCheckBoxDetail");
-        var multiCheckBoxDetailBody = $(this).closest(".MultiCheckBoxDetailBody");
-        multiCheckBoxDetail.next().UpdateSelect();
-        
-
-        var val = ($(".MultiCheckBoxDetailBody input:checked").length == $(".MultiCheckBoxDetailBody input").length)
-        $(".MultiCheckBoxDetailHeader input").prop("checked", val);
-        
-    });
-
-    $(document).mouseup(function (e) {
-        var container = $(".MultiCheckBoxDetail");
-        if (!container.is(e.target) && container.has(e.target).length === 0) {
-            container.hide();
-        }
-    });
-});
-var defaultMultiCheckBoxOption = { width: '220px', defaultText: "Selecionar", height: '200px' }
-jQuery.fn.extend({
-    CreateMultiCheckBox: function (options) {
-
-        var localOption = {};
-        localOption.width = (options != null && options.width != null && options.width != undefined) ? options.width : defaultMultiCheckBoxOption.width;
-        localOption.defaultText = (options != null && options.defaultText != null && options.defaultText != undefined) ? options.defaultText : defaultMultiCheckBoxOption.defaultText;
-        localOption.height = (options != null && options.height != null && options.height != undefined) ? options.height : defaultMultiCheckBoxOption.height;
-        this.hide();
-        this.attr("multiple", "multiple");
-        //console.log("this: ",this[0].id);
-        var divSel = $("<div class='MultiCheckBox' id='"+this[0].id+"Vals'>" + localOption.defaultText + "<span class='k-icon k-i-arrow-60-down'><svg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' class='svg-inline--fa fa-sort-down fa-w-10 fa-2x'><path fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z' class=''></path></svg></span></div>").insertBefore(this);
-        divSel.css({ "width": localOption.width });
-
-        var detail = $("<div class='MultiCheckBoxDetail'><div class='MultiCheckBoxDetailHeader'><input type='checkbox' class='mulinput' value='-1982' /><div>Tudo</div></div><div class='MultiCheckBoxDetailBody'></div></div>").insertAfter(divSel);
-        detail.css({ "width": parseInt(options.width) + 10, "max-height": localOption.height });
-        var multiCheckBoxDetailBody = detail.find(".MultiCheckBoxDetailBody");
-
-        this.find("option").each(function () {
-            var val = $(this).attr("value");
-
-            if (val == undefined)
-                val = '';
-
-            multiCheckBoxDetailBody.append("<div class='cont'><div><input type='checkbox' class='mulinput' value='" + val + "' /></div><div>" + $(this).text() + "</div></div>");
-        });
-
-        multiCheckBoxDetailBody.css("max-height", (parseInt($(".MultiCheckBoxDetail").css("max-height")) - 28) + "px");
-
-    },
-    UpdateSelect: function () {
-        var arr = [];
-        var filterName = this[0].id.replace("checks","");
-        var filterMultiName = this[0].id+'Vals';
-        const filterMulti = document.getElementById(filterMultiName);
-
-        this.prev().find(".mulinput:checked").each(function () {
-            arr.push($(this).val());
-        });
-
-        this.val(arr);
-        console.log("arr ",arr);
-        allFilters[filterName] = arr;
-
-        // Gathering values of inputs & updating dropdown viz based on selections
-        filterVals = [];
-        /*this.prev().find(".mulinput:checked").each(function() {
-            filterVals.push($(this).attr("value"));
-        })*/
-        const attrFilters = document.getElementById("attrFilters");
-        if (arr.length < 1) {
-            filterVals = filterName;
-        } else if (arr.length > 3) {
-            filterVals = "("+arr.length+" "+ filterName.toLowerCase() +" selecionados)"
+        var sCardSection = document.createElement('div');
+        sCardSection.className = 'sotry-section hide-text';
+        if (stories[i].section.length>0){
+            sCardSection.innerHTML = stories[i].section+'<br>';
         } else {
-            filterVals = arr
+            sCardSection.innerHTML = '<br>';
         }
-        //attrFilters.innerHTML = filterVals;
-        filterMulti.innerHTML= filterVals+"<span class='k-icon k-i-arrow-60-down'><svg aria-hidden='true' focusable='false' data-prefix='fas' data-icon='sort-down' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512' class='svg-inline--fa fa-sort-down fa-w-10 fa-2x'><path fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z' class=''></path></svg></span>";
-    },
-});
+        sCardDetails.appendChild(sCardSection);
 
+        var sCardDate = document.createElement('div');
+        sCardDate.className = 'pub-date hide-text';
+        sCardDate.innerHTML = stories[i].pub_date+'<br>';
+        sCardDetails.appendChild(sCardDate);
 
+        var sCardTags = document.createElement('div');
+        sCardTags.className = 'story-tags hide-text';
+        sCardTags.innerHTML = stories[i].tags;
+        sCardDetails.appendChild(sCardTags);
+
+        
+        
+        
+        sCard.onclick = function(){
+            sID = parseInt(this.id.substring(4),10);
+            window.location = "/jornal/" + sID + "/historia"; 
+        };
+
+        sCard.onmouseenter = function(){
+            sID = parseInt(this.id.substring(4),10);
+            console.log("Show instances related to story ",sID);
+            var features = vSource.getFeatures();
+            var hasFeatures = false;
+            for (j=0; j<features.length; j++){
+                if(features[j]["A"]["s_id"] == sID){
+                    hasFeatures = true;
+                    hoverOverlay.getSource().addFeature(features[j]);
+                    featureFocus.getSource().addFeature(features[j]);
+                };
+            };
+            console.log("Focus features: ",hoverOverlay.getSource().getFeatures());
+            if (hasFeatures == true){
+                layerExtent = hoverOverlay.getSource().getExtent();
+                console.log("layerExtent: ",layerExtent);
+                map.getView().fit(ol.extent.buffer(layerExtent, .001)); //What does this number mean??
+            };
+            
+        };
+
+        sCard.onmouseleave = function(){
+            var iIDs = [];
+            console.log("iIDs: ",iIDs);
+            hoverOverlay.getSource().clear();
+            featureFocus.getSource().clear();
+        };
+
+        resultsStory.appendChild(sCard);
+    }
+};
 

@@ -4,6 +4,28 @@
     --fill-color: rgba(255,255,255,.6);
     --stroke-color: rgba(255,255,255,1);
     --shadow-color: rgba(0,0,0,.6);
+
+    --brightlight-color: rgb(255, 255, 0,1);
+    --highlight-color: rgba(255, 255, 150, 1);
+    --lowlight-color: rgb(69, 108, 131);
+    padding: 10px;
+
+    --card-height: 150px;
+    --card-width: 300px;
+    --card-margin: 10px;
+    --card-box-shadow: -10px 5px 20px;
+    --card-box-shadow-hover: -10px 10px 20px rgba(0,0,0,0.4);
+    --card-border-radius: 5px;
+    --card-border: 3px solid;
+
+    --card-title-height: 40px;
+    --card-title-width: (100%);
+    --card-title-font-size: 16px;
+    --card-title-padding: 5px;
+
+}
+body {
+    background-color:white;
 }
 
 #iframeH {
@@ -94,6 +116,7 @@
 
 .ol-popup {
     color: var(--pub-color);
+    /*background-color: white;*/
     font-size: 12px; /*This only changes hte size of hte x. Where is the size of hte content??*/
     z-index:10;
 }
@@ -102,6 +125,7 @@
     font-size: 8px;
 }
 
+/*View nearby area*/
 .instanceInst {
     overflow: auto;
 }
@@ -203,11 +227,28 @@
     margin: 0,0,0, 15px;
 }
 
+.bigCenter{
+    position: static;
+    height: 600px;
+}
+
 .centerArea{
     width: 100%;
     height: 450px;
     position: absolute;
     padding: 20px;
+    color: black;
+}
+
+.timeArea {
+    position: fixed;
+    top: 620px;
+    left: 5%;
+    width: 90%;
+    height: 100px;
+    align-items: center;
+    justify-content: center;
+
 }
 
 .seeFilters{
@@ -255,6 +296,8 @@
     padding: 5px;
     border-radius:5px;
     cursor:pointer;
+    background-color: #ffffff;
+    color: black;
 }
 
 .MultiCheckBox .k-icon{ 
@@ -317,18 +360,12 @@
         color:#fff;
     }
 
-.timeArea {
-    bottom: 0px;
-    position: fixed;
-    width: 80%;
-    height: 100px;
-    align-items: center;
-    justify-content: center;
 
-}
+
+
 /* SLIDERS */
 .wrapperSlider{
-    position: fixed;
+    position: relative;
     bottom: 0px;
     width: 90%;
     background-color: transparent;
@@ -434,4 +471,85 @@ input[type="range"]:active::-webkit-slider-thumb{
     bottom: -14px;
     left: 0;
     right: 0;
+}
+
+
+
+
+/* STORY CARDS */
+
+.resultsArea {
+    height: 200px;
+    width: 95%;
+    position: absolute;
+    bottom: 10px;
+    position: center;
+    margin: 10px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.resultsStory {
+    align-items: left;
+    justify-content: left;
+    overflow-x: auto;
+    white-space: nowrap;
+    height: 200px;
+    position: center;
+}
+
+.story-card {
+    width: var(--card-width);
+    height: var(--card-height);
+    margin: var(--card-margin);
+    box-shadow: var(--card-box-shadow) var(--pub-colorL);
+    border-radius: var(--card-border-radius);
+    border: var(--card-border) var(--pub-color);
+    overflow: hidden;
+    color: black;
+    display: inline-block; /*previously: flex*/
+    flex-direction: column; /*column*/
+    align-items: center;
+    justify-content: space-between;
+    transition: box-shadow 0.2s ease-in;
+    cursor: pointer;
+}
+
+.story-card:hover {
+    box-shadow: var(--card-box-shadow-hover);
+    font-weight: bold;
+}
+
+.story-card .story-title {
+    height: var(--card-title-height);
+    width: var(--card-title-width);
+    font-size: var(--card-title-font-size);
+    padding: var(--card-title-padding);
+    text-align: left;
+    position: relative;
+    background-color: var(--pub-color);
+    color: white;
+}
+
+.story-card .story-details{
+    text-align: center;
+    margin: var(--card-details-margin);
+    padding-top: 10px;
+    width: var(--card-details-width);
+}
+
+.story-card .story-details .pub-date {
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.story-card .story-details .story-section {
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.story-card .story-details .story-tags {
+    margin-top: 5px;
+    font-size: 12px;
 }

@@ -214,7 +214,21 @@ def process_explore(req):
         print("subqCustom2: ",subqCustom2)
         print("subqAdmin2: ",subqAdmin2)
         subqU = (union(select(subqCustom2),select(subqAdmin2)).subquery())
-        stmtI = stmtI.join(subqU, Instances.i_id == subqU.c.i_id)     
+        stmtI = stmtI.join(subqU, Instances.i_id == subqU.c.i_id)  
+
+    if "e_ids" in req:
+        if len(req["e_ids"])>0:
+            instance_filtered = True
+            print(req["e_ids"])
+            
+            subqCustom1 = (select(Spatial_assoc).where(Spatial_assoc.e_id.in_(req["e_ids"])).subquery())
+            subqCustom2 = (select(Spatial_assoc.e_id.label("e_id"),Instance_ugaz.i_id.label("i_id"))).join_from(subqCustom1,Instance_ugaz, subqCustom1.c.p_id == Instance_ugaz.p_id).subquery()
+            print("subqCustom2: ",subqCustom2)
+            subqAdmin = (select(Instance_egaz.e_id.label("e_id"),Instance_egaz.i_id.label("i_id")).where(Instance_egaz.e_id.in_(req["e_ids"])).subquery())
+            subqU = (union(select(subqCustom2),select(subqAdmin)).subquery())
+            print("subqAdmin: ",subqAdmin)
+            stmtI = stmtI.join(subqU, Instances.i_id == subqU.c.i_id) 
+            
     
     if len(req["T_types"])>0:
         instance_filtered = True
@@ -423,7 +437,7 @@ def process_explore(req):
                         "author": result.Stories.author,
                         "web_link": result.Stories.web_link,
                         "i_id": result.Instances.i_id,
-                        "t_begin": str(result.Instances.t_end),
+                        "t_begin": str(result.Instances.t_begin), #was t_end...??
                         "t_end": str(result.Instances.t_end),
                         "t_type": result.Instances.t_type,
                         "p_desc": result.Instances.p_desc,

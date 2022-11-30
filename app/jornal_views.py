@@ -209,9 +209,11 @@ def pub_map_specific(publication, e_id):
             SQL = SQL.bindparams(x=publication.lower().replace("_"," "))
             result = conn.execute(SQL)
     except:
+        print("error extracting publications from database")
         conn.close()
         return redirect(url_for("explore"))
     else:
+        print("success extracting publication")
         for row in result:
             fsession["p_name"] = row["publication_name"]                
         return redirect(url_for("pub_map",publication=fsession["p_name"]))
@@ -224,89 +226,101 @@ def pub_map(publication):
     print("publication: ",publication)
 
     if request.method == "POST":
+        print("request method = 'post'")
+        print("fsession['e_id']: ",fsession["e_id"])
         req = request.get_json()
+        print("req: ",req)
         response = process_explore(req=req)
+        #print("response: ",response)
         return make_response(response,200)
     else:
+        print("request method = 'get'")
         #Determine if any e_id have been passed with the publication
         try:
             e_id = fsession["e_id"] 
         except:
             e_id = 0
+            print("no e_id in fsession")
         else:
             if e_id == 0:    
                 print("e_id: none")
             else:
                 print("e_id: ",e_id)
+                #Extract instances in focus area
             fsession["e_id"] = 0
         
         try:
             with engine.connect() as conn:
-                SQL = text("SELECT publication_id, publication_name, colors, main_sections FROM apregoar.publications WHERE publication_name LIKE :x")
+                SQL = text("SELECT publication_id, publication_name, colors, main_sec FROM apregoar.publications WHERE publication_name LIKE :x")
                 SQL = SQL.bindparams(x=publication.lower().replace("_"," "))
                 result = conn.execute(SQL)
         except:
+            print("error extracting publication information")
             conn.close()
             return render_template("explore/explore_map.html")
         else:
+            print("success extracting publication information")
             for row in result:
                 p_id = row["publication_id"]
-                p_sections = row["main_sections"]
-                
+                                
                 publication = {
                     "p_id": p_id,
                     "p_name": row["publication_name"],
                     "p_colors": row["colors"],
                 }
                 jVals = prepare_exploreJ(p_id)
-                #Determining main sections for jornal
-                counter = 0
-                counterMax = 5
-                big_section = []
-                print("p_sections: ",p_sections, type(p_sections))
-                if len(p_sections) > 1:
-                    if len(p_sections) < counterMax:
-                        counterMax = len(p_sections)
-                    
-                    for section in p_sections:
-                        if section in jVals["sections"]:
-                            big_section.append(section)
-                            if (counter == counterMax):
-                                break
-                            counter += 1
-                    if counter < counterMax:
-                        for section in jVals["sections"]:
-                            if section not in big_section:
-                                big_section.append(section)
-                            if (counter == counterMax):
-                                break
-                            counter += 1
-                else:
-                    if len(jVals["sections"]) < counterMax:
-                        counterMax = len(jVals["sections"])
-                    for section in jVals["sections"]:
+            #Determining main sections for jornal
+            counter = 0
+            counterMax = 5
+            big_section = []
+            p_sections = row["main_sec"]
+            print("p_sections: ",p_sections, type(p_sections))
+            if len(p_sections) > 1:
+                if len(p_sections) < counterMax:
+                    counterMax = len(p_sections)
+                
+                for section in p_sections:
+                    if section in jVals["sections"]:
                         big_section.append(section)
                         if (counter == counterMax):
-                                break
+                            break
                         counter += 1
-                print("counterMax = ",counterMax,". counter: ",counter)
-                big_section2 = []
-                for i in big_section:
-                    big_section2.append(i.upper())
-                return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, jVals = jVals,bigSections = big_section2)
-    return render_template("explore/explore_map.html")
+                if counter < counterMax:
+                    for section in jVals["sections"]:
+                        if section not in big_section:
+                            big_section.append(section)
+                        if (counter == counterMax):
+                            break
+                        counter += 1
+            else:
+                if len(jVals["sections"]) < counterMax:
+                    counterMax = len(jVals["sections"])
+                for section in jVals["sections"]:
+                    big_section.append(section)
+                    if (counter == counterMax):
+                            break
+                    counter += 1
+            print("counterMax = ",counterMax,". counter: ",counter)
+            big_section2 = []
+            for i in big_section:
+                big_section2.append(i.upper())
+        
+        return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, jVals = jVals,bigSections = big_section2)
+    #return render_template("explore/explore_map.html")
     
 
 
 def prepare_exploreJ(p_id):
+    print("entering prepare_explore(p_id = ",p_id,")")
+    print("type(p_id): ",type(p_id))
     try:
         with engine.connect() as conn:
-            SQL = text("SELECT s_id, i_id, pub_date, section, section_id, author, author_id, publication, publication_id, t_begin, t_end, t_type, p_id, e_ids FROM apregoar.geonoticias WHERE publication_id = :x")
+            SQL = text("SELECT s_id, i_id, pub_date, section, section_id, author, author_id, publication, publication_id, t_begin, t_end, t_type, p_id, e_ids FROM apregoar.geonoticias WHERE :x = ANY(publication_id )")
             SQL = SQL.bindparams(x=p_id)
             result = conn.execute(SQL)
     except: 
         conn.close()
-        print("Error in distracting filters from database")
+        print("Error in extracting geonoticias filters from database")
     else:
         sections = {}
         authors = {}
@@ -383,7 +397,7 @@ def prepare_exploreJ(p_id):
                 result2 = conn.execute(SQL2)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting egaz filters from database")
         else:
             for row in result2:
                 e_names[row["e_name"].lower()] = {
@@ -399,7 +413,7 @@ def prepare_exploreJ(p_id):
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting tags from database")
         else:
             for row in result:
                 tags[row["tag_name"]] = {
@@ -418,7 +432,7 @@ def prepare_exploreJ(p_id):
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting section filters from database")
         else:
             for row in result:
                 sections[row["section_name"]] = {
@@ -433,7 +447,7 @@ def prepare_exploreJ(p_id):
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting authors from database")
         else:
             for row in result:
                 authors[row["author_name"]] = {
@@ -503,4 +517,5 @@ def prepare_exploreJ(p_id):
             "pub_date_range": pub_date_range, 
             "dates": dates
         }
+        print("leaving prepare_exploreJ")
         return allVals
