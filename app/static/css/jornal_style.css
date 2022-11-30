@@ -5,10 +5,12 @@
     --stroke-color: rgba(255,255,255,1);
     --shadow-color: rgba(0,0,0,.6);
 
+    --egaz-color: black;
+
     --brightlight-color: rgb(255, 255, 0,1);
     --highlight-color: rgba(255, 255, 150, 1);
     --lowlight-color: rgb(69, 108, 131);
-    padding: 10px;
+    /*padding: 10px;*/
 
     --card-height: 150px;
     --card-width: 300px;
@@ -528,6 +530,7 @@ input[type="range"]:active::-webkit-slider-thumb{
     text-align: left;
     position: relative;
     background-color: var(--pub-color);
+    border: var(--card-border) var(--pub-color);
     color: white;
 }
 
@@ -552,4 +555,31 @@ input[type="range"]:active::-webkit-slider-thumb{
 .story-card .story-details .story-tags {
     margin-top: 5px;
     font-size: 12px;
+}
+
+/* Filter Bubbles*/
+.bubbleFilteres {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.bubbleFilters .egaz{
+    border-radius: 20px;
+    border-color: var(--egaz-color);
+    border-style: solid;
+    background-color:white;
+    border-width: 2px;
+    font-weight: 500;
+    color: var(--egaz-color);
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    width: fit-content;
+    cursor: pointer;
+}
+
+.egaz:hover {
+    font-weight: bold;
+    font-size: 11px;
+    box-shadow: -5px 10px 5px var(--shadow-color); 
 }

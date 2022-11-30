@@ -23,7 +23,7 @@
 
 <div class="bigCenter">
     <div class="centerArea">
-        <div class="bubbleFilters"></div>
+        
         <div class="seeFilters">
             <div class="seeAuthors">
                 <select id="checksAuthors">
@@ -47,6 +47,7 @@
             <div class="filterReady">
                 <button class="maisB filtrarB">Atualizar</button>
             </div>
+            <div class="bubbleFilters"></div>
             <div class="resultsArea"></div>
         </div>
         <div class="mapArea">
@@ -82,8 +83,8 @@
                 <input type="range" min="{{ jVals.dates.pubdate1}}" max="{{ jVals.dates.pubdate2}}" value="{{ jVals.dates.pubdate2}}" id="slider-2" oninput="slideTwo()">
                 -->
             </div>
-            <input type="checkbox" id="ifromforever" name="ifromforever" value="ifromforever" oninput="adjustRange()">
-            <label for="ifromforever">Só inclui instâncias dentro um ano</label>
+            <!-- <input type="checkbox" id="ifromforever" name="ifromforever" value="ifromforever" oninput="adjustRange()">
+            <label for="ifromforever">Só inclui instâncias dentro um ano</label> -->
         </div>
     </div>
 </div>
@@ -107,6 +108,8 @@
 <script>
     const p_name = '{{ publication.p_name }}';
     eID = '{{ e_id|int }}';
+    e_name = '{{ e_name }}';
+    console.log("e_name: ",e_name);
     console.log("eID: ",eID);
     const doc_source = "jornal_map";;
     publication = JSON.parse('{{ publication | tojson | safe }} ');

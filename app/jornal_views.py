@@ -224,6 +224,7 @@ def pub_map_specific(publication, e_id):
 def pub_map(publication):
     print("pub_map(publication)")
     print("publication: ",publication)
+    e_name = ""
 
     if request.method == "POST":
         print("request method = 'post'")
@@ -237,15 +238,23 @@ def pub_map(publication):
         print("request method = 'get'")
         #Determine if any e_id have been passed with the publication
         try:
-            e_id = fsession["e_id"] 
+            e_id = fsession["e_id"]
+            with engine.connect() as conn:
+                SQL = text("SELECT name FROM apregoar.egazetteer WHERE e_id = :x")
+                SQL = SQL.bindparams(x=e_id)
+                result = conn.execute(SQL)
         except:
             e_id = 0
             print("no e_id in fsession")
         else:
             if e_id == 0:    
+                e_name = ""
                 print("e_id: none")
             else:
                 print("e_id: ",e_id)
+                for row in result:
+                    e_name = row["name"]
+                print("e_name: ",e_name)
                 #Extract instances in focus area
             fsession["e_id"] = 0
         
@@ -305,7 +314,7 @@ def pub_map(publication):
             for i in big_section:
                 big_section2.append(i.upper())
         
-        return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, jVals = jVals,bigSections = big_section2)
+        return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, e_name = e_name, jVals = jVals,bigSections = big_section2)
     #return render_template("explore/explore_map.html")
     
 

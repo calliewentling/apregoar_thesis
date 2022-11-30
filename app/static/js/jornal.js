@@ -14,7 +14,15 @@ console.log("publication: ",publication);
  let resultsStory;
  let stories;
 
+ let eBoundary;
+ let eLayerExtent;
+ var eBounds = false;
+
+
 pubColor = setColors();
+
+const eGazColor = '#f56c42';
+document.documentElement.style.setProperty('--egaz-color',eGazColor);
 
 const key = 'Jf5RHqVf6hGLR1BLCZRY';
 const attributions =
@@ -220,6 +228,37 @@ const featureFocus = new ol.layer.Vector({
     source: new ol.source.Vector(),
     map: map,
     style: highlightFocus,
+});
+
+
+const eBoundaryStyle = new ol.style.Style({
+    stroke: new ol.style.Stroke({
+        color: eGazColor,
+        width: 5,
+    }),
+    fill: new ol.style.Fill({
+        color: eGazColor +'80',
+        opacity: .2,
+    }),
+    text: new ol.style.Text({
+        font: '14px Calibri,sans-serif',
+        fill: new ol.style.Fill({
+            color: eGazColor,
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#fff',
+            width: 3,
+        }),
+    }),
+});
+
+var eBoundaryL = new ol.layer.Vector({
+    source: new ol.source.Vector(),
+    map: map,
+    style: function(feature) {
+        eBoundaryStyle.getText().setText(feature.get('name'));
+        return eBoundaryStyle;
+    },
 });
 
 let highlight;
@@ -513,7 +552,20 @@ else if (doc_source == "jornal_map"){
     };
     var allFilters = baseFilters;
     if (eID > 0){
+        var bubbleFilters = document.getElementsByClassName("bubbleFilters")[0];
+        var eName = document.createElement('div');
+        eName.className = 'egaz';
+        eName.id = "eID_"+eID;
+        eName.innerHTML = e_name;
+        eName.onmouseenter = function(){
+            console.log("should recenter to eBoundary");
+            map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001));
+        };
+        bubbleFilters.appendChild(eName);
+
         allFilters["e_ids"] = [eID];
+        eBounds = true;
+
     }
     console.log("allFilters: ",allFilters);
     vSource = new ol.source.Vector();
@@ -568,7 +620,7 @@ else if (doc_source == "jornal_map"){
         }
         var s1 = sliderOne.value/1000;
         console.log("s1: ",s1);
-        var s11 = 
+        var s11 = 0;
         console.log("s11: ", s11);
         displayValOne.textContent = new Date(sliderOne.value/1).toDateString();;
 
@@ -635,8 +687,23 @@ else if (doc_source == "jornal_map"){
 
     resultsStory = document.getElementById("resultsStory"); 
 
-
+    
     filterAllVals();
+    if (eID > 0){
+        console.log("add eBoundary to map");
+        defineEBoundary(eID = eID);
+        eBoundaryL = new ol.layer.Vector({
+            source: eBoundary,
+            /*style: function (feature) {
+                style.getText().setText(feature.get('name'));
+                return style;
+            }*/
+            style: eBoundaryStyle,
+        });
+        map.addLayer(eBoundaryL);
+        console.log("addition of eBoundary complete");
+    };
+    
     /*
     //This should be dynamically updatesa call to exploreFilters.
     var mapFilter = "s_id="+112; 
@@ -858,7 +925,10 @@ function defineVSource(mapFilter){
                         }
                     }
                     success(features);
-                    if (noFeatures == false) {
+                    if (eBounds == true){
+                        console.log("empty layer extent? ",eBoundary.getExtent());
+                        map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001)); //What does this number mean??
+                    } else if (noFeatures == false) {
                         layerExtent = vSource.getExtent();
                         //console.log("layerExtent: ",layerExtent);
                         map.getView().fit(ol.extent.buffer(layerExtent, .001)); //What does this number mean??
@@ -906,7 +976,7 @@ function filterAllVals(){
             return;
         }
         response.json().then(function(resp){
-            console.log(resp);
+            console.log("response: ",resp);
             stories = resp["stories"];
             instances = resp["instances"];
             iIDs = resp["iIDs"];
@@ -921,7 +991,7 @@ function filterAllVals(){
             } else {
                 map.removeLayer(vectorLayer);
                 removeSkeleton();
-            }
+            };
         })
     })
     
@@ -1030,3 +1100,65 @@ function refreshStoryCards(stories){
     }
 };
 
+function defineEBoundary(eID){
+    console.log("entering defineEboundary");
+    eBoundary = new ol.source.Vector({
+        format: new ol.format.GeoJSON(),
+        loader: function(extent, resolution, projection, success, failure) {
+            var proj = projection.getCode();
+            console.log("proj: ",proj);
+            url = 'http://localhost:8080/geoserver/wfs?service=wfs&'+
+                'version=2.0.0&request=GetFeature&typeNames=apregoar:egazetteer&'+
+                'cql_filter='+"e_id="+eID+'&'+
+                'outputFormat=application/json&srsname='+proj+'&';
+            //console.log("url: ",url);
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET',url);
+            var onError = function() {
+                console.log("Error in loading eBoundary source");
+                eBoundary.removeLoadedExtent(extent);
+                failure();
+            }
+            xhr.onerror = onError;
+            xhr.onloadend = function() {
+                //removeSkeleton();
+                //console.log("eBoundary loaded");
+            }
+            xhr.onload = function() {
+                console.log("onload");
+                if (xhr.status == 200){
+                    //console.log("loaded boundary features");
+                    //console.log("xhr.resonseText: ",xhr.responseText);
+                    var features = eBoundary.getFormat().readFeatures(xhr.responseText);
+                    eBoundary.addFeatures(features);
+                    noFeatures = false;
+                    if (features.length == 1) {
+                        if (features[0]["A"]["geometry"] == null){
+                            console.log("no instances here");
+                            noFeatures = true;
+                        }
+                    }
+                    success(features);
+                    if (noFeatures == false) {
+                        eLayerExtent = eBoundary.getExtent();
+                        //console.log("layerExtent: ",layerExtent);
+                    }
+                    var eBoundaryInfo = eBoundary.getFeatures();
+                    console.log("sourceFeatureInfo: ",eBoundaryInfo);
+                    numStoryFeatures = eBoundaryInfo.length;
+                    console.log("Number of features in story: ", numStoryFeatures);
+                    console.log("Successful loading of e boundary source");
+
+                } else {
+                    console.log("error in loading eBoundary");
+                    onError();
+                }
+            }
+            xhr.send();
+            //console.log("Passed send of xhr");
+        },
+        //strategy: ol.loadingstrategy.bbox,
+    });
+    console.log("leaving defineEBoundary");
+    return eBoundary;
+};
