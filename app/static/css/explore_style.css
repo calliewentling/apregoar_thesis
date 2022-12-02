@@ -450,7 +450,8 @@ top: 3em;
         border-radius: var(--card-border-radius);
         border: var(--card-border) var(--light-color);
         overflow: hidden;
-        background: var(--primary-color);
+        /*background: var(--primary-color);*/
+        background-color: rgb(235,247,250);
         color: var(--light-color);
         display: inline-block; /*previously: flex*/
         flex-direction: column; /*column*/
@@ -486,10 +487,35 @@ top: 3em;
         font-size: 10px;
     }
 
-    .instance-card .instance-details .instance-dateframe {
+    .instance-card .instance-details {
         font-size: 12px;
         color: var(--light-color);
         font-weight: bold;
+    }
+
+    .instance-dateframe {
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .past {
+        color: rgb(103,140,110);
+    }
+
+    .future {
+        color: rgb(103,132,140);
+    }
+
+    .perpetual {
+        color: rgb(92,92,92);
+    }
+
+    .today{
+        color: rgba(229,140,211);
+    }
+     
+    .now{
+        color: rgba(229,140,211);
     }
 
     .instance-card .instance-details .instance-stitle {
@@ -831,3 +857,5 @@ top: 3em;
         padding: 10px;
 
     }
+
+    

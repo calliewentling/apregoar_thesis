@@ -416,16 +416,48 @@ def process_explore(req):
                     #print(ttype,": ",t_begin,"-",t_end)
                     #print("t_begin type: ",type(t_begin))
                     i_T = ""
+                    i_frame = 4
+                    #i_frame vals: 0 = perpetual, 1=past, 2= future, 3=today, 4=now
+                    now = datetime.datetime.now()
+                    today = datetime.date.today()
                     if ttype=="allday_p":
                         i_D = "Temporada continual"
+                        i_frame = 0 #timeframe is perpetual
+                        t_class = "perpetual"
+                        t_delt = 0
                     else:
+                        t_med = round((int(t_begin.toordinal())+int(t_end.toordinal()))/2)
+                        t_med = datetime.date.fromordinal(t_med)
+                        print(t_med)
+                        t_delt = abs(t_med - today).days
+                        print("t_delt: ",t_delt)
                         if t_begin.date() == t_end.date():
                             i_D = str(t_begin.date())
                         else:
                             i_D = str(t_begin.date())+" - "+str(t_end.date())
+                        if t_end.date() < today:
+                            i_frame = 1 #timeframe is past
+                            t_class = "past"
+                        elif t_begin.date() > today:
+                            i_frame = 2 #timeframe is future
+                            t_class = "future"
+                        else:
+                            i_frame = 3 #happening today
+                            t_class = "today"
+
                         if ttype == "allday_no":
                             i_T = str(t_begin.time())+" - "+str(t_end.time())
-                    
+                            if t_end.datetime() < now:
+                                i_frame = 3 #today but earlier
+                                t_class = "past"
+                            elif t_begin.datetime() > now:
+                                i_frame = 3 #today but later
+                                t_class = "future"
+                            else:
+                                i_frame = 4 #happening right now
+                                t_class = "now"
+                        
+
                     instance = {
                         "s_id": result.Stories.s_id,
                         "title": result.Stories.title,
@@ -445,6 +477,9 @@ def process_explore(req):
                         "p_name": result.Instances.p_name,
                         "i_D": i_D,
                         "i_T": i_T,
+                        "i_frame": i_frame,
+                        "t_class": t_class,
+                        "t_delt": t_delt,
                     }
                     instancesJSON.append(instance)
                     for story in storiesJSON:
@@ -514,7 +549,14 @@ def process_explore(req):
                 instance["instances_yes"] = story["instances_yes"]
                 instance["instances_no"] = story["instances_no"]
                 break
-    
+    #print()
+    #print("storiesJSON: ",storiesJSON)
+    #print("storiesJSON keys: ",storiesJSON[0].keys())
+    storiesJSON = sorted(storiesJSON, key=lambda k: k['pub_date'], reverse=True)
+    instancesJSON = sorted(instancesJSON, key=lambda k: (-k['i_frame'],k['t_delt']))
+    print("instancesJSON keys: ",instancesJSON[0].keys())
+    #print("instancesJSON: ",instancesJSON)
+    #print()
     response["stories"] = storiesJSON
     response["instances"] = instancesJSON
     #print("response['instances']: ",response["instances"])

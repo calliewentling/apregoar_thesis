@@ -1,4 +1,11 @@
 
+/*todayColor = 
+nowColor = todayColor;
+pastColor = ;
+futureColor = ;
+perpetualColor = ;*/
+
+
 
 // MULTISELECT CHECKBOX //
 
@@ -298,6 +305,7 @@ function updatePopup(instanceID){
     for (i=0;i<instances.length;i++){
         if(instances[i]["i_id"]==instanceID){
             cardD = instances[i];
+            console.log("cardD: ",cardD)
             closeDeets();
             renderDeets(cardD = cardD);
             //Start here
@@ -915,8 +923,9 @@ function refreshInstanceCards(instances){
     //Preparing new instance cards
     for(i=0; i<instances.length; i++){
         var iCard = document.createElement('div');
-        iCard.className = 'instance-card skeleton';
+        iCard.className = 'instance-card skeleton ';
         iCard.id = "iID_"+instances[i]["i_id"];
+        
 
         var iCardTitle = document.createElement('div');
         iCardTitle.className = 'instance-title hide-text';
@@ -930,11 +939,13 @@ function refreshInstanceCards(instances){
         var iCardDFrame = document.createElement('div');
         iCardDFrame.className = 'instance-dateframe hide-text';
         iCardDFrame.innerHTML = instances[i]["i_D"];
+        iCardDFrame.classList.add(instances[i]["t_class"]);
         iCardDetails.appendChild(iCardDFrame);
 
         var iCardTFrame = document.createElement('div');
         iCardTFrame.className = 'instance-timeframe hide-text';
         iCardTFrame.innerHTML = instances[i]["i_T"]+'<br>';
+        iCardTFrame.classList.add(instances[i]["t_class"]);
         iCardDetails.appendChild(iCardTFrame);
 
         var iCardSTitle = document.createElement('div');
@@ -973,7 +984,8 @@ function loadStoryDeets(card){
     cardD = {};
     for (i=0; i<card["path"].length; i++){
         console.log(card["path"][i].className);
-        if(card["path"][i].className == "story-card"){
+        //if(card["path"][i].className == "story-card"){
+        if(card["path"][i].classList.contains("story-card")){
             card["path"][i].classList.add('brightlight');
             console.log("great success!")
             console.log(card["path"][i].className);
@@ -1100,6 +1112,7 @@ function renderDeets(cardD){
 
     var dSection = document.createElement('div');
     dSection.className = 'dO-section';
+    console.log("cardD: ",cardD);
     if (cardD["section"].length > 0){
         dSection.innerHTML = cardD["publication"],': ',cardD["section"];
     } else {
