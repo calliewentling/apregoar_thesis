@@ -221,7 +221,7 @@ var map = new ol.Map({
     overlays: [popupOverlay],
     target: 'map',
     view: view,
-    interactions: ol.interaction.defaults({mouseWheelZoom:false}),
+    interactions: ol.interaction.defaults({mouseWheelZoom:true}),
 });
 map.addLayer(backDrop);
 

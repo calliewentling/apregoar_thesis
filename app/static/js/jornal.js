@@ -557,12 +557,8 @@ else if (doc_source == "jornal_map"){
         eName.className = 'egaz';
         eName.id = "eID_"+eID;
         eName.innerHTML = e_name;
-        eName.onmouseenter = function(){
-            console.log("should recenter to eBoundary");
-            map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001));
-        };
         bubbleFilters.appendChild(eName);
-
+        //Elsewhere, when filtering the eName element should be removed if no longer applicable
         allFilters["e_ids"] = [eID];
         eBounds = true;
 
