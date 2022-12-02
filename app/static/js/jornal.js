@@ -553,11 +553,32 @@ else if (doc_source == "jornal_map"){
     var allFilters = baseFilters;
     if (eID > 0){
         var bubbleFilters = document.getElementsByClassName("bubbleFilters")[0];
+
         var eName = document.createElement('div');
         eName.className = 'egaz';
         eName.id = "eID_"+eID;
         eName.innerHTML = e_name;
         bubbleFilters.appendChild(eName);
+        eName.onmouseenter = function(){
+            map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001)); //What does this number mean??
+        };
+        /*
+        var eCloser = document.createElement('div');
+        eCloser.className = 'ename-closer';
+        eCloser.href = '#';
+        eCloser.text="decoration:none";
+        eCloser.position = "absolute";
+        eCloser.top = "2px";
+        eCloser.right = "8px";
+        eCloser.after.content = "✖";
+        eCloser.color = "black";
+        eCloser.onclick = function () {
+            allFilters["e_ids"] = "";
+            this.parentElement.remove();
+            this.remove();
+            filterAllVals();
+        };*/
+
         //Elsewhere, when filtering the eName element should be removed if no longer applicable
         allFilters["e_ids"] = [eID];
         eBounds = true;
@@ -1028,17 +1049,23 @@ function refreshStoryCards(stories){
         sCard.className = 'story-card skeleton';
         sCard.id = "sID_"+stories[i]["s_id"];
 
+        //console.log("instances all: ", stories[i].instances_all);
+
         var sCardTitle = document.createElement('div');
         sCardTitle.className = 'story-title hide-text';
         sCardTitle.innerHTML = stories[i]["title"];
         sCard.appendChild(sCardTitle);
+
+        if (Object.keys(stories[i]["instances_all"]).length === 0){
+            sCardTitle.classList.add("noInstanceGrey");
+        };     
 
         var sCardDetails = document.createElement('div');
         sCardDetails.className='story-details';
         sCard.appendChild(sCardDetails);
 
         var sCardSection = document.createElement('div');
-        sCardSection.className = 'sotry-section hide-text';
+        sCardSection.className = 'story-section hide-text';
         if (stories[i].section.length>0){
             sCardSection.innerHTML = stories[i].section+'<br>';
         } else {
@@ -1056,7 +1083,7 @@ function refreshStoryCards(stories){
         sCardTags.innerHTML = stories[i].tags;
         sCardDetails.appendChild(sCardTags);
 
-        
+          
         
         
         sCard.onclick = function(){

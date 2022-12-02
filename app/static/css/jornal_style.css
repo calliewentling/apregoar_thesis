@@ -115,6 +115,15 @@ body {
     cursor: wait;
 }
 
+.mapAll.skeleton {
+    cursor: wait;
+}
+
+.story-card.skeleton {
+    cursor: wait;
+}
+
+
 
 .ol-popup {
     color: var(--pub-color);
@@ -481,7 +490,7 @@ input[type="range"]:active::-webkit-slider-thumb{
 /* STORY CARDS */
 
 .resultsArea {
-    height: 200px;
+    height: 220px;
     width: 95%;
     position: absolute;
     bottom: 10px;
@@ -489,6 +498,8 @@ input[type="range"]:active::-webkit-slider-thumb{
     margin: 10px;
     border-radius: 5px;
     padding: 10px;
+    border:var(--pub-colorL);
+    border-style: solid;
 }
 
 .resultsStory {
@@ -498,6 +509,7 @@ input[type="range"]:active::-webkit-slider-thumb{
     white-space: nowrap;
     height: 200px;
     position: center;
+    
 }
 
 .story-card {
@@ -522,6 +534,8 @@ input[type="range"]:active::-webkit-slider-thumb{
     font-weight: bold;
 }
 
+
+
 .story-card .story-title {
     height: var(--card-title-height);
     width: var(--card-title-width);
@@ -532,6 +546,11 @@ input[type="range"]:active::-webkit-slider-thumb{
     background-color: var(--pub-color);
     border: var(--card-border) var(--pub-color);
     color: white;
+}
+
+.story-title.noInstanceGrey {
+    background-color:rgb(100, 103, 104);
+    border: rgb(100,103,104);
 }
 
 .story-card .story-details{
