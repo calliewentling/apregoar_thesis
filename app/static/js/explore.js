@@ -758,7 +758,7 @@ function addSkeletons(){
             card.classList.add("skeleton"); //Avoid multiple skeleton associations 
         }
         card.childNodes[0].classList.add("hide-text"); //Add hide-text to title
-        console.log("card.childNodes[1].childNodes: ",card.childNodes[1].childNodes);
+        //console.log("card.childNodes[1].childNodes: ",card.childNodes[1].childNodes);
         for(c=0;c<card.childNodes[1].childNodes.length;c++){
             card.childNodes[1].childNodes[c].classList.add("hide-text");
         }
@@ -815,12 +815,24 @@ function filterAllVals(){
     })
     .then(function(response){
         if (response.status !== 200){
-            window.alert("Erro no filtros");
+            window.alert("Erro no filtros. Se faz favor, experimenta outra vez");
             console.log(`Error status code: ${response.status}`);
             resultsArea.style.display="none";
+            removeSkeleton();
             stories = [];
+            prematureReturn = true;
             return;
         }
+        else if (response.comments){
+            console.log("returned because no results");
+            window.alert(response["comments"]);
+            removeSkeleton();
+            resultsArea.style.display="none";
+            stories = [];
+            instances = [];
+            prematureReturn = true;
+        }
+
         response.json().then(function(resp){
             console.log(resp);
             sIDs = resp["sIDs"];
@@ -829,14 +841,20 @@ function filterAllVals(){
             instances = resp["instances"];
             countAllStories = resp["countStories"];
             countAllInstances = resp["countInstances"];
+            console.log("stories: ",stories);
 
+            if (typeof stories == "undefined"){
+                stories = [];
+                instances = [];
+                window.alert("A sua pesquisa não resultou nos resultados. Por favor, tenta outra vez.");
+            }
             refreshStoryCards(stories=stories);
             storyCount.innerHTML = '<p>notícias</p><p>'+stories.length+' / '+countAllStories+'</p>' ;
 
             refreshInstanceCards(instances=instances);
             instanceCount.innerHTML = '<p>instáncias</p><p>'+instances.length+' / '+countAllInstances+'</p>' ;
             
-            if (instances.length > 0){
+            if (typeof instances != "undefined" && instances.length > 0){
                 iIDFilter = "i_id IN ("+iIDs+")";
                 cqlFilter = iIDFilter.replace(/%/gi,"%25").replace(/'/gi,"%27").replace(/ /gi,"%20");
                 urlFiltered = 'http://localhost:8080/geoserver/wfs?service=wfs&'+
@@ -850,10 +868,9 @@ function filterAllVals(){
                 map.render();
             } else {
                 map.removeLayer(filteredLayer);
-
-                
                 removeSkeleton();
             }
+                        
         })
     })
     console.log("Leaving filterAllVals");

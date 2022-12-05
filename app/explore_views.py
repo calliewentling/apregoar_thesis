@@ -488,9 +488,16 @@ def process_explore(req):
             #else:
                 #print("no instance")
         print("Number of results: ",count,", # s_ids: ",len(s_ids),", # i_ids: ", len(i_ids), ", # stories: ", len(stories))
+        
+
     
     response["sIDs"] = s_ids 
     response["iIDs"] = i_ids
+    if len(s_ids) == 0:
+        if len(i_ids) == 0:
+            response["comments"] = "A sua pesquisa não resultou nas histórias nem instâncias. Muda os filtros e experimenta outra vez."
+            return response
+
     #Extracting all relatedd instances for each story
     stmt2 = select(Instances).where(Instances.s_id.in_(s_ids))
     results2 = session.execute(stmt2).all()
@@ -550,8 +557,8 @@ def process_explore(req):
                 instance["instances_no"] = story["instances_no"]
                 break
     #print()
-    #print("storiesJSON: ",storiesJSON)
-    #print("storiesJSON keys: ",storiesJSON[0].keys())
+    print("storiesJSON: ",storiesJSON)
+    print("storiesJSON keys: ",storiesJSON[0].keys())
     storiesJSON = sorted(storiesJSON, key=lambda k: k['pub_date'], reverse=True)
     instancesJSON = sorted(instancesJSON, key=lambda k: (-k['i_frame'],k['t_delt']))
     print("instancesJSON keys: ",instancesJSON[0].keys())

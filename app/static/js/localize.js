@@ -1,5 +1,5 @@
 //// Initialize loader ////
-const spinner = document.getElementById("spinner");
+//const spinner = document.getElementById("spinner");
 
     
     
@@ -167,7 +167,7 @@ fetch(wfs_url_story).then(function (response) {
         vectorSourceStories.addFeatures(featuresS);
         layerExtent = zoomGaz(vectorSource = vectorSourceStories);
     }
-    spinner.setAttribute('hidden', '');
+    //spinner.setAttribute('hidden', '');
     return vectorSourceStories;
     //layerExtent = vectorSource.getExtent();
     //map.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
@@ -498,8 +498,8 @@ function loadGazPOI(gazetteer) {
 }
 
 //Calling RESTAPI of geonames to search gazetteer
+var selectGeonames = document.getElementById('select_geonames');
 function searchGeoNames() {
-    var selectGeonames = document.getElementById('select_geonames');
     var buttonZoomGeonames = document.getElementById("buttonZoomGeonames");
     buttonZoomGeonames.style.display="none";
     while (selectGeonames.hasChildNodes()) {
@@ -507,6 +507,11 @@ function searchGeoNames() {
     }
     selectGeonames.style.display="none";
     var searchTerm = prompt("Pode especificar a pesquisa para Geonames:");
+    console.log("searchTerm: ",searchTerm);
+    if (searchTerm === null){
+        return false;
+    }
+    
     encodedSearch = encodeURIComponent(searchTerm);
     var url = "http://api.geonames.org/search?q="+encodedSearch+"&east=-7.74577887999189&west=-9.517104891617194&north=39.83801908704823&south=38.40907442337447&type=json&isNameRequired=true&maxRows=20&username=cwentling";
     console.log("URL: ",url);
@@ -540,6 +545,7 @@ function searchGeoNames() {
             }
             
         })
+    
 }
 // Zooming to GeoNames results
 function zoomGeonames(){
@@ -774,11 +780,19 @@ function searchGazPrev(gazetteer) {
     selectNominatim.style.display="none";
     var bodyContent = {}
     if (gazetteer == "gaz_prev"){
-        var searchTerm = prompt("Pode especificar a pesquisa:");
+        //var searchTerm = prompt("Pode especificar a pesquisa:");
+        var searchTerm = document.getElementById('gazSearch').value;
+        console.log("searchTerm: ",searchTerm);
+        invalidSearchTerm = [null,""," "];
+        if (invalidSearchTerm.includes(searchTerm)){
+            console.log("no valid searchTerm");
+            return;
+        };
         bodyContent = JSON.stringify({
             "gazetteer": gazetteer,
             "searchTerm": searchTerm
-        })
+        });
+        console.log("bodyContent: ",bodyContent);
         var searchTermDisplay = document.getElementById("searchTermDisplay");
         searchTermDisplay.innerHTML = "<p>"+searchTerm+"</p>";
         searchTermDisplay.style.display="block";
@@ -925,7 +939,7 @@ function styleSelectGaz(gaz) {
 const loadingGaz = document.getElementById("loadingGaz");
 function loadGaz(gazetteer) {
     //const loadingGaz = document.getElementById(gazetteer);
-    spinner.removeAttribute('hidden');
+    //spinner.removeAttribute('hidden');
     fetch(`${window.origin}/publisher/${sID}/gazetteer`, {
         method: "POST",
         credentials: "include",
@@ -961,7 +975,7 @@ function loadGaz(gazetteer) {
     .catch(function(error){
         console.log("Fetch error: "+error);
     });
-    spinner.setAttribute('hidden', '');
+    //spinner.setAttribute('hidden', '');
 }
 
 // Initialize POI map layers
@@ -992,7 +1006,7 @@ function prepGaz(selectedGaz,selectedInt) {
 }
 
 function initGaz(){
-    spinner.removeAttribute('hidden');
+    //spinner.removeAttribute('hidden');
     console.log("Entering initGaz");
     // Initializing values
     var selectedIntE = [];
@@ -1126,7 +1140,7 @@ function vizGaz(selectedIntE,selectedIntU, selectedIntN){
             vectorSource.addFeatures(featuresE);
             console.log("layerExtent: in Egaz",vectorSource.getExtent());
             layerExtent = zoomGaz(vectorSource);
-            spinner.setAttribute('hidden', '');
+            //spinner.setAttribute('hidden', '');
             return vectorSource;
         });
         // Add eGaz shapes     
@@ -1164,7 +1178,7 @@ function vizGaz(selectedIntE,selectedIntU, selectedIntN){
             vectorSource.addFeatures(featuresU);
             console.log("layerExtent: in get Ugaz",vectorSource.getExtent());
             layerExtent = zoomGaz(vectorSource);
-            spinner.setAttribute('hidden', '');
+            //spinner.setAttribute('hidden', '');
             return vectorSource;
         });
         // Add eGaz shapes     
@@ -1423,7 +1437,7 @@ function submitInstance() {
         console.log("entry: ",entry);
         console.log("entry properties: ",entry.properties);
         //Send to flask
-        spinner.removeAttribute('hidden');
+        //spinner.removeAttribute('hidden');
         fetch(`${window.origin}/publisher/${sID}/save_instance`, {
             method: "POST",
             credentials: "include",
@@ -1447,7 +1461,7 @@ function submitInstance() {
                 } else {
                     window.location.href = "review";
                 }
-                spinner.setAttribute('hidden','');
+                //spinner.setAttribute('hidden','');
             });
         })
         .catch(function(error) {
@@ -1514,3 +1528,21 @@ function FileUpload(img, file) {
     return throbber;
   }
   */ 
+
+
+  /* Collapsible */
+var coll = document.getElementsByClassName("collapsible");
+var c_index;
+
+for (c_index = 0; c_index < coll.length; c_index++) {
+  coll[c_index].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+};
+

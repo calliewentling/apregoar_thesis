@@ -100,32 +100,166 @@
                 </a>
             </p>
         </div>
-        
-        <div id="eGazMap" style="display:block">
-            <div class="wrapper">
-                <div id="map" class="map"></div>
-                <div id="progress"></div>
-                </div>
-                <div id="deletedFeatures" style="display:none"></div>
+        <form method="POST" action="review">
+            <div class="card" id="eventInfo">
+                <h3>Descrever o evento</h3>
+                <p> Name of event: </p>
+                <p> Event description</p>
             </div>
+            <br>
             
-        </div>
+            <div class="card" id="temporal_dez">
+                <!-- TEMPORAL -->
+                <h2>Associar uma altura</h2>
+                <div class="row_local">
+                    <div class = "column_local cozycheck">
+                        <label for="allday_y">Todo o dia</label><input type="radio" id="allday_y" name="allDay" value="allday_y" onClick="timeDefD()" checked="checked" ><br>
+                        <label for="allday_n">Horas específicas</label><input type="radio" id="allday_n" name="allDay" value="allday_n" onClick="timeDefH()"><br>
+                        <label for="allday_p">Persistente (sim datas específicas) </label><input type="radio" id="allday_p" name="allDay" value="allday_p" onClick="timeDefP()"><br>  
+                    </div>
+                    <div class = "column_local">
+                        <input type="date" id="tBegin" name="tBegin" required> <input type="date" id="tEnd" name="tEnd"  required>
+                        <br>
+                        <input type="text" id="tDesc" name="tDesc" placeholder="Temporal description">
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="card">
+                <h2>Localizar o evento</h2>
+                <div class="card">
+                    <h3>Utilizar áreas existentes</h3>
+                    <div>
+                        <input type="text" id="gazSearch" name="gazSearch" placeholder="Pesquisar todos dos sítios nos gazetteers"><button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar</button>
+                        <div id="searchTermDisplay" style="display:none"></div>
+                    </div>
+                    <button type="button" class="collapsible">Sítios personalizados</button>
+                    <div class="contentCollapse place" style="display:none">
+                        <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_personal')">Meus sítios</button>
+                        <br>
+                        <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                    </div>
+                </div> <br>
+                <div class="card">
+                    <h3>Desenhar áreas novas</h3>
+                </div>
+                
+                
+                <button type="button" class="collapsible">Pesquisar lugares existentes</button>  
+                <div class="contentCollapse place" style="display:none">
+                    <div>
+                        <button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar áreas existentes</button>
+                        <br><br>
+                        
+                    </div>
+                    
+                    <div class="containerG grid">
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_personal')">Sítios Pessoais</button>
+                            <br>
+                            <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                        </div>
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_empresa')">Sítios Empresiais</button>
+                            <br>
+                            <select id='select_ugaz_empresa' name="selectUgazEmpresa" multiple style="display:none"></select>
+                        </div>
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_all')">Sítios (Totais)</button>
+                            <br>
+                            <select id='select_ugaz_all' name="selectUgazAll" multiple style="display:none"></select>
+                        </div>
+                    </div>
+                    <br><br><br>
+                    <div class="containerG grid">
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_freguesia')">Freguesias</button>
+                            <br>
+                            <select id='select_egaz_freguesia' name="selectEgazFreguesia" multiple style="display:none"></select>
+                        </div>
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_concelho')">Concelhos</button>
+                            <br>
+                            <select id='select_egaz_concelho' name="selectEgazConcelho" multiple style="display:none"></select>
+                        </div>
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_extra')">Grupos Administrativos</button>
+                            <br>
+                            <select id='select_egaz_extra' name="selectEgazExtra" multiple style="display:none"></select>
+                        </div>
+                    </div>
+                    <div class="containerG grid">
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_green')">Espaço Verde</button>
+                            <br>
+                            <select id='select_egaz_green' name="selectEgazGreen" multiple style="display:none"></select>
+                        </div>
+                        <div class="itemG">
+                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_archive')">Archivo</button>
+                            <br>
+                            <select id='select_egaz_archive' name="selectEgazArchive" multiple style="display:none"></select>
+                        </div>
+                    </div>
+                    <div class="containerG grid">
+                        <div class = "itemG">
+                            <button type="button" class="btn btn-primary" onclick="searchNominatim()">OSM Gazetteer</button>
+                            <br>                
+                            <select id='select_nominatim' name="selectNominatim" multiple style="display:none"></select>
+                        </div>
+                    </div>
+                        
+                        
+                    <br><br>
+                    <button type="button" class="btn btn-primary" onclick="initGaz()">Prever</button>
+                </div>
+
+                <button type="button" class="collapsible">Resumo dos localizações</button>  
+                <div class="contentCollapse place" style="display:none">
+                    <div id="totalGazSummary">
+                        <!--Summary of associated places-->
+                        <p id="totalNumGaz" style="color:red;font-size:24px;">0 </p>
+                        <p>localizações associadas</p>
+                        <em id="alertPoly" style="color:rgb(117, 5, 5)">Associar e/ou desenhar pelo menos um localização de notícia.</em>
+                        <br><br>
+                        <p id = "totalUGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
+                        <p> áreas desinhadas. </p>
+                        <p id = "totalEGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
+                        <p> áreas existentes. </p>
+                    </div>
+                </div>
+
+                <div id="eGazMap" style="display:block">
+                    <div class="wrapper">
+                        <div id="map" class="map"></div>
+                        <div id="progress"></div>
+                        <div id="deletedFeatures" style="display:none"></div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            
+            <div class="card">
+                <h2> Guardar instância</h2>
+                <h3 id="validation" style="display:none">Validação</h3>
+                <div id="successAnnouncement">
+                    <p>Se faz favor: assinar todos dos campos necesários</p>
+                </div>
+                <div id="formButton" style="display:none"></div>
+            </div>
+          
+
+        </form>
+        <br>
+
+        
+
+
+
         <br> 
         <div class="card" id="save_instance" >             
             <h3>Localização/ões</h3>
-            <form method="POST" action="review">
-                <div id="totalGazSummary">
-                    
-                    <!--Summary of associated places-->
-                    <p id="totalNumGaz" style="color:red;font-size:24px;">0 </p>
-                    <p>localizações associadas</p>
-                    <em id="alertPoly" style="color:rgb(117, 5, 5)">Associar e/ou desenhar pelo menos um localização de notícia.</em>
-                    <br><br>
-                    <p id = "totalUGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
-                    <p> áreas desinhadas. </p>
-                    <p id = "totalEGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
-                    <p> áreas existentes. </p>
-                </div>
+        
                 <br>
                 <!-- Name of instance place group -->
                 <div id="selectName">
@@ -198,71 +332,7 @@
                 <div class="card" id="egaz_dez">
 
                     <!-- EGAZ --> 
-                    <h3>Escolher sítios existentes</h3> 
-                    <div>
-                        <button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar áreas existentes</button>
-                        <br><br>
-                        <div id="searchTermDisplay" style="display:none"></div>
-                    </div>
                     
-                    <div class="containerG grid">
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_personal')">Sítios Pessoais</button>
-                            <br>
-                            <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_empresa')">Sítios Empresiais</button>
-                            <br>
-                            <select id='select_ugaz_empresa' name="selectUgazEmpresa" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_all')">Sítios (Totais)</button>
-                            <br>
-                            <select id='select_ugaz_all' name="selectUgazAll" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                    <br><br><br>
-                    <div class="containerG grid">
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_freguesia')">Freguesias</button>
-                            <br>
-                            <select id='select_egaz_freguesia' name="selectEgazFreguesia" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_concelho')">Concelhos</button>
-                            <br>
-                            <select id='select_egaz_concelho' name="selectEgazConcelho" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_extra')">Grupos Administrativos</button>
-                            <br>
-                            <select id='select_egaz_extra' name="selectEgazExtra" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                    <div class="containerG grid">
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_green')">Espaço Verde</button>
-                            <br>
-                            <select id='select_egaz_green' name="selectEgazGreen" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_archive')">Archivo</button>
-                            <br>
-                            <select id='select_egaz_archive' name="selectEgazArchive" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                    <div class="containerG grid">
-                        <div class = "itemG">
-                            <button type="button" class="btn btn-primary" onclick="searchNominatim()">OSM Gazetteer</button>
-                            <br>                
-                            <select id='select_nominatim' name="selectNominatim" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                        
-                        
-                    <br><br>
-                    <button type="button" class="btn btn-primary" onclick="initGaz()">Prever</button>
                 </div>
 
                 <br>
@@ -278,38 +348,10 @@
                     -->
                 </div>
                 <br>
-                
-                <div class="card" id="temporal_dez">
-                    <!-- TEMPORAL -->
-                    <h3>Associar uma altura</h3>
-                    <div>
-                        <label for="allday_y">Todo o dia</label><input type="radio" id="allday_y" name="allDay" value="allday_y" onClick="timeDefD()" checked="checked">
-                        <label for="allday_n">Horas específicas</label><input type="radio" id="allday_n" name="allDay" value="allday_n" onClick="timeDefH()">
-                        <label for="allday_p">Persistente (sim datas específicas) </label><input type="radio" id="allday_p" name="allDay" value="allday_p" onClick="timeDefP()">
-                            
-                    </div>
-                    <div>
-                        <input type="date" id="tBegin" name="tBegin" required> <input type="date" id="tEnd" name="tEnd"  required>
-                    </div>
-                    <br>
-                    <div>
-                        <input type="text" id="tDesc" name="tDesc" placeholder="Temporal description">
-                    </div>
-                </div>
-
-                
-
-                <br>
-
-                <h2> Guardar instância</h2>
-
-                <h3 id="validation" style="display:none">Validação</h3>
-                <div id="successAnnouncement" style="display:none"></div>
-                <div id="formButton" style="display:none"></div>
-            </form>
+            
         </div>
-        <br>
-        
+    <br>
+    
         <br>
         
         <br>
