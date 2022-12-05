@@ -493,125 +493,128 @@ def review():
     print("current user id is: ",fsession["u_id"]) 
     print()
 
-    try:
-        with engine.connect() as conn:
-            SQL = text("SELECT web_link FROM apregoar.stories")
-            result = conn.execute(SQL)
-    except:
-        print("Error in extracting desired story from database")
-        feedback=f"Erro"
-        flash(feedback,"danger")
-    else:
-        existing_urls = []
-        for row in result:
-            existing_urls.append(row["web_link"])
-        print(existing_urls)
-    
-        story = {
-            ##Required
-            "title": request.form["title"],
-            "pub_date": request.form["pubDate"],
-            "web_link": request.form["webLink"],
-            "publication": request.form["publication"],
-            ##Optional 
-            "summary": request.form["summary"],
-                #Move these to review?
-            "section" : request.form["section"],
-            "tags": request.form["tags"],
-            "author": request.form["author"]
-        }
-
-        if story["web_link"] in existing_urls:
-            feedback = f"A história já existe no database: "+story["web_link"]
-            flash(feedback, "warning")
-            return render_template("publisher/create.html")
-
-        #Prepare & Submit
-        con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+    print("formType: ",request.form["formType"])
+    if request.form["formType"] == "create_story":
         try:
-            with con:
-                with con.cursor() as cur:
-                    cur.execute("""
-                        INSERT INTO apregoar.stories (title, summary, pub_date, web_link, section, tags, author, publication, u_id, created, edited)
-                        VALUES (%(title)s,%(summary)s,%(pub_date)s,%(web_link)s,%(section)s, %(tags)s, %(author)s,%(publication)s,%(u_id)s, NOW(), NOW())
-                        RETURNING s_id
-                        ;""",
-                        {'title':story["title"],'summary':story["summary"], 'pub_date':story["pub_date"], 'web_link': story["web_link"], 'section': story["section"], 'tags': story["tags"], 'author': story["author"], 'publication':story["publication"], 'u_id':fsession["u_id"]}
-                    )
-                    s_id = cur.fetchone()[0]
-                    print("Story added to database. s_id: ",s_id)
-        except psycopg2.Error as e:
-            #If not submitted, attempt to create again
-            print(e.pgerror)
-            print(e.diag.message_primary)
-            feedback = f"Excepção: a história não ficou guardada. Erro: "+e.pgerror+", "+e.diag.message_primary
-            flash(feedback, "danger")
-            con.rollback()
-            con.close()
-            return render_template("publisher/create.html")
+            with engine.connect() as conn:
+                SQL = text("SELECT web_link FROM apregoar.stories")
+                result = conn.execute(SQL)
+        except:
+            print("Error in extracting desired story from database")
+            feedback=f"Erro"
+            flash(feedback,"danger")
         else:
-            story["s_id"] = s_id
-            #Saving Tags
-            if story["tags"]:
-                tags = story["tags"].split(",")
-                for tag in tags:
-                    if tag == "":
-                        tags.remove(tag)
-                    if tag == " ":
-                        tags.remove(tag)
-                if len(tags)>0:
-                    savingAttributes(attr = "tag",s_id=s_id,con=con,attr_vals=tags)
-                else:
-                    print("Actually, no real tags associated")
-                    emptyAttribute(attr="tag", s_id = s_id, con=con)
-            else:  
-                print("No tags associated")
-                emptyAttribute(attr="tag", s_id = s_id, con=con) 
-            #Saving Authors
-            if story["author"]:
-                authors = story["author"].split(",")
-                for author in authors:
-                    if author == "":
-                        authors.remove(author)
-                    if author == " ":
-                        authors.remove(author)
-                if len(authors)>0:
-                    savingAttributes(attr = "author",s_id=s_id,con=con,attr_vals=authors)
-                else:
-                    print("Actually, no real authors associated")
+            existing_urls = []
+            for row in result:
+                existing_urls.append(row["web_link"])
+            print(existing_urls)
+        
+            story = {
+                ##Required
+                "title": request.form["title"],
+                "pub_date": request.form["pubDate"],
+                "web_link": request.form["webLink"],
+                "publication": request.form["publication"],
+                ##Optional 
+                "summary": request.form["summary"],
+                    #Move these to review?
+                "section" : request.form["section"],
+                "tags": request.form["tags"],
+                "author": request.form["author"]
+            }
+
+            if story["web_link"] in existing_urls:
+                feedback = f"A história já existe no database: "+story["web_link"]
+                flash(feedback, "warning")
+                return render_template("publisher/create.html")
+
+            #Prepare & Submit
+            con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+            try:
+                with con:
+                    with con.cursor() as cur:
+                        cur.execute("""
+                            INSERT INTO apregoar.stories (title, summary, pub_date, web_link, section, tags, author, publication, u_id, created, edited)
+                            VALUES (%(title)s,%(summary)s,%(pub_date)s,%(web_link)s,%(section)s, %(tags)s, %(author)s,%(publication)s,%(u_id)s, NOW(), NOW())
+                            RETURNING s_id
+                            ;""",
+                            {'title':story["title"],'summary':story["summary"], 'pub_date':story["pub_date"], 'web_link': story["web_link"], 'section': story["section"], 'tags': story["tags"], 'author': story["author"], 'publication':story["publication"], 'u_id':fsession["u_id"]}
+                        )
+                        s_id = cur.fetchone()[0]
+                        print("Story added to database. s_id: ",s_id)
+            except psycopg2.Error as e:
+                #If not submitted, attempt to create again
+                print(e.pgerror)
+                print(e.diag.message_primary)
+                feedback = f"Excepção: a história não ficou guardada. Erro: "+e.pgerror+", "+e.diag.message_primary
+                flash(feedback, "danger")
+                con.rollback()
+                con.close()
+                return render_template("publisher/create.html")
+            else:
+                story["s_id"] = s_id
+                #Saving Tags
+                if story["tags"]:
+                    tags = story["tags"].split(",")
+                    for tag in tags:
+                        if tag == "":
+                            tags.remove(tag)
+                        if tag == " ":
+                            tags.remove(tag)
+                    if len(tags)>0:
+                        savingAttributes(attr = "tag",s_id=s_id,con=con,attr_vals=tags)
+                    else:
+                        print("Actually, no real tags associated")
+                        emptyAttribute(attr="tag", s_id = s_id, con=con)
+                else:  
+                    print("No tags associated")
+                    emptyAttribute(attr="tag", s_id = s_id, con=con) 
+                #Saving Authors
+                if story["author"]:
+                    authors = story["author"].split(",")
+                    for author in authors:
+                        if author == "":
+                            authors.remove(author)
+                        if author == " ":
+                            authors.remove(author)
+                    if len(authors)>0:
+                        savingAttributes(attr = "author",s_id=s_id,con=con,attr_vals=authors)
+                    else:
+                        print("Actually, no real authors associated")
+                        emptyAttribute(attr="author", s_id = s_id, con=con)
+                else:  
+                    print("No authors associated")
                     emptyAttribute(attr="author", s_id = s_id, con=con)
-            else:  
-                print("No authors associated")
-                emptyAttribute(attr="author", s_id = s_id, con=con)
-            #Saving Sections
-            if story["section"]:
-                section = story["section"]
-                if section == "":
+                #Saving Sections
+                if story["section"]:
+                    section = story["section"]
+                    if section == "":
+                        emptyAttribute(attr="section", s_id = s_id, con=con)
+                    elif section == " ":
+                        emptyAttribute(attr="section", s_id = s_id, con=con)
+                    else:
+                        savingAttributes(attr = "section",s_id=s_id,con=con,attr_vals=[section])
+                        
+                else:  
+                    print("No authors associated")
                     emptyAttribute(attr="section", s_id = s_id, con=con)
-                elif section == " ":
-                    emptyAttribute(attr="section", s_id = s_id, con=con)
-                else:
-                    savingAttributes(attr = "section",s_id=s_id,con=con,attr_vals=[section])
-                    
-            else:  
-                print("No authors associated")
-                emptyAttribute(attr="section", s_id = s_id, con=con)
-            #Saving Publication
-            if story["publication"]:
-                publication = story["publication"]
-                if publication == "":
+                #Saving Publication
+                if story["publication"]:
+                    publication = story["publication"]
+                    if publication == "":
+                        emptyAttribute(attr="publication", s_id = s_id, con=con)
+                    elif publication == " ":
+                        emptyAttribute(attr="publication", s_id = s_id, con=con)
+                    else:
+                        savingAttributes(attr = "publication",s_id=s_id,con=con,attr_vals=[publication])
+                        
+                else:  
+                    print("No authors associated")
                     emptyAttribute(attr="publication", s_id = s_id, con=con)
-                elif publication == " ":
-                    emptyAttribute(attr="publication", s_id = s_id, con=con)
-                else:
-                    savingAttributes(attr = "publication",s_id=s_id,con=con,attr_vals=[publication])
-                    
-            else:  
-                print("No authors associated")
-                emptyAttribute(attr="publication", s_id = s_id, con=con)
-            con.commit()
-            con.close()
-            return render_template("publisher/review.html", story=story, sID = s_id)
+                con.commit()
+                con.close()
+                return redirect(url_for("review_e", s_id = s_id))
+                #return render_template("publisher/review.html", story=story, sID = s_id, instances = [])
     return render_template("publisher/dashboard.html")
 
 def savingAttributes(attr,s_id,con,attr_vals):
@@ -664,7 +667,7 @@ def savingAttributes(attr,s_id,con,attr_vals):
                             "INSERT INTO apregoar."+attr_ing+" (story_id,"+attr_id_name+") VALUES (%(s_id)s,%(attr_id)s);",
                             {'s_id':s_id, 'attr_id':id}
                         )
-                        print(attr+"relation added to database")
+                        print(attr+" relation added to database")
             except psycopg2.Error as e:
                 print(e.pgerror)
                 print(e.diag.message_primary)
