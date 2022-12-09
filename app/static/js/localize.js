@@ -73,6 +73,22 @@ if (this.loading === this.loaded) {
 const progress = new Progress(document.getElementById('progress'));
 
 
+
+//////// Defining color schemes /////////
+const re= /&#39;/gi
+pubColors = pubColors.replace(re,'').replace('[','').replace(']','').split(",");
+console.log("pubColors: ",pubColors);
+
+if (pubColors[0].length > 2){
+    var pubColor1 = pubColors[0];
+    document.documentElement.style.setProperty('--pub-color1',pubColor1);
+    var pubColor1L = pubColors[0]+'80';
+    document.documentElement.style.setProperty('--pub-color1L',pubColor1L);
+};
+
+
+
+
 ////// MAP INITIALIZATION //////
 //Generic Map Setup
 const viewGaz = new ol.View({
@@ -135,6 +151,19 @@ function zoomGaz(vectorSource){
     console.log("vectorSource (in zoomGaz): ",vectorSource.getExtent());
     var layerExtent = ol.extent.extend(sourceNominatimPoly.getExtent(),vectorSource.getExtent());
     console.log("layerExtent wtih Nominatim: ", layerExtent);
+    isInfinite = false;
+    for (coord in layerExtent){
+        if (!isFinite(layerExtent[coord])){
+            console.log("coord is infinite");
+            isInfinite = true;
+        } else {
+            console.log("coord is finite");
+        }
+    };
+    if (isInfinite == false){
+        mapGaz.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
+    }
+
     /*if (layerExtent[0] > xmin){
         layerExtent[0] = xmin;
     }
@@ -148,7 +177,6 @@ function zoomGaz(vectorSource){
         layerExtent[3] = ymax
     }
     console.log("updatd layer extent: ", layerExtent);*/
-    mapGaz.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
     return layerExtent;
 }
 
@@ -267,8 +295,8 @@ function toggleLocalization(){
     if (tswitch.checked == true){
         console.log("CREATE NEW UGAZ MODE");
         toggleMode.innerHTML = "Desenhar localização";
-        poiGaz.style.display = "block";
-        poiNominatim.style.display = "block";
+        //poiGaz.style.display = "block";
+        //poiNominatim.style.display = "block";
         //Draw new areas on the map
         const modifyDraw = new ol.interaction.Modify({
             source: drawSource,
@@ -299,8 +327,8 @@ function toggleLocalization(){
     } else {
         console.log("UGAZ MODIFY MODE");
         toggleMode.innerHTML = "Ver localizações";
-        poiGaz.style.display = "none";
-        poiNominatim.style.display = "none";
+        //poiGaz.style.display = "none";
+        //poiNominatim.style.display = "none";
         //remove interactivity
         mapGaz.removeInteraction(drawDraw);
         mapGaz.removeInteraction(snapDraw); 
@@ -732,8 +760,9 @@ function zoomNominatim(){
 
 // Adding fetch to search through all previous areas
 const selectPrev = document.getElementById("selectPrev");
+var selectUgazPersonal = document.getElementById('select_ugaz_personal');
 function searchGazPrev(gazetteer) {
-    var selectUgazPersonal = document.getElementById('select_ugaz_personal');
+    
     while (selectUgazPersonal.hasChildNodes()) {
         selectUgazPersonal.removeChild(selectUgazPersonal.firstChild);
     }
@@ -797,6 +826,20 @@ function searchGazPrev(gazetteer) {
         searchTermDisplay.innerHTML = "<p>"+searchTerm+"</p>";
         searchTermDisplay.style.display="block";
     }
+    var CSR = { //count search results
+        "bUgazAll": 0,
+        "bUgazMine": 0,
+        "bUgazEmp": 0,
+        "bUgazOther": 0,
+        "bEgazAll": 0,
+        "bEgazFreg": 0,
+        "bEgazConc": 0,
+        "bEgazBig": 0,
+        "bEgazVer": 0,
+        "bEgazArq": 0,
+        "bOgazAll": 0,
+        "bOgazOsm": 0,
+    };
     fetch(`${window.origin}/publisher/${sID}/gazetteer`, {
         method: "POST",
         credentials: "include",
@@ -813,7 +856,8 @@ function searchGazPrev(gazetteer) {
             return;
         }
         response.json().then(function(data){
-            console.log(data);          
+            console.log(data);
+                     
             for (var i=0; i < data.length; i++) {
                 var option = document.createElement("option");
                 option.textContent = data[i]["gaz_name"];
@@ -822,42 +866,64 @@ function searchGazPrev(gazetteer) {
                 console.log("gazType: ",gazType);
                 console.log("Option: ",option);
                 if (gazType.includes("ugaz")) {
-                    console.log("Entering UGAZ if statement");
-                    gazUID = parseInt(gazType.substr(4));
-                    console.log("gazUID: ",gazUID);
+                    //console.log("Entering UGAZ if statement");
+                    gazType = gazType.split('_');
+                    gazUID = parseInt(gazType[0].substr(4));
+                    //console.log("gazUID: ",gazUID);
+                    gazPID = parseInt(gazType[1]);
+                    //gazUID = parseInt(gazType.substr(4));
+                    //console.log("gazPID: ",gazPID);
+                    CSR["bUgazAll"] = CSR["bUgazAll"] + 1;
                     if (gazUID == uID) {
-                        console.log("My place");
+                        //console.log("My place");
                         selectUgazPersonal.appendChild(option);
                         selectUgazPersonal.style.display="block";
-                        console.log("selectUgazPersonal: ",selectUgazPersonal);
-                        console.log("child element count: ",selectUgazPersonal.childElementCount);
+                        //console.log("selectUgazPersonal: ",selectUgazPersonal);
+                        //console.log("child element count: ",selectUgazPersonal.childElementCount);
+                        CSR["bUgazMine"] = CSR["bUgazMine"] + 1;
+                    } else if (gazPID == pubID){
+                        //console.log("my company place");
+                        selectUgazEmpresa.appendChild(option);
+                        selectUgazEmpresa.style.display="block";
+                        CSR["bUgazEmp"] = CSR["bUgazEmp"] + 1;
                     }
                     else {
-                        console.log("not my place");
+                        //console.log("not my place");
                         selectUgazAll.appendChild(option);
                         selectUgazAll.style.display="block";
-                    }
+                        CSR["bUgazOther"] = CSR["bUgazOther"]+1;
+                    };
                 }
                 else if (gazType == "freguesia") {
                     selectEgazFreguesia.appendChild(option);
                     selectEgazFreguesia.style.display="block";
+                    CSR["bEgazAll"] = CSR["bEgazAll"]+1;
+                    CSR["bEgazFreg"] = CSR["bEgazFreg"]+1;
                 }
                 else if (gazType == "concelho") {
                     selectEgazConcelho.appendChild(option);
                     selectEgazConcelho.style.display="block";
+                    CSR["bEgazAll"] = CSR["bEgazAll"]+1;
+                    CSR["bEgazConc"] = CSR["bEgazConc"]+1;
                 }
                 else if (gazType == "espaço_verde") {
                     selectEgazGreen.appendChild(option);
                     selectEgazGreen.style.display="block";
+                    CSR["bEgazAll"] = CSR["bEgazAll"]+1;
+                    CSR["bEgazVer"] = CSR["bEgazVer"]+1;
                 }
                 else if (gazType.includes("archiv")) {
-                    console.log("In Archive");
+                    //console.log("In Archive");
                     selectEgazArchive.appendChild(option);
                     selectEgazArchive.style.display="block";
+                    CSR["bEgazAll"] = CSR["bEgazAll"]+1;
+                    CSR["bEgazArq"] = CSR["bEgazArq"]+1;
                 }
                 else {
                     selectEgazExtra.appendChild(option);
                     selectEgazExtra.style.display="block";
+                    CSR["bEgazAll"] = CSR["bEgazAll"]+1;
+                    CSR["bEgazBig"] = CSR["bEgazBig"]+1;
                 }
             }
             styleSelectGaz(gaz=selectUgazPersonal);
@@ -870,6 +936,7 @@ function searchGazPrev(gazetteer) {
             //$(function(){
             //    $(`#select_${gazetteer}`).multiSelect();
             //});
+
             
         })
     })
@@ -914,6 +981,8 @@ function searchGazPrev(gazetteer) {
                     //libraryNominatim[nameN] = geojson;
                     if (nominatim[i]["geojson"]["type"]=="Polygon"){
                         selectNominatim.appendChild(option);
+                        CSR["bOgazAll"] = CSR["bOgazAll"]+1;
+                        CSR["bOgazOsm"] = CSR["bOgazOsm"]+1;
                     } 
                     
                 }
@@ -922,6 +991,23 @@ function searchGazPrev(gazetteer) {
                 }
             }
             //console.log("libraryNominatim: ", libraryNominatim);
+            console.log("CSR: ",CSR);
+            for (g in CSR){
+                //console.log("g: ",g);
+                //console.log("CSR[g]: ",CSR[g]);
+                let updateText = document.getElementById(g);
+                if (CSR[g] > 0){
+                    updateText.textContent = "("+CSR[g]+")";
+                    console.log("new text: ",updateText);
+                } else {
+                    updateText.textContent = "";
+                    console.log("no new text: ",updateText);
+                };
+            };
+            /*console.log(document.getElementById("bUgazAll"));
+            bUgazAll.textContent = "("+CSR["bUgazAll"]+")";
+            //Update */
+
             
         })
 }
@@ -1214,11 +1300,11 @@ function updateGazTotals(uGaz,gazL) {
     totalNumGaz.innerHTML = tGaz;
     if (totalNumGaz == 0) {
         alertPoly.style.display="block";
-        alertPoly.style.color="red";
-        totalNumGaz.style.color="red";
+        alertPoly.style.color="var(--danger-color)";
+        //totalNumGaz.style.color="red";
     } else {
         alertPoly.style.display="none";
-        totalNumGaz.style.color="green";
+        //totalNumGaz.style.color="green";
     }
     console.log("total gaz features selected: ", tGaz)
     return tGaz;
@@ -1352,6 +1438,8 @@ function submitInstance() {
     var selectedIntN = results.selectedIntN;
 
     // Get form values for validation
+    var eName = document.getElementById("eName");
+    var eDesc = document.getElementById("eDesc");
     var pNamef = document.getElementById("pName");
     var pDescf = document.getElementById("pDesc");
     var tBeginf = document.getElementById("tBegin");
@@ -1367,16 +1455,19 @@ function submitInstance() {
     //Check for places assigned
     var faltas = [];
     console.log("tGaz: ",tGaz);
-    if (tGaz == 0){
-        console.log("No geometry associated");
-        faltas.push("Geometria");
+    if (! eName.value){
+        faltas.push(" "+eName.placeholder);
     }
+
     if (! pNamef.value){
         console.log('pNamef: ');
         console.log(pNamef);
         faltas.push(" "+pNamef.placeholder);
-        console.log('faltas: ');
-        console.log(faltas);
+        console.log('faltas: ',faltas);
+    }
+    if (tGaz == 0){
+        console.log("No geometry associated");
+        faltas.push(" Geometria");
     }
     console.log("allDay.value: ",allDay.value);
     if (allDay.value !== "allday_p") {
@@ -1396,10 +1487,16 @@ function submitInstance() {
         }
     }     
     if (faltas.length > 0){
-        window.alert("Falta alguns campos requeridos");
+        faltasText = "";
+        for (f in faltas){
+            faltasText = faltasText + faltas[f];
+        };
+        console.log("faltasText: ",faltasText);
+        window.alert("Falta alguns campos requeridos: "+faltasText);
         validation.style.display="block";
         successAnnouncement.style.display="block";
-        successAnnouncement.innerHTML = `<em style="color:red">Falta: ${faltas}</em>`;
+        successAnnouncement.innerHTML = `<em style="color:var(--danger-color)">Falta: ${faltas}</em>`;
+        
         return
     } else {
         console.log("Preparating of entry");
@@ -1422,6 +1519,8 @@ function submitInstance() {
         var entry = {
             type: "Feature",
             properties: {
+                eName: eName.value,
+                eDesc: eDesc.value,
                 pName: pNamef.value,
                 pDesc: pDescf.value,
                 allDay: allDay.value,

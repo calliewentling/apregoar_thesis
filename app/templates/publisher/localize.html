@@ -43,22 +43,20 @@
         text-align: center;
     }
 
-    .p {
-        font-family: 'Open Sans';
-        margin: 0;
-        font-size: 12px;
-    }
-    
-
 
 </style>
     
 
 
-<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<!--<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css" type="text/css">
-<!--<link href="../../static/css/publish.css" rel="stylesheet"> -->
+<link href="../../static/css/publish.css" rel="stylesheet"> -->
+<head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+
 
 {% extends "publisher/templates/publisher_template.html" %}
 
@@ -67,18 +65,11 @@
 {% block main %}
 
 
-<!--<script src="{{ url_for('static', filename='js/create.js') }}"></script> -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Raleway'>
-<link rel='stylesheet' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
-
-<script>
+<!--<script>
     $(document).ready(function(){
         $('[data-toggle="tooltip"]').tooltip();
     });
-</script>
+</script>-->
 
 
 
@@ -90,142 +81,301 @@
         <h1>Localizar as Notícias</h1>
         <h3>{{ story["title"] }}</h3>
 
-        <div>
-            <p> Definir uma instância (tempo e sítio) da notícia
-                <a 
-                    href="#" 
-                    data-toggle="tooltip" 
-                    title="Cada instância é uma oportunidade de elaborar onde e quando uma coisa está a acontacer. Cada notícia pode ter algumas notícias, e cada instância pode ter alguns sítios (polígonos). Escreve um ou mas polígonos aqui, dar um nome (não precisa de ser oficial) e uma descrição. Definir as datas do início e o fim, um tipo de interval temporal, e afinal um descrição.">
-                    <span class="material-icons">info</span>
-                </a>
-            </p>
+        <div class="row_local">
+            <p>Definir uma instância (tempo e sítio) da notícia </p>
+            <div class="toolTipL">
+                <i class="material-icons">info_outline</i>
+                <span class="tooltiptext">
+                    <p>Cada instância é uma oportunidade de elaborar onde e quando uma coisa está a acontacer.</p> <br>
+                    <p>Cada notícia pode ter algumas notícias, e cada instância pode ter alguns sítios (polígonos).</p> <br>
+                    <p>Escreve um ou mas polígonos aqui, dar um nome (não precisa de ser oficial) e uma descrição. </p><br>
+                    <p>Definir as datas do início e o fim, um tipo de interval temporal, e afinal um descrição.</p></span>
+            </div>
         </div>
         <form method="POST" action="review">
             <div class="card" id="eventInfo">
-                <h3>Descrever o evento</h3>
-                <p> Name of event: </p>
-                <p> Event description</p>
+                <div class="row_local">
+                    <h2>Descrever a instância</h2>
+                    <div class="toolTipL">
+                        <i class="material-icons">info_outline</i>
+                        <span class="tooltiptext">
+                            <p>Estas informaçoes ajudam com avaliação das instâncias e suas distribuições.</p><br>
+                            <p>Podem ser visíveis nas vistas de exploração e monitorização.</p>
+                        </span>
+                    </div>
+                </div>
+                <div class="row_local">
+                    <label for="eName" style="flex:20%"> Nome do evento: </label>
+                    <input type="text" id="eName" name="eName" placeholder="Nome do evento" required>
+                </div>
+                <div class="row_local">
+                    <label for="eDesc" style="flex:20%">Descrição do evento:</label>
+                    <input type="text" id="eDesc" name="eDesc" placeholder="Descrição do evento">
+                </div>
             </div>
             <br>
             
             <div class="card" id="temporal_dez">
                 <!-- TEMPORAL -->
-                <h2>Associar uma altura</h2>
                 <div class="row_local">
-                    <div class = "column_local cozycheck">
-                        <label for="allday_y">Todo o dia</label><input type="radio" id="allday_y" name="allDay" value="allday_y" onClick="timeDefD()" checked="checked" ><br>
-                        <label for="allday_n">Horas específicas</label><input type="radio" id="allday_n" name="allDay" value="allday_n" onClick="timeDefH()"><br>
-                        <label for="allday_p">Persistente (sim datas específicas) </label><input type="radio" id="allday_p" name="allDay" value="allday_p" onClick="timeDefP()"><br>  
+                    <h2>Associar uma altura</h2>
+                    <div class="toolTipL">
+                        <i class="material-icons">info_outline</i>
+                        <span class="tooltiptext">
+                            <p>As alturas ajuda com a filtração e organização das instâncias. </p><br>
+                            <p>São visíveis nas vistas da contextualização, exploração, publicação, e monitorização.</p><br>
+                            <p>Quando será possível, define as alturas mais específicas.</p><br>
+                            <p>No caso que não tem dias específicas, pode marcar "Persistente".</p><br>
+                            <p>A descrição pode dar mais contexto para a altura.</p>
+                        </span>
+                    </div>
+                </div>
+                <div class="row_local">
+                    <div class = "column_local cozycheck" style="flex:20%">
+                        <div class="row_local">
+                            <input type="radio" id="allday_y" name="allDay" value="allday_y" onClick="timeDefD()" checked="checked" >
+                            <label for="allday_y">  Todo o dia</label>
+                            <br>
+                        </div>
+                        <div class="row_local">
+                            <input type="radio" id="allday_n" name="allDay" value="allday_n" onClick="timeDefH()">
+                            <label for="allday_n">Horas específicas  </label>
+                            <br>
+                        </div>
+                        <div class="row_local">
+                            <input type="radio" id="allday_p" name="allDay" value="allday_p" onClick="timeDefP()">
+                            <label for="allday_p">Persistente (sim datas específicas)  </label>
+                            <br>
+                        </div>                        
                     </div>
                     <div class = "column_local">
-                        <input type="date" id="tBegin" name="tBegin" required> <input type="date" id="tEnd" name="tEnd"  required>
-                        <br>
-                        <input type="text" id="tDesc" name="tDesc" placeholder="Temporal description">
+                        <div class="row_local">
+                            <input type="date" id="tBegin" name="tBegin" required>
+                            <input type="date" id="tEnd" name="tEnd"  required>
+                        </div>
+                        <div class="row_local">
+                            <label for="tDesc" style="flex:30%">Descrição temporal: </label>
+                            <input type="text" id="tDesc" name="tDesc" placeholder="Descrição da altura">
+                        </div>
+                        
                     </div>
                 </div>
             </div>
             <br>
 
             <div class="card">
-                <h2>Localizar o evento</h2>
-                <div class="card">
-                    <h3>Utilizar áreas existentes</h3>
-                    <div>
-                        <input type="text" id="gazSearch" name="gazSearch" placeholder="Pesquisar todos dos sítios nos gazetteers"><button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar</button>
-                        <div id="searchTermDisplay" style="display:none"></div>
+                <div class="row_local">
+                    <h2>Localizar a instância</h2>
+                    <div class="toolTipL">
+                        <i class="material-icons">info_outline</i>
+                        <span class="tooltiptext">
+                            <p>As localizações ajudam leitores de contextualizar a notícia.</p><br>
+                            <p>Localizações são visíveis nas ferramentas de publicação, contextualização, exploração e monitorização</p><br>
+                            <p>Cada sítio obriga pelo menos um localiação, mas pode definir mais. </p><br>
+                            <p>Pode reutilizar sítios já existentes nos gazetteers ou definir sítios novos. Pode utilizar uma mixtura dos existentes e novos a vontade.</p><br>
+                        </span>
                     </div>
-                    <button type="button" class="collapsible">Sítios personalizados</button>
-                    <div class="contentCollapse place" style="display:none">
-                        <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_personal')">Meus sítios</button>
-                        <br>
-                        <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                </div>
+                <div id="selectName">
+                    <div class="row_local">
+                        <label for="eDesc" style="flex:20%">Nome do locale:</label>
+                        <input type="text" id="pName" name="pName" placeholder="Nome do sítio" required>
+                        <span class="error" aria-live="polite"></span>
                     </div>
-                </div> <br>
-                <div class="card">
-                    <h3>Desenhar áreas novas</h3>
+                    <div class="row_local">
+                        <label for="eDesc" style="flex:20%">Descrição do locale:</label>
+                        <!--<div id="selectDesc">-->
+                        <input type="text" id="pDesc" name="pDesc" placeholder="Descrição do sítio">
+                    </div>
                 </div>
                 
-                
-                <button type="button" class="collapsible">Pesquisar lugares existentes</button>  
-                <div class="contentCollapse place" style="display:none">
-                    <div>
-                        <button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar áreas existentes</button>
-                        <br><br>
-                        
+                   
+                <br>
+                <div class="card">
+                    <button type="button"class="collapsible">
+                        <div class="row_local">
+                            <h3>Pesquisar gazetteers</h3>
+                            <div class="toolTipL">
+                                <i class="material-icons">info_outline</i>
+                                <span class="tooltiptext">
+                                    <p>Pode carregar gazetteers individualmente (nos butões "Carregar") ou pesquisar todas as gazetteers no mesmo tempo. Resultados são organizados por tipo.</p><br>
+                                    <p>Para utilizar, selecionar pelo menos uma opção e carrega a butão "Prever" para visualizar no mapa.</p> <br>
+                                    <p> No momento de aguarda, todas as áreas previdos no mapa serão associadas à instância. </p> <br>
+                                    <p>Para remover, deselecionar a área e carrega "Prever" outra vez.</p><br>
+                                </span>
+                            </div>
+                        </div>
+                    </button>
+                    <div class="contentCollapse">
+                        <div class="row_local">
+                            <div style="flex:70%">
+                                <input type="text" id="gazSearch" name="gazSearch" placeholder="Pesquisar todos dos sítios nos gazetteers">
+                            </div>
+                            <div style="flex:30%">
+                                <button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar</button>
+                            </div>                       
+                            <div id="searchTermDisplay" style="display:none"></div>
+                        </div>
+                        <!-- Ugazetteer -->
+                        <button type="button"class="collapsible"><p>Sítios personalizados <span  id="bUgazAll"></span></p></button>
+                        <div class="contentCollapse" style="display:none;">
+                            <button type="button" class="collapsible"><p>Sítios meus <span  id="bUgazMine"></span></p></button>
+                            <div class="contentCollapse" style="display:none;">
+                                <div class="contentLowest">
+                                    <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('ugaz_personal')">Caregar todos meus</button> 
+                                </div>              
+                            </div>
+                            <button type="button"  class="collapsible"><p>Sítios empresariais <span id="bUgazEmp"></span></p></button>
+                            <div class="contentCollapse " style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_ugaz_empresa' name="selectUgazEmpresa" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary btn-load" onclick="loadGaz('ugaz_empresa')">Carragar todos empresariais</button>
+                                </div>
+                            </div>
+                            <button type="button"  class="collapsible"><p>Outros personalizados <span id="bUgazOther"></span></p></button>
+                            <div class="contentCollapse subC" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_ugaz_all' name="selectUgazAll" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary btn-load" onclick="loadGaz('ugaz_all')">Carregar todoso outros</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Egazetteer -->
+                        <button type="button" class="collapsible"><p>Sítios administrativos <span  id="bEgazAll"></span></p></button>
+                        <div class="contentCollapse" style="display:none">
+                            <button type="button"  class="collapsible"><p>Freguesias <span id="bEgazFreg"></span></p></button>
+                            <div class="contentCollapse subC" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_egaz_freguesia' name="selectEgazFreguesia" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_freguesia')">Carregar todas</button>
+                                </div>                           
+                            </div>
+                            <button type="button" class="collapsible"><p>Conselhos <span id="bEgazConc" ></span></p></button>
+                            <div class="contentCollapse subC" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_egaz_concelho' name="selectEgazConcelho" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_concelho')">Carregar todos</button>
+                                </div>
+                            </div>
+                            <button type="button"  class="collapsible"><p>Áreas maiores <span id="bEgazBig"></span></p></button>
+                            <div class="contentCollapse subC" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_egaz_extra' name="selectEgazExtra" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_extra')">Carregar todos</button>
+                                </div>                        
+                            </div>
+                            <button type="button" class="collapsible"><p>Espaço verde <span id ="bEgazVer"></span></p></button>
+                            <div class="contentCollapse subC" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_egaz_green' name="selectEgazGreen" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_green')">Carregar verdes</button>                     
+                                </div>
+                            </div>
+                            <button type="button" class="collapsible"><p>Arquivos <span id="bEgazArq"></span></p></button>
+                            <div class="contentCollapse subC" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_egaz_archive' name="selectEgazArchive" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_archive')">Carregar arquivados</button>   
+                                </div>                    
+                            </div>
+                        </div>
+                        <!-- Other gazetteer -->
+                        <button type="button" class="collapsible"><p>Gazetteers externais <span id="bOgazAll"></span></p></button>
+                        <div class="contentCollapse" style="display:none">
+                            <button type="button" class="collapsible"><p>Open Street Map <span id="bOgazOsm"></span></p></button>
+                            <div class="contentCollapse" style="display:none">
+                                <div class="contentLowest">
+                                    <select id='select_nominatim' name="selectNominatim" multiple style="display:none"></select>
+                                    <button type="button" class="btn btn-primary btn-load" onclick="searchNominatim()">Pesquisar OSM</button>
+                                </div>                         
+                            </div>
+                        </div><br>
+
+                        <button type="button" class="btn btn-primary btn-big" onclick="initGaz()">Prever</button>
+                        <br>
+
                     </div>
                     
-                    <div class="containerG grid">
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_personal')">Sítios Pessoais</button>
-                            <br>
-                            <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                </div> <br>
+
+                <!--<div class="card">
+                    <h3>Carregar localizações</h3>
+                    
+                    <input type="file" id="uploadFile" name="uploadFile">
+                    <label for="uploadFile">Carregar um shapefile (.shp)</label>
+                    
+                    <br>
+                    <button type="button" class="btn btn-primary" onclick="validateFile()">Carregar</button>
+                    
+                </div><br>-->
+
+                <div class="card">
+                    <button type="button" class="collapsible">
+                        <div class="row_local">
+                            <h3>Desenhar áreas novas</h3>
+                            <div class="toolTipL">
+                                <i class="material-icons">info_outline</i>
+                                <span class="tooltiptext">
+                                    <p>Pode desenhar um ou mais polígonos para representar a localização customizada onde a notícia acontece (no passado, presente, ou futuro). </p><br>
+                                    <p>Pode modificar os polígonos depois ou deleter e começer outra vez.</p>
+                                </span>
+                            </div>
                         </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_empresa')">Sítios Empresiais</button>
-                            <br>
-                            <select id='select_ugaz_empresa' name="selectUgazEmpresa" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('ugaz_all')">Sítios (Totais)</button>
-                            <br>
-                            <select id='select_ugaz_all' name="selectUgazAll" multiple style="display:none"></select>
+                    </button>
+                    <div class="contentCollapse" style="display:none">
+                        <div id="newUgaz" style="display:block" class="row_local">
+                            <!-- TOGGLE -->
+                            <div class="container1" style="flex:50%">
+                                <label class="switch">
+                                    <input id ="tswitch" type="checkbox" onclick = "toggleLocalization()">
+                                    <span class="slider round"></span>
+                                </label>
+                                <div id="toggleMode"><p>Ativar modo do desenho</p></div>
+                            </div>
+                            <div style="display:none">
+                                <p>Número dos polígonos:</p>
+                                <div id="calculated-area" style="color:red"></div> 
+                                <div id="selectGeom" style="color:red" ></div>
+                            </div>
+                            <div id="deletedFeatures" style="display:none"></div>
+                            <!--<label for="type">Geometry type &nbsp;</label> -->
+                            <select id="type" style="display:none">
+                                <option value="Polygon" select="selected">Polygon</option>
+                            </select>   
+                            <!--<label for="type">Select type &nbsp;</label> -->
+                            <select id="clickType" style="display:none">
+                                <option value="click" select="selected">Click</option>
+                                <option value="singleclick">Single-click</option>
+                                <option value="pointermove">Hover</option>
+                                <option value="altclick">Alt+Click</option>
+                                <option value="none">None</option>
+                            </select> 
                         </div>
                     </div>
-                    <br><br><br>
-                    <div class="containerG grid">
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_freguesia')">Freguesias</button>
-                            <br>
-                            <select id='select_egaz_freguesia' name="selectEgazFreguesia" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_concelho')">Concelhos</button>
-                            <br>
-                            <select id='select_egaz_concelho' name="selectEgazConcelho" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_extra')">Grupos Administrativos</button>
-                            <br>
-                            <select id='select_egaz_extra' name="selectEgazExtra" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                    <div class="containerG grid">
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_green')">Espaço Verde</button>
-                            <br>
-                            <select id='select_egaz_green' name="selectEgazGreen" multiple style="display:none"></select>
-                        </div>
-                        <div class="itemG">
-                            <button type="button" class="btn btn-primary" onclick="loadGaz('egaz_archive')">Archivo</button>
-                            <br>
-                            <select id='select_egaz_archive' name="selectEgazArchive" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                    <div class="containerG grid">
-                        <div class = "itemG">
-                            <button type="button" class="btn btn-primary" onclick="searchNominatim()">OSM Gazetteer</button>
-                            <br>                
-                            <select id='select_nominatim' name="selectNominatim" multiple style="display:none"></select>
-                        </div>
-                    </div>
-                        
-                        
-                    <br><br>
-                    <button type="button" class="btn btn-primary" onclick="initGaz()">Prever</button>
                 </div>
 
-                <button type="button" class="collapsible">Resumo dos localizações</button>  
-                <div class="contentCollapse place" style="display:none">
-                    <div id="totalGazSummary">
-                        <!--Summary of associated places-->
-                        <p id="totalNumGaz" style="color:red;font-size:24px;">0 </p>
-                        <p>localizações associadas</p>
-                        <em id="alertPoly" style="color:rgb(117, 5, 5)">Associar e/ou desenhar pelo menos um localização de notícia.</em>
-                        <br><br>
-                        <p id = "totalUGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
-                        <p> áreas desinhadas. </p>
-                        <p id = "totalEGaz" style="color:rgb(255, 166, 0);font-size:18px">0</p>
-                        <p> áreas existentes. </p>
+                <div class="card">
+                    <button type="button" class="collapsible comingSoonNav">
+                        <div class="row_local">
+                            <h3>Avancados</h3>
+                            <div class="toolTipL">
+                                <i class="material-icons">info_outline</i>
+                                <span class="tooltiptext">
+                                    <p>As funcionalidades avancadas estão em desenvolvimento.</p>
+                                </span>
+                            </div>
+                        </div>
+                    </button>
+                    <div class="contentCollapse" style="display:none">
+                        <button type="button" class="collapsible comingSoonNav">Carregar ficheiros</span></p></button>
+                        <div class="contentCollapse" style="display:none">
+                            <p class="comingSoon">Funcionalidade em breve</p>
+                        </div>
+                        <button type="button" class="collapsible comingSoonNav">Ligar com fonte</span></p></button>
+                        <div class="contentCollapse" style="display:none">
+                            <p class="comingSoon">Funcionalidade em breve</p>
+                        </div>
                     </div>
                 </div>
 
@@ -233,9 +383,26 @@
                     <div class="wrapper">
                         <div id="map" class="map"></div>
                         <div id="progress"></div>
-                        <div id="deletedFeatures" style="display:none"></div>
+                    </div>
+                </div> 
+
+                <!--Summary of associated places-->
+                <div id="totalGazSummary" class="row_local"> 
+                    <div style="flex:25%;background-color:var(--danger-colorL)">
+                        <p id="totalNumGaz" style="font-weight:bolder;font-size:24px;">0 </p>
+                        <p>localizações associadas</p>
+                    </div>
+                    <div style="flex:25%">
+                        <p id = "totalUGaz" style="font-weight:bolder;font-size:18px">0</p>
+                        <p> áreas desinhadas. </p>
+                    </div>
+                    <div style="flex:25%">
+                        <p id = "totalEGaz" style="font-weight:bolder;font-size:18px">0</p>
+                        <p> áreas existentes. </p>
                     </div>
                 </div>
+                <em id="alertPoly" style="color:var(--danger-color)">Associar e/ou desenhar pelo menos um localização de notícia.</em>
+
             </div>
             <br>
             
@@ -246,45 +413,35 @@
                     <p>Se faz favor: assinar todos dos campos necesários</p>
                 </div>
                 <div id="formButton" style="display:none"></div>
+                <button type="button" class="btn btn-primary" onclick = submitInstance()> Associar instáncia</button>
             </div>
-          
-
         </form>
         <br>
 
-        
+        <div class="row_local">
+            <div id="btnReturn"></div>
+            <button type="button" class="btn btn-primary" onclick=limparTudo()>Limpar tudo</button>
+        </div>
 
+    </div>
+</div>
 
-
+<!--
         <br> 
         <div class="card" id="save_instance" >             
             <h3>Localização/ões</h3>
         
                 <br>
-                <!-- Name of instance place group -->
-                <div id="selectName">
-                    <input type="text" id="pName" name="pName" placeholder="Nome do sítio" required>
-                    <span class="error" aria-live="polite"></span>
-                </div>
-                <div id="selectDesc">
-                    <input type="text" id="pDesc" name="pDesc" placeholder="Descrição do sítio">
-                </div>
 
-                <!-- DESIGN NEW (UGAZ) -->
+                
+
+
                 <div class="card" id = "ugaz_dez">
                     <h3>Desenhar uns localizações novos</h3>
                 
-                    <div id="newUgaz" style="display:block">
-                        <!-- TOGGLE -->
-                        <div class="container1">
-                            <label class="switch">
-                                <input id ="tswitch" type="checkbox" onclick = "toggleLocalization()">
-                                <span class="slider round"></span>
-                            </label>
-                            <div id="toggleMode"><p>Ativar modo do desenho</p></div>
-                        </div>
-                        <em>Pode desenhar um ou mais polígonos para representar a localização customizada onde a notícia acontece (no passado, presente, ou futuro). Pode modificar os polígonos depois ou deleter e começer outra vez.</em>
-                        <!-- UGAZ INFO -->
+                    
+
+
                         <div id="poiGaz" style="display:block">
                             <button type="button" onclick="searchGeoNames()">GeoNames</button>
                             <br>
@@ -304,65 +461,10 @@
                         <div id="buttonZoomNominatim" style="display:none">
                             <button type="button" onclick="zoomNominatim()">Zoom</button>
                         </div>
+-->
 
-                        
-                        <div style="display:none">
-                            <p>Número dos polígonos:</p>
-                            <div id="calculated-area" style="color:red"></div> 
-                            <div id="selectGeom" style="color:red" ></div>
-                        </div>
-                        <!--<label for="type">Geometry type &nbsp;</label> -->
-                        <select id="type" style="display:none">
-                            <option value="Polygon" select="selected">Polygon</option>
-                        </select>   
-                        <!--<label for="type">Select type &nbsp;</label> -->
-                        <select id="clickType" style="display:none">
-                            <option value="click" select="selected">Click</option>
-                            <option value="singleclick">Single-click</option>
-                            <option value="pointermove">Hover</option>
-                            <option value="altclick">Alt+Click</option>
-                            <option value="none">None</option>
-                        </select> 
-                    </div>
-
-                </div>
-                
-                <br>
-
-                <div class="card" id="egaz_dez">
-
-                    <!-- EGAZ --> 
-                    
-                </div>
-
-                <br>
-
-                <div class="card">
-                    <h3>Carregar localizações</h3>
-                    <!--
-                    <input type="file" id="uploadFile" name="uploadFile">
-                    <label for="uploadFile">Carregar um shapefile (.shp)</label>
-                    
-                    <br>
-                    <button type="button" class="btn btn-primary" onclick="validateFile()">Carregar</button>
-                    -->
-                </div>
-                <br>
-            
-        </div>
-    <br>
-    
-        <br>
         
-        <br>
-        <div class="card">
-            <button type="button" class="btn btn-primary" onclick = submitInstance()> Associar instáncia</button>
-            <div id="btnReturn"></div>
-            <br>
-            <button type="button" class="btn btn-primary" onclick=limparTudo()>Limpar tudo</button>
-        </div>
-    </div>
-</div>
+
 
 <script>
     //////// STORY INFO ///////
@@ -370,6 +472,8 @@
     var sID = '{{ sID }}';
     console.log("sID is: ");
     console.log(sID);
+    pubID = '{{ story.p_id }}';
+    console.log("pubID: ",pubID);
     var mapStoryFilter = "s_id="+sID;
     console.log("Map Story filter: ",mapStoryFilter);
     var mapEAGazFilter = "";
@@ -380,6 +484,10 @@
     var pubName = '{{ story.publication }}';
     console.log("pubName is: ");
     console.log(pubName);
+    var pubColors = '{{ story.colors }}';
+
+    const story = '{{ story }}';
+    console.log("story: ",story);
 </script>
 <script src="{{ url_for('static', filename='js/localize.js') }}"></script>
 

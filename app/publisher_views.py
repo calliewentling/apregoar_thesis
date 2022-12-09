@@ -514,13 +514,13 @@ def review():
                 "title": request.form["title"],
                 "pub_date": request.form["pubDate"],
                 "web_link": request.form["webLink"],
-                "publication": request.form["publication"],
+                "publication": request.form["publication"].lower(),
                 ##Optional 
                 "summary": request.form["summary"],
                     #Move these to review?
-                "section" : request.form["section"],
-                "tags": request.form["tags"],
-                "author": request.form["author"]
+                "section" : request.form["section"].lower(),
+                "tags": request.form["tags"].lower(),
+                "author": request.form["author"].lower()
             }
 
             if story["web_link"] in existing_urls:
@@ -744,7 +744,7 @@ def localize(s_id):
 
         try:
             with engine.connect() as conn:
-                SQL = text("SELECT * FROM apregoar.stories WHERE s_id = :x")
+                SQL = text("SELECT * FROM apregoar.stories LEFT JOIN apregoar.publicationing ON stories.s_id = publicationing.story_id LEFT JOIN apregoar.publications ON publicationing.p_id = publications.publication_id WHERE s_id = :x")
                 SQL = SQL.bindparams(x=s_id)
                 result = conn.execute(SQL)
         except:
@@ -754,15 +754,16 @@ def localize(s_id):
             flash(feedback,"danger")
         else:
             conn.close()
-            story = {}
+            story2 = {}
+            story={}
             for row in result:
                 story = row
-            print(story)
             #egaz_area = []
             #egaz_freguesia = []
             #egaz_concelho = []
             #egaz_extra = []
-            if story:               
+
+            if story:             
                 return render_template("publisher/localize.html", story=story, sID = s_id)
                     #return render_template("publisher/localize.html", story=story, sID = s_id, eGazF=egaz_freguesia, eGazC=egaz_concelho, eGazA = egaz_area, eGazX = egaz_extra)
             else:
@@ -793,6 +794,7 @@ def loadGaz(s_id):
                 u_id
             FROM apregoar.access_ugaz
             WHERE u_id = :x
+            ORDER BY gaz_name ASC
             ;
         """)
         SQL = SQL.bindparams(x=u_id)
@@ -821,6 +823,7 @@ def loadGaz(s_id):
                     publication AS gaz_pub
                 FROM apregoar.access_ugaz
                 WHERE publication = :x AND u_id NOT IN (:y)
+                ORDER BY gaz_name ASC
                 ;
             """)
             SQL = SQL.bindparams(x=publication,y=u_id)
@@ -832,7 +835,8 @@ def loadGaz(s_id):
                 p_desc AS gaz_desc,
                 u_id
             FROM apregoar.access_ugaz
-            WHERE u_id NOT IN :x
+            WHERE u_id NOT IN (:x)
+            ORDER BY gaz_name ASC
             ;
         """)
         SQL = SQL.bindparams(x=u_id)
@@ -927,8 +931,8 @@ def loadGaz(s_id):
             SELECT
                 p_id as gaz_id,
                 p_name as gaz_name,
-                concat('ugaz',u_id) as gaz_desc
-            FROM apregoar.ugazetteer
+                concat('ugaz',u_id,'_',pub_id) as gaz_desc
+            FROM apregoar.access_ugaz
         """
         print("query_ugaz:",query_ugaz)
         if search_term:
@@ -1041,6 +1045,8 @@ def save_instance(s_id):
     instance = req["properties"]
     print("instance: ",instance)
     print()
+    i_name = instance["eName"]
+    i_desc = instance["eDesc"]
     p_name = instance["pName"]
     p_desc = instance["pDesc"]
     all_day = instance["allDay"]
@@ -1086,11 +1092,11 @@ def save_instance(s_id):
             with con.cursor() as cur:
                 #Save new instance
                 cur.execute("""
-                    INSERT INTO apregoar.instances (t_begin, t_end, t_desc, p_desc, s_id, u_id, t_type, p_name,created,edited) 
-                    VALUES (%(t_begin)s, %(t_end)s, %(t_desc)s, %(p_desc)s, %(s_id)s, %(u_id)s, %(t_type)s, %(p_name)s,NOW(),NOW())
+                    INSERT INTO apregoar.instances (t_begin, t_end, t_desc, p_desc, s_id, u_id, t_type, p_name,created,edited,i_name,i_desc) 
+                    VALUES (%(t_begin)s, %(t_end)s, %(t_desc)s, %(p_desc)s, %(s_id)s, %(u_id)s, %(t_type)s, %(p_name)s,NOW(),NOW(),%(i_name)s,%(i_desc)s)
                     RETURNING i_id
                     ;""",
-                    {'t_begin':t_begin, 't_end':t_end, 't_desc':t_desc, 'p_desc':p_desc, 's_id':s_id, 'u_id':u_id, 't_type':all_day,'p_name':p_name}
+                    {'t_begin':t_begin, 't_end':t_end, 't_desc':t_desc, 'p_desc':p_desc, 's_id':s_id, 'u_id':u_id, 't_type':all_day,'p_name':p_name, 'i_name':i_name,'i_desc':i_desc}
                 )
                 i_id = cur.fetchone()[0]
                 print("Instance added to database. i_id: ",i_id)

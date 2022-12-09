@@ -1,53 +1,103 @@
-body {
-    background-color: #f1f1f1;
+:root {
+    --pub-color1: black;
+    --pub-color1L: grey;
+    --danger-colorL: rgb(253, 240, 240);
+    --danger-color: rgb(144, 60, 60);
 }
 
 
-h1 {
-    color:black;
-    font-family: verdana;
-    font-size: 32px;
-    font-weight: bolder;
+body {
+    background-color: white;
+    color: rgb(56,56,56);
+    accent-color: var(--pub-color1);
+}
+
+input {
+    border: 1px solid var(--pub-color1);
+}
+h1 { 
+    display: block;
+    font-size: 2em;
+    margin-top: 0.67em;
+    margin-bottom: 0.67em;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    font-family: "Times New Roman";
+    color: var(--pub-color1);
 }
 h2 {
-    font-size: 24px;
-    font-weight: bolder;
+    display: block;
+    font-size: 1.5em;
+    margin-top: 0.83em;
+    margin-bottom: 0.83em;
+    margin-left: 0;
+    margin-right: 0;
+    font-family: "Times New Roman";
 }
-h3 {
-    font-size: 18.72px;
-    font-weight: bolder;
+h3 { 
+    display: block;
+    font-size: 1.17em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    font-family: "Georgia";
+
 }
-h4 {
-    font-size: 16px;
-    font-weight: bolder;
+h4 { 
+    display: block;
+    margin-top: 1.33em;
+    margin-bottom: 1.33em;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    font-family: "Georgia";
 }
-h5 {
-    font-size: 13.28px;
-    font-weight: bolder;
+h5 { 
+    display: block;
+    font-size: .83em;
+    margin-top: 1.67em;
+    margin-bottom: 1.67em;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    font-family: "Helvetica";
 }
-h5 {
-    font-size: 10.72px;
-    font-weight: bolder;
+h6 { 
+    display: block;
+    font-size: .67em;
+    margin-top: 2.33em;
+    margin-bottom: 2.33em;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    font-family: "Helvetica";
 }
 
 p {
-    font-family:verdana;
-    font-size: 16px;
+    font-family: "Helvetica";
+
+}
+
+label {
+    font-family: "Helvetica";
+    font-weight: lighter;
 }
 
 /* Inputs */
 input:required,
 textarea:required {
-    border-color:  red ; /*!important*/
+
+    background-color: var(--danger-colorL);
 }
 input:required:invalid {
-     border-color: red;
+     background-color: var(--danger-colorL);
 }
 
 input:required:valid {
-    border-color: green;
+    background-color: white;
 }
-
 input:required + label {
     color: red;
 }
@@ -151,33 +201,29 @@ label {
     margin: 0;
     vertical-align: bottom;
     position: relative;
-    top: -1px;
+    top: 2px;
+    margin-right: 6px;
 }
 
-.collapsible {
-    background-color: #eee;
-    color: #444;
-    cursor: pointer;
-    padding: 18px;
-    width: 100%;
-    border: none;
-    text-align: left;
-    outline: none;
-    font-size: 15px;
-    }
-    
-/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .collapsible:hover {
-    background-color: #ccc;
+
+
+
+.btn-primary {
+    background-color: var(--pub-color1);
+    padding: 15px, 30px;
 }
-    
-/* Style the collapsible content. Note: hidden by default */
-.ccontent {
-    padding: 0 18px;
-    display: none;
-    overflow: hidden;
-    background-color: #f1f1f1;
+
+.btn-load {
+    margin: 30px;
+    background-color: var(--pub-color1);
 }
+
+.btn-big{
+    padding: 15px;
+    width: 90%;
+    margin: 25px;
+}
+
     
 /* The switch - the box around the slider */
 .switch {
@@ -202,7 +248,7 @@ label {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #21f344;
+    background-color: var(--pub-color1L);
     -webkit-transition: .4s;
     transition: .4s;
 }
@@ -220,12 +266,12 @@ label {
 }
     
 input:checked + .slider {
-    background-color: #2196F3; 
+    background-color: var(--pub-color1); 
     /*background-image: url(https://fonts.googleapis.com/icon?family=Material+Icons)*/
 }
     
 input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px var(--pub-color1);
 }
     
 input:checked + .slider:before {
@@ -359,27 +405,44 @@ select {
 
 /* COLLAPSABLE AREAS*/
 .collapsible {
-    background-color: #eee;
-    color: #444;
+    background-color: white;
+    color: var(--pub-color1);
     cursor: pointer;
     padding: 18px;
     width: 100%;
-    border: none;
     text-align: left;
     outline: none;
+    border: none;
     font-size: 15px;
+    text-decoration: underline;
+    font-weight: bold;
   }
 
-  .active, .collapsible:hover {
-    background-color: #ccc;
-  }
-  
-  .content {
-    padding: 0 18px;
+
+    
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+    background-color: var(--pub-color1);
+    color: white;
+}
+
+.comingSoonNav.active, .comingSoonNav:hover {
+    background-color: var(--pub-color1L);
+}
+    
+/* Style the collapsible content. Note: hidden by default */
+.contentCollapse {
+    padding: 0 0 0 30px;
     display: none;
     overflow: hidden;
-    background-color: #f1f1f1;
-  }
+    background-color: white;
+    border: solid;
+    border-color:var(--pub-color1);
+}
+
+.contentLowest {
+    display: flex;
+}
 
   /*Columns*/
 .row_local {
@@ -389,3 +452,47 @@ select {
 .column_local {
     flex: 50%;
 }
+
+/* TOOLTIP */
+
+.tooltipL {
+    vertical-align: center;
+    position: relative;
+    display: inline-block;
+    color: var(--pub-color1);
+    max-width: max-content;
+}
+
+.tooltipL .tooltiptext {
+    visibility: hidden;
+    width: 600px;
+    top: 100%;
+    left: 50%;
+
+    overflow:visible;
+    overflow-wrap:break-word;
+    background-color: white;
+    color: black;
+    text-align: left;
+    padding: 20px;
+    border-radius: 6px;
+    border: solid var(--pub-color1);
+
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltipL:hover .tooltiptext{
+    visibility: visible;
+}
+
+.tooltipL:hover {
+    background-color: var(--pub-color1);
+    color: white;
+}
+
+.comingSoon {
+    font-style:oblique;
+    margin: 10px;
+}
+
