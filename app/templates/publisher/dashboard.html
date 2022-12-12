@@ -7,67 +7,59 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <h1>Publisher dashboard</h1>
+      <div class="pageTitle">Publisher dashboard</div>
+      <h1>{{ username }}</h1>
+      <div class="align-right">
+        <a href="{{ url_for('sign_outU', login_source='publisher')}}"><button type="button" class="btn btn-primary">Sign out</button></a>
+      </div>
       <hr>
 
-      
-      <div class="card">
-        <div class="card-body" id="welcome"></div>
-        <script>
-          username = "{{ username }}";
-          const welcomeU = document.getElementById('welcome');
-          welcomeU.innerHTML = `<h2>Welcome, ${username}</h2>`;
-        </script>
-        <div class="align-right">
-          <a href="{{ url_for('sign_outU', login_source='publisher')}}"><button type="button" class="btn btn-primary">Sign out</button></a>
-        </div>
-      </div> 
-
       <div class="card">
         <div class="card-body">
-          <h4>Publicar uma notícia nova</h4>
+          <h2>Publicar uma notícia nova</h2>
           <a href="/publisher/addstory"><button class="btn btn-primary"> Publicar </button></a> 
         </div>
-      </div>
+      </div><br>
 
       <div class="card">
         <div class="card-body">
-          <h3> Os meus notícias</h3>
-          <div class="scrollResults">
-            {% for uStory in userStories %}
-              {% for sID, attributes in uStory.items() %}
-                <p><a href="{{ '/publisher/' + sID|string + '/review'}}"> {{ attributes["title"] }} </a> - <i> {{ attributes["date"] }}</i></p>
-                <br>
-              {% endfor %}
-            {% endfor %}
-          </div>
-          <br>
-          
-          <br>
-          {% for orgName, orgStories in allOrgStories.items() %}
-            <h3>{{ orgName }}</h3>
+          <h2>Notícias prévias</h2>
+
+          <button type="button" class="collapsible active">
+            <h3> Os meus notícias ({{ userStories|count }})</h3>
+          </button>
+          <div class="contentCollapse" style="display:block">
             <div class="scrollResults">
-              {% for orgStory in orgStories %}
-                {% for orgStoryID, orgStoryDeets in orgStory.items() %}
-                  {% set storyRef = '/publisher/' + orgStoryID|string + '/review' %}
-                  <p><a href = "{{ storyRef }}"> {{ orgStoryDeets.title }} </a> - {{ orgStoryDeets.date }}</p>
+              {% for uStory in userStories %}
+                {% for sID, attributes in uStory.items() %}
+                  <p><a href="{{ '/publisher/' + sID|string + '/review'}}"> {{ attributes["title"] }} </a> - <i> {{ attributes["date"] }}</i></p>
                   <br>
                 {% endfor %}
               {% endfor %}
             </div>
-            <br>
+          </div>
+          {% for orgName, orgStories in allOrgStories.items() %}
+            <button type="button" class="collapsible">
+              <h3>{{ orgName }} ({{ orgStories|count }})</h3>
+            </button>
+            <div class="contentCollapse">
+              <div class="scrollResults">
+                {% for orgStory in orgStories %}
+                  {% for orgStoryID, orgStoryDeets in orgStory.items() %}
+                    {% set storyRef = '/publisher/' + orgStoryID|string + '/review' %}
+                    <p><a href = "{{ storyRef }}"> {{ orgStoryDeets.title }} </a> - {{ orgStoryDeets.date }}</p>
+                    <br>
+                  {% endfor %}
+                {% endfor %}
+              </div>
+            </div>
           {% endfor %}
-            
-          
-          
-          
-
         </div>
-      </div>
+      </div><br>
 
       <div class="card">
         <div class="card-body">
-          <h3>Localizações das notícias</h3>
+          <h2>Mapa das notícias</h2>
           <p>Pode ver a distribuição de todas as notícias aqui.</p>
             <!-- THIS IS THE PUBLISHER NOTICIAS MAP -->
             <div id="instanceMap" style="display:block">
@@ -83,10 +75,8 @@
               </div>
               <div id="info"></div>
             </div>
-        
         </div>
       </div>
-
     </div>
   </div>
 </div>

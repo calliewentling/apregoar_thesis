@@ -3,8 +3,9 @@
     --pub-color1L: grey;
     --danger-colorL: rgb(253, 240, 240);
     --danger-color: rgb(144, 60, 60);
+    --shadow-color: rgba(0,0,0,0.3);
+    --shadow-dim: -10px 5px 20px;
 }
-
 
 body {
     background-color: white;
@@ -24,7 +25,6 @@ h1 {
     margin-right: 0;
     font-weight: bold;
     font-family: "Times New Roman";
-    color: var(--pub-color1);
 }
 h2 {
     display: block;
@@ -83,8 +83,12 @@ p {
 label {
     font-family: "Helvetica";
     font-weight: lighter;
+    margin-right: 10px;
 }
 
+.rigid {
+    width: 200px;
+}
 /* Inputs */
 input:required,
 textarea:required {
@@ -121,6 +125,16 @@ textarea {
 .align-right {
     text-align:right;
     border: 0;
+}
+
+.pageTitle{
+    background-color:var(--pub-color1L);
+    color: white;
+    font-family:"Times New Roman";
+    font-size:larger;
+    font-weight:bolder;
+    text-align: right;
+    padding: 10px;
 }
 
 /* The modal (background) */
@@ -424,6 +438,7 @@ select {
 .active, .collapsible:hover {
     background-color: var(--pub-color1);
     color: white;
+    box-shadow: var(--shadow-dim) var(--shadow-color);
 }
 
 .comingSoonNav.active, .comingSoonNav:hover {
@@ -438,6 +453,7 @@ select {
     background-color: white;
     border: solid;
     border-color:var(--pub-color1);
+    box-shadow: var(--shadow-dim) var(--shadow-color);
 }
 
 .contentLowest {

@@ -148,9 +148,18 @@ let ymin = 38.40907442337447;
 let xmin = -9.517104891617194;
 //Extent order: [xmin, ymin, xmax, ymax]
 function zoomGaz(vectorSource){
+    console.log("Entering zoomGaz()");
     console.log("vectorSource (in zoomGaz): ",vectorSource.getExtent());
-    var layerExtent = ol.extent.extend(sourceNominatimPoly.getExtent(),vectorSource.getExtent());
-    console.log("layerExtent wtih Nominatim: ", layerExtent);
+    console.log("sourceNominatimPoly: ",sourceNominatimPoly.getExtent());
+    var nominatimPolyExtent = sourceNominatimPoly.getExtent();
+    if (isFinite(nominatimPolyExtent[0])){
+        var layerExtent = nominatimPolyExtent;
+    } else {
+        var layerExtent = vectorSource.getExtent();
+    }
+    //var layerExtent = ol.extent.extend(sourceNominatimPoly.getExtent(),vectorSource.getExtent());
+    //var layerExtent = sourceNominatimPoly.getExtent()
+    console.log("layerExtent", layerExtent);
     isInfinite = false;
     for (coord in layerExtent){
         if (!isFinite(layerExtent[coord])){
@@ -161,7 +170,21 @@ function zoomGaz(vectorSource){
         }
     };
     if (isInfinite == false){
-        mapGaz.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
+        /*if (layerExtent[0] > xmin){
+            layerExtent[0] = xmin;
+        };
+        if (layerExtent[1] > ymin){
+            layerExtent[1] = ymin;
+        };
+        if (layerExtent[2] < xmax){
+            layerExtent[2] = xmax;
+        };
+        if (layerExtent[3] < ymax){
+            layerExtent[3] = ymax
+        };*/
+        var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(layerExtent,maxExtent));
+        bufferExtent.scale(1.5);
+        mapGaz.getView().fit(bufferExtent); //What does this number mean??
     }
 
     /*if (layerExtent[0] > xmin){
@@ -576,6 +599,8 @@ function searchGeoNames() {
     
 }
 // Zooming to GeoNames results
+const maxExtent = ol.extent.boundingExtent([[xmin,ymin],[xmax,ymin],[xmin,ymax],[xmax,ymax]]);
+console.log("maxExtent: ",maxExtent);
 function zoomGeonames(){
     console.log("Entering zoomGeonames");
     var sourceGeonames = new ol.source.Vector();
@@ -616,7 +641,9 @@ function zoomGeonames(){
     mapGaz.addLayer(layerGeonames);
     var layerExtent = sourceGeonames.getExtent();
     console.log("layerExtent: ",layerExtent);
-    mapGaz.getView().fit(ol.extent.buffer(layerExtent, .01));
+    var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(layerExtent,maxExtent));
+    bufferExtent.scale(1.5);
+    mapGaz.getView().fit(bufferExtent); //What does this number mean??
 }
 
 let libraryNominatim;
@@ -752,9 +779,9 @@ function zoomNominatim(){
     //mapGaz.addLayer(layerNominatimPoly);
     mapGaz.addLayer(layerNominatimPoint);
     var layerExtent = sourceNominatimPoint.getExtent()
-    //var layerExtent = ol.extent.extend(sourceNominatimPoly.getExtent(),sourceNominatimPoint.getExtent());
-    console.log("layerExtent: ",layerExtent);
-    mapGaz.getView().fit(ol.extent.buffer(layerExtent, .01));
+    var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(layerExtent,maxExtent));
+    bufferExtent.scale(1.5);
+    mapGaz.getView().fit(bufferExtent); //What does this number mean??
 }
 
 
@@ -1091,7 +1118,8 @@ function prepGaz(selectedGaz,selectedInt) {
     return selectedInt
 }
 
-function initGaz(){
+function initGaz(initSource){
+    console.log("initSource: ",initSource);
     //spinner.removeAttribute('hidden');
     console.log("Entering initGaz");
     // Initializing values

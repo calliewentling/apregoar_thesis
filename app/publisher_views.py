@@ -340,7 +340,30 @@ def publisher_profile():
 
 @app.route("/publisher/addstory")
 def addstory():
-    return render_template("publisher/create.html")
+    #Add selection of relevant values here: publication options, sections, authors, and tags
+    try:
+        with engine.connect() as conn:
+            SQL = text("SELECT * FROM apregoar.publication_info WHERE :x = ANY(user_ids)")
+            SQL = SQL.bindparams(x=fsession["u_id"])
+            result = conn.execute(SQL)
+    except:
+        print("Error in loading publisher info")
+        return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"])
+    else:
+        publication_info = {}
+        for row in result:
+            pub_info = {
+                "publication_name": row["publication_name"],
+                "sections": row["main_sections"],
+                "tags": row["tags"],
+                "authors": row["authors"],                        
+            }
+            publication_info[row["publication_id"]] = pub_info
+            #publication_info.append(pub_info)
+        print("publication_info: ",publication_info)
+    finally: conn.close()
+
+    return render_template("publisher/create.html", publication_info = publication_info)
 
 @app.route("/publisher/<s_id>/review", methods=["GET","POST"])
 def review_e(s_id):

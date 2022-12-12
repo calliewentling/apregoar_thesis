@@ -184,6 +184,17 @@ wmsSourceStory.on('imageloaderror', function() {
 })
 
 //Zoom to instances
+let layerExtent;
+let ymax = 39.83801908704823;
+let xmax = -7.74577887999189;
+let ymin = 38.40907442337447;
+let xmin = -9.517104891617194;
+//Extent order: [xmin, ymin, xmax, ymax]
+
+const maxExtent = ol.extent.boundingExtent([[xmin,ymin],[xmax,ymin],[xmin,ymax],[xmax,ymax]]);
+console.log("maxExtent: ",maxExtent);
+
+
 const vectorSource = new ol.source.Vector();
 //spinner.removeAttribute('hidden');
 var wfs_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=apregoar:geonoticias&cql_filter='+mapStoryFilter+'&outputFormat=application/json';
@@ -199,7 +210,22 @@ fetch(wfs_url).then(function (response) {
         console.log("Arrival to add features and future zoom")
         vectorSource.addFeatures(features);
         layerExtent = vectorSource.getExtent();
-        map.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
+        isInfinite = false;
+        for (coord in layerExtent){
+            if (!isFinite(layerExtent[coord])){
+                console.log("coord is infinite");
+                isInfinite = true;
+            } else {
+                console.log("coord is finite");
+            }
+        };
+        if (isInfinite == false){
+            console.log("layerExtent: ",layerExtent);
+            const currentExtent = ol.extent.getIntersection(layerExtent,maxExtent);
+            console.log("currentExtent: ",currentExtent);
+            map.getView().fit(currentExtent); //What does this number mean??
+        } 
+        //map.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
         //spinner.setAttribute('hidden', '');
     }   
 });
@@ -309,3 +335,20 @@ map.on('singleclick', function (evt) {
         });
     }
 });
+
+  /* Collapsible */
+  var coll = document.getElementsByClassName("collapsible");
+  var c_index;
+  
+  for (c_index = 0; c_index < coll.length; c_index++) {
+    coll[c_index].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        content.style.display = "block";
+      }
+    });
+  };
+  

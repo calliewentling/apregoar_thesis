@@ -77,9 +77,10 @@
 <div class="container">
   <div class="row">
     <div class="col">
-    
-        <h1>Localizar as Notícias</h1>
-        <h3>{{ story["title"] }}</h3>
+        <div class="pageTitle">Localizar as Notícias</div>
+        <h1>{{ story["title"] }}</h1>
+        
+        <hr>
 
         <div class="row_local">
             <p>Definir uma instância (tempo e sítio) da notícia </p>
@@ -292,7 +293,7 @@
                             </div>
                         </div><br>
 
-                        <button type="button" class="btn btn-primary btn-big" onclick="initGaz()">Prever</button>
+                        <button type="button" class="btn btn-primary btn-big" onclick="initGaz(initSource='prever')">Prever</button>
                         <br>
 
                     </div>

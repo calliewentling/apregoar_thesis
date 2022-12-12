@@ -11,50 +11,77 @@
 <div class="container">
   <div class="row">
     <div class="col">
-        <h1>Notícia Nova</h1>
-
-
+        <div class="pageTitle">Publicar uma Notícia</div>
         <div class="card">
             <div class="card-body">
-                <h3>Enter the article details</h3>
+                <h3>Entrar as detalhas da notícia</h3>
                 <form name="addStory" action="{{ url_for('review') }}" method="post">
                     
                     <!-- Required fields -->
-                    <div>
-                        <input type="text" id="title" name="title" placeholder="Title" required minlength="6">
+                    <div class="row_local">
+                        <label class="rigid" for="title">Título: </label>
+                        <input type="text" id="title" name="title" placeholder="Título" required minlength="6">
                         <span class="error" aria-live="polite"></span>
                     </div>
-                    <div>
-                        <input type="date" id="pubDate" name="pubDate" placeholder="Date of Publish" required>
+                    <div class="row_local">
+                        <label  class="rigid" for="pubDate">Data de publicação: </label>
+                        <input type="date" id="pubDate" name="pubDate" required>
                         <span class="error" aria-live="polite"></span>
                     </div>
-                    <div>
-                        <input type="text" id= "webLink" name="webLink" placeholder="Link to Story" required minlength="6">
+                    <div class="row_local">
+                        <label class="rigid" for="webLink">URL: </label>
+                        <input type="text" id= "webLink" name="webLink" placeholder="Ligação ao história original" required minlength="6">
                         <span class="error" aria-live="polite"></span>
                     </div>
-                    <div>
+
+                    <div class="row_local">
+                        <label class="rigid" for="publication">Publicação: </label>
+                        <select name="publication" id="publication" onchange="updatePub()">
+                            {% for pub_id,vals in publication_info.items() %}
+                                <option value="{{ vals.publication_name|lower }}">{{ vals.publication_name|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        <!--
                         <input type="text" id ="publication" name="publication" placeholder="Revista" required minlength="4">
                         <span class="error" aria-live="polite"></span>
+                        -->
                     </div>
                     <!-- Optional fields -->
-                    <div>
-                        <input type="text" name="author" placeholder="Author">
+                            
+                    <div class="row_local">
+                        <label class="rigid" for="author">Jornalista(s): </label>
+                        <select multiple name="author">
+                            {% for pub_id,vals in publication_info.items() %}
+                                {% for cat,val in vals.items() %}
+                                    {% if cat == 'authors' %}
+                                        {% for id,author in val.items() %}
+                                            <option value="{{ author }}">{{ author|upper }}</options>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                            
+                        </select>
+                        <!--<input type="text" name="author" placeholder="Jornalista(s)">-->
                     </div>
-                    <div>
+                    <div class="row_local">
                         <!-- <input type="text" name="summary" placeholder="Summary"> -->
-                        <textarea name="summary" rows="5" placeholder = "Summary"></textarea>
+                        <label class="rigid" for="summary">Resumo: </label>
+                        <textarea name="summary" rows="5" placeholder = "Resúmo"></textarea>
                     </div>
-                    <div>
-                        <input type="text" name="section" placeholder="Section">
+                    <div class="row_local">
+                        <label class="rigid" for="section">Secção:</label>
+                        <input type="text" name="section" placeholder="Secções">
                     </div>
-                    <div>
-                        <input type="text" name="tags" placeholder="Tags (separate by commas: ',')">
+                    <div class="row_local">
+                        <label class="rigid" for="tags">Etiquetas: </label>
+                        <input type="text" name="tags" placeholder="Etiquetas (separarar com vírgulas: ',')">
                     </div>
                     <input type="hidden" name="formType" value="create_story">
 
                     <br>
                     <div>
-                        <button>Save</button>
+                        <button class="btn btn-primary">Guardar</button>
                     </div>
                 </form>
                 
@@ -64,6 +91,28 @@
     </div>
 </div>
 
+<script>
+    const publicationInfo = JSON.parse('{{ publication_info|tojson|safe }}');
+    console.log("publicationInfo: ",publicationInfo);
+    var pubInput = document.getElementById("publication");
+    pubInput.addEventListener("oninput",updatePub());
+
+    document.querySelector('publication').querySelector('option')[0].selected="selected";
+
+
+    function updatePub(){
+        console.log("Entering updatePub()");
+        var pubVal = this.value;
+        console.log("pubVal: ",pubVal);
+        console.log("pubInput: ",pubInput);
+        for (publication in publicationInfo){
+            console.log("publication: ",publicationInfo[publication]);
+        }
+        console.log("Leaving updatePub");
+    };
+    
+    updatePub();
+</script>
 
 
 {% endblock %}
