@@ -201,8 +201,11 @@
                                 <span class="tooltiptext">
                                     <p>Pode carregar gazetteers individualmente (nos butões "Carregar") ou pesquisar todas as gazetteers no mesmo tempo. Resultados são organizados por tipo.</p><br>
                                     <p>Para utilizar, selecionar pelo menos uma opção e carrega a butão "Prever" para visualizar no mapa.</p> <br>
-                                    <p> No momento de aguarda, todas as áreas previdos no mapa serão associadas à instância. </p> <br>
-                                    <p>Para remover, deselecionar a área e carrega "Prever" outra vez.</p><br>
+                                    <p>Para selecionar mais de que uma opção no mesmo tempo, carrega "CTRL" enquanto está a selecionar.</p><br>
+                                    <p>Todos dos nomes dos gazetteers selectionados ficam no título da gazetteer.</p>
+                                    <p>Ver o número dos gazetteers selecionados na seccão "áreas desinhadas" abaixo do mapa.</p>
+                                    <p>Para remover, deselecionar a área. </p><br>
+                                    <p>No momento de aguarda, todas as áreas desenhadas/selecionadas no mapa serão associadas à instância.</p>
                                 </span>
                             </div>
                         </div>
@@ -218,76 +221,76 @@
                             <div id="searchTermDisplay" style="display:none"></div>
                         </div>
                         <!-- Ugazetteer -->
-                        <button type="button"class="collapsible"><p>Sítios personalizados <span  id="bUgazAll"></span></p></button>
+                        <button type="button"class="collapsible"><p>Sítios personalizados <span id="bUgazAll"></span><span id="sUgazAll"></span></p></button>
                         <div class="contentCollapse" style="display:none;">
-                            <button type="button" class="collapsible"><p>Sítios meus <span  id="bUgazMine"></span></p></button>
+                            <button type="button" class="collapsible"><p>Sítios meus <span id="bUgazMine"></span><span id="sUgazMine"></span></p></button>
                             <div class="contentCollapse" style="display:none;">
                                 <div class="contentLowest">
-                                    <select id='select_ugaz_personal' name="selectUgazPersonal" multiple style="display:none"></select>
+                                    <select id='select_ugaz_personal' name="selectUgazPersonal" onchange="showSelected(this,'sUgazMine')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('ugaz_personal')">Caregar todos meus</button> 
                                 </div>              
                             </div>
-                            <button type="button"  class="collapsible"><p>Sítios empresariais <span id="bUgazEmp"></span></p></button>
+                            <button type="button"  class="collapsible"><p>Sítios empresariais <span id="bUgazEmp"></span><span id="sUgazEmp"></span></p></button>
                             <div class="contentCollapse " style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_ugaz_empresa' name="selectUgazEmpresa" multiple style="display:none"></select>
+                                    <select id='select_ugaz_empresa' name="selectUgazEmpresa" onchange="showSelected(this,'sUgazEmp')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary btn-load" onclick="loadGaz('ugaz_empresa')">Carragar todos empresariais</button>
                                 </div>
                             </div>
-                            <button type="button"  class="collapsible"><p>Outros personalizados <span id="bUgazOther"></span></p></button>
+                            <button type="button"  class="collapsible"><p>Outros personalizados <span id="bUgazOther"></span><span id="sUgazOther"></span></p></button>
                             <div class="contentCollapse subC" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_ugaz_all' name="selectUgazAll" multiple style="display:none"></select>
+                                    <select id='select_ugaz_all' name="selectUgazAll" onchange="showSelected(this,'sUgazOther')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary btn-load" onclick="loadGaz('ugaz_all')">Carregar todoso outros</button>
                                 </div>
                             </div>
                         </div>
                         <!-- Egazetteer -->
-                        <button type="button" class="collapsible"><p>Sítios administrativos <span  id="bEgazAll"></span></p></button>
+                        <button type="button" class="collapsible"><p>Sítios administrativos <span  id="bEgazAll"></span><span  id="sEgazAll"></span></p></button>
                         <div class="contentCollapse" style="display:none">
-                            <button type="button"  class="collapsible"><p>Freguesias <span id="bEgazFreg"></span></p></button>
+                            <button type="button"  class="collapsible"><p>Freguesias <span id="bEgazFreg"></span><span id="sEgazFreg"></span></p></button>
                             <div class="contentCollapse subC" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_egaz_freguesia' name="selectEgazFreguesia" multiple style="display:none"></select>
+                                    <select id='select_egaz_freguesia' name="selectEgazFreguesia" onchange="showSelected(this,'sEgazFreg')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_freguesia')">Carregar todas</button>
                                 </div>                           
                             </div>
-                            <button type="button" class="collapsible"><p>Conselhos <span id="bEgazConc" ></span></p></button>
+                            <button type="button" class="collapsible"><p>Conselhos <span id="bEgazConc"></span><span id="sEgazConc"></span></p></button>
                             <div class="contentCollapse subC" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_egaz_concelho' name="selectEgazConcelho" multiple style="display:none"></select>
+                                    <select id='select_egaz_concelho' name="selectEgazConcelho" onchange="showSelected(this,'sEgazConc')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_concelho')">Carregar todos</button>
                                 </div>
                             </div>
-                            <button type="button"  class="collapsible"><p>Áreas maiores <span id="bEgazBig"></span></p></button>
+                            <button type="button"  class="collapsible"><p>Áreas maiores <span id="bEgazBig"></span><span id="sEgazBig"></span></p></button>
                             <div class="contentCollapse subC" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_egaz_extra' name="selectEgazExtra" multiple style="display:none"></select>
+                                    <select id='select_egaz_extra' name="selectEgazExtra" onchange="showSelected(this,'sEgazBig')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_extra')">Carregar todos</button>
                                 </div>                        
                             </div>
-                            <button type="button" class="collapsible"><p>Espaço verde <span id ="bEgazVer"></span></p></button>
+                            <button type="button" class="collapsible"><p>Espaço verde <span id ="bEgazVer"></span><span id ="sEgazVer"></span></p></button>
                             <div class="contentCollapse subC" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_egaz_green' name="selectEgazGreen" multiple style="display:none"></select>
+                                    <select id='select_egaz_green' name="selectEgazGreen" onchange="showSelected(this,'sEgazVer')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_green')">Carregar verdes</button>                     
                                 </div>
                             </div>
-                            <button type="button" class="collapsible"><p>Arquivos <span id="bEgazArq"></span></p></button>
+                            <button type="button" class="collapsible"><p>Arquivos <span id="bEgazArq"></span><span id="sEgazArq"></span></p></button>
                             <div class="contentCollapse subC" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_egaz_archive' name="selectEgazArchive" multiple style="display:none"></select>
+                                    <select id='select_egaz_archive' name="selectEgazArchive"  onchange="showSelected(this,'sEgazArq')" multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary  btn-load" onclick="loadGaz('egaz_archive')">Carregar arquivados</button>   
                                 </div>                    
                             </div>
                         </div>
                         <!-- Other gazetteer -->
-                        <button type="button" class="collapsible"><p>Gazetteers externais <span id="bOgazAll"></span></p></button>
+                        <button type="button" class="collapsible"><p>Gazetteers externais <span id="bOgazAll"></span><span id="sOgazAll"></span></p></button>
                         <div class="contentCollapse" style="display:none">
-                            <button type="button" class="collapsible"><p>Open Street Map <span id="bOgazOsm"></span></p></button>
+                            <button type="button" class="collapsible"><p>Open Street Map <span id="bOgazOsm"></span><span id="sOgazOsm"></span></p></button>
                             <div class="contentCollapse" style="display:none">
                                 <div class="contentLowest">
-                                    <select id='select_nominatim' name="selectNominatim" multiple style="display:none"></select>
+                                    <select id='select_nominatim' name="selectNominatim" onchange="showSelected(this,'sOgazOsm')"  multiple style="display:none"></select>
                                     <button type="button" class="btn btn-primary btn-load" onclick="searchNominatim()">Pesquisar OSM</button>
                                 </div>                         
                             </div>
@@ -298,7 +301,7 @@
 
                     </div>
                     
-                </div> <br>
+                </div>
 
                 <!--<div class="card">
                     <h3>Carregar localizações</h3>
@@ -389,7 +392,7 @@
 
                 <!--Summary of associated places-->
                 <div id="totalGazSummary" class="row_local"> 
-                    <div style="flex:25%;background-color:var(--danger-colorL)">
+                    <div id="totalGazDiv" style="flex:25%;background-color:var(--danger-colorL)">
                         <p id="totalNumGaz" style="font-weight:bolder;font-size:24px;">0 </p>
                         <p>localizações associadas</p>
                     </div>
@@ -427,53 +430,13 @@
     </div>
 </div>
 
-<!--
-        <br> 
-        <div class="card" id="save_instance" >             
-            <h3>Localização/ões</h3>
-        
-                <br>
-
-                
-
-
-                <div class="card" id = "ugaz_dez">
-                    <h3>Desenhar uns localizações novos</h3>
-                
-                    
-
-
-                        <div id="poiGaz" style="display:block">
-                            <button type="button" onclick="searchGeoNames()">GeoNames</button>
-                            <br>
-                            
-                            <select id='select_geonames' name="selectGeonames" multiple style="display:none"></select>
-                            <div id="geonamesComment"></div>
-                        </div>
-                        <div id="buttonZoomGeonames" style="display:none">
-                            <button type="button" onclick="zoomGeonames()">Zoom</button>
-                        </div>
-
-                        <div id="poiNominatim" style="display:block">
-                            <button type="button" class="btn btn-primary" onclick="searchNominatim()">OSM Gazetteer</button>
-                            <br>
-                            <select id='guide_nominatim' name="guideNominatim" multiple style="display:none"></select> 
-                        </div>
-                        <div id="buttonZoomNominatim" style="display:none">
-                            <button type="button" onclick="zoomNominatim()">Zoom</button>
-                        </div>
--->
-
-        
-
-
 <script>
     //////// STORY INFO ///////
     // Loading story info
     var sID = '{{ sID }}';
     console.log("sID is: ");
     console.log(sID);
-    pubID = '{{ story.p_id }}';
+    const pubID = '{{ story.p_id }}';
     console.log("pubID: ",pubID);
     var mapStoryFilter = "s_id="+sID;
     console.log("Map Story filter: ",mapStoryFilter);

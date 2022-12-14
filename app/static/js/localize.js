@@ -149,8 +149,8 @@ let xmin = -9.517104891617194;
 //Extent order: [xmin, ymin, xmax, ymax]
 function zoomGaz(vectorSource){
     console.log("Entering zoomGaz()");
-    console.log("vectorSource (in zoomGaz): ",vectorSource.getExtent());
-    console.log("sourceNominatimPoly: ",sourceNominatimPoly.getExtent());
+    //console.log("vectorSource (in zoomGaz): ",vectorSource.getExtent());
+    //console.log("sourceNominatimPoly: ",sourceNominatimPoly.getExtent());
     var nominatimPolyExtent = sourceNominatimPoly.getExtent();
     if (isFinite(nominatimPolyExtent[0])){
         var layerExtent = nominatimPolyExtent;
@@ -159,15 +159,15 @@ function zoomGaz(vectorSource){
     }
     //var layerExtent = ol.extent.extend(sourceNominatimPoly.getExtent(),vectorSource.getExtent());
     //var layerExtent = sourceNominatimPoly.getExtent()
-    console.log("layerExtent", layerExtent);
+    //console.log("layerExtent", layerExtent);
     isInfinite = false;
     for (coord in layerExtent){
         if (!isFinite(layerExtent[coord])){
-            console.log("coord is infinite");
+            //console.log("coord is infinite");
             isInfinite = true;
-        } else {
+        };/* else {
             console.log("coord is finite");
-        }
+        }*/
     };
     if (isInfinite == false){
         /*if (layerExtent[0] > xmin){
@@ -200,6 +200,7 @@ function zoomGaz(vectorSource){
         layerExtent[3] = ymax
     }
     console.log("updatd layer extent: ", layerExtent);*/
+    console.log("leaving zoomGaz()");
     return layerExtent;
 }
 
@@ -492,6 +493,7 @@ mapGaz.addLayer(wmsLayerUGaz);
 console.log("UGaz Layer added");
 
 // Adding fetch to view POIs
+/*
 const preverPOI = document.getElementById("preverPOI");
 function loadGazPOI(gazetteer) {
     var bodyContent = {}
@@ -501,14 +503,7 @@ function loadGazPOI(gazetteer) {
             "gazetteer": gazetteer,
             "searchTerm": searchTerm
         })
-    } /*else if (gazetteer == "poi_locale"){
-        var getBottomLeft = mapGaz.getView().extent.getBottomLeft();
-        console.log("layerExtent: ",layerExtent)
-        bodyContent = JSON.stringify({
-            "gazetteer":gazetteer,
-            "layerExent":getBottomLeft
-        })
-    }*/
+    };
 
     fetch(`${window.origin}/publisher/${sID}/gazetteer`, {
         method: "POST",
@@ -546,128 +541,34 @@ function loadGazPOI(gazetteer) {
     .catch(function(error){
         console.log("Fetch error: "+error);
     });
-}
+}*/
 
-//Calling RESTAPI of geonames to search gazetteer
-var selectGeonames = document.getElementById('select_geonames');
-function searchGeoNames() {
-    var buttonZoomGeonames = document.getElementById("buttonZoomGeonames");
-    buttonZoomGeonames.style.display="none";
-    while (selectGeonames.hasChildNodes()) {
-        selectGeonames.removeChild(selectGeonames.firstChild);
-    }
-    selectGeonames.style.display="none";
-    var searchTerm = prompt("Pode especificar a pesquisa para Geonames:");
-    console.log("searchTerm: ",searchTerm);
-    if (searchTerm === null){
-        return false;
-    }
-    
-    encodedSearch = encodeURIComponent(searchTerm);
-    var url = "http://api.geonames.org/search?q="+encodedSearch+"&east=-7.74577887999189&west=-9.517104891617194&north=39.83801908704823&south=38.40907442337447&type=json&isNameRequired=true&maxRows=20&username=cwentling";
-    console.log("URL: ",url);
-    fetch(url)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('HTTP error! Status: ${ resonse.status }');
-            }
-            return response.json();
-        })
-        .then((response) => {
-            console.log("Response: ",response);
-            var totalResults = response.totalResultsCount;
-            console.log("Number of total results: ",totalResults);
-            var geonames = response["geonames"];
-            
-            if (totalResults == 0) {
-                geonamesComment.innerHTML = "<i>Desculpa, pesquisa sem resultos</i>";
-                selectGeonames.style.display="none";
-            } else {
-                for (var i=0; i < geonames.length; i++) {
-                    var option = document.createElement("option");
-                    option.textContent = geonames[i]["name"];
-                    console.log("option text: ",option.textContent);
-                    option.value = geonames[i]["lng"].concat(",",geonames[i]["lat"]);
-                    console.log("option value: ",option.value);
-                    selectGeonames.appendChild(option);
-                }
-                selectGeonames.style.display="block";
-                buttonZoomGeonames.style.display="block";
-            }
-            
-        })
-    
-}
-// Zooming to GeoNames results
+
 const maxExtent = ol.extent.boundingExtent([[xmin,ymin],[xmax,ymin],[xmin,ymax],[xmax,ymax]]);
 console.log("maxExtent: ",maxExtent);
-function zoomGeonames(){
-    console.log("Entering zoomGeonames");
-    var sourceGeonames = new ol.source.Vector();
-    var selectGeonames = document.getElementsByName("selectGeonames")[0];
-    for (var i=0; i<selectGeonames.length; i++){
-        if (selectGeonames[i].selected){
-            var value = selectGeonames[i]["value"].split(",")
-            var lat = parseFloat(value[1]);
-            var lon = parseFloat(value[0]);
-            console.log("Lat/Lon: ",lat," ",lon);
-            console.log("Type: ",typeof(lat));
-            coords = [lon,lat];
-            var feature = new ol.Feature({
-                geometry: new ol.geom.Point(coords),
-                name: selectGeonames["name"]
-            })
-            console.log("feature geom: ",feature["geometry"]);
-            sourceGeonames.addFeature(feature);
-            var pGeom = feature.getGeometry();
-            console.log("pGeom: ",pGeom);
-            var gFeatures = sourceGeonames.getFeatures();
-            console.log("gFeatures: ",gFeatures);
-        }
-    }
-    var layerGeonames = new ol.layer.Vector({
-        source: sourceGeonames,
-        style: new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 7,
-                fill: new ol.style.Fill({
-                    color: '#ff3333',
-                }),
-            }),
-        }),
-    });
-    
-    //REUNITE
-    mapGaz.addLayer(layerGeonames);
-    var layerExtent = sourceGeonames.getExtent();
-    console.log("layerExtent: ",layerExtent);
-    var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(layerExtent,maxExtent));
-    bufferExtent.scale(1.5);
-    mapGaz.getView().fit(bufferExtent); //What does this number mean??
-}
-
 let libraryNominatim;
+
+function cleanSelectOptions(selectionElement){
+    //Function removing all options that are not already selected
+    console.log("entering cleanSelectOptions("+selectionElement+")");
+    for (let c=selectionElement.children.length-1; c>=0; c--){
+        console.log("option: ",selectionElement.children[c]);
+        if (selectionElement.children[c].selected == false){
+            selectionElement.removeChild(selectionElement.children[c]);
+        };
+    };
+    if (selectionElement.children.length == 0){
+        selectionElement.style.display="none";
+    }
+    console.log("leaving cleanSelectOptions");
+};
 
 //Calling RESTAPI of geonames to search gazetteer
 function searchNominatim() {
     var selectNominatim = document.getElementById('select_nominatim');
-    while (selectNominatim.hasChildNodes()) {
-        selectNominatim.removeChild(selectNominatim.firstChild);
-    }
-    selectNominatim.style.display="none";
-
-    var guideNominatim = document.getElementById('guide_nominatim');
-    while(guideNominatim.hasChildNodes()){
-        guideNominatim.removeChild(guideNominatim.firstChild);
-    }
-    guideNominatim.style.display="none";
-
-    var buttonZoomNominatim = document.getElementById("buttonZoomNominatim");
-    buttonZoomNominatim.style.display="none";
-
+    cleanSelectOptions(selectNominatim);
     var searchTerm = prompt("Pode especificar a pesquisa para Nominatim:");
     encodedSearch = encodeURIComponent(searchTerm);
-    //var url = "http://api.geonames.org/search?q="+encodedSearch+"&east=-7.74577887999189&west=-9.517104891617194&north=39.83801908704823&south=38.40907442337447&type=json&isNameRequired=true&maxRows=20&username=cwentling";
     var url = "https://nominatim.openstreetmap.org/search?q="+encodedSearch+"&format=jsonv2&countrycodes=pt&limit=50&viewbox=-7.74577887999189,39.83801908704823,-9.517104891617194,38.40907442337447&polygon_geojson=1"
     console.log("URL: ",url);
     fetch(url)
@@ -678,56 +579,49 @@ function searchNominatim() {
             return response.json();
         })
         .then((response) => {
-            console.log("Response: ",response);
+            //console.log("Response: ",response);
             var nominatim = response;
             const totalResults = nominatim.length;
-            console.log("totalResults: ",totalResults);
-            //libraryNominatim = {};
-            
-            if (totalResults == 0) {
-                geonamesComment.innerHTML = "<i>Desculpa, pesquisa sem resultos</i>";
-                selectGeonames.style.display="none";
-            } else {
+            //console.log("totalResults: ",totalResults);
+            var CSR = {
+                "bOgazOsm": 0,
+            };
+            if (totalResults > 0) {
                 for (var i=0; i < nominatim.length; i++) {
                     var option = document.createElement("option");
                     option.textContent = nominatim[i]["display_name"];
-                    console.log("option text: ",option.textContent);
+                    //console.log("option text: ",option.textContent);
                     var valueN = {
                         "name": nominatim[i]["display_name"],
                         "geojson" : nominatim[i]["geojson"],
                         "id": nominatim[i]["osm_type"]+nominatim[i]["osm_id"] //If you need an ID that is consistent over multiple installations of Nominatim, then you should use the combination of osm_type+osm_id+class. https://nominatim.org/release-docs/latest/api/Output/#notes-on-field-values
                     };
-                
                     option.value = JSON.stringify(valueN);
                     nameN = nominatim[i]["display_name"];
                     const geojson = JSON.stringify(nominatim[i]["geojson"]);
-                    console.log("geojson ",geojson);
-                    //libraryNominatim[nameN] = geojson;
+                    //console.log("geojson ",geojson);
                     if (nominatim[i]["geojson"]["type"]=="Polygon"){
+                        //Only loading polygons (as these can be saved). In the future: can reincorporate points as guides.
                         selectNominatim.appendChild(option);
-                    } else if (nominatim[i]["geojson"]["type"]=="Point"){
-                        guideNominatim.appendChild(option);
-                    }
-                    
-                }
+                        CSR["bOgazOsm"] = CSR["bOgazOsm"] + 1;
+                    };
+                    //console.log("Intermediate CSR: ",CSR);              
+                };
+                //console.log("selectNominatim: ",selectNominatim);
                 if (selectNominatim.hasChildNodes()){
                     selectNominatim.style.display="block";
-                }
-                
-                
-                guideNominatim.style.display="block";
-                buttonZoomNominatim.style.display="block";
-            }
-            //console.log("libraryNominatim: ", libraryNominatim);
-            
+                };
+            };
+            console.log("CSR: ",CSR);
+            updateReturnCounts(CSR,searchTerm);            
         })
-}
+};
 
 
 var sourceNominatimPoly = new ol.source.Vector();
 
 // Zooming to GeoNames results
-function zoomNominatim(){
+/*function zoomNominatim(){
     console.log("Entering zoomNominatim");
     var sourceNominatimPoint = new ol.source.Vector();
     var guideNominatim = document.getElementsByName("guideNominatim")[0];
@@ -782,77 +676,33 @@ function zoomNominatim(){
     var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(layerExtent,maxExtent));
     bufferExtent.scale(1.5);
     mapGaz.getView().fit(bufferExtent); //What does this number mean??
-}
+}*/
 
 
 // Adding fetch to search through all previous areas
 const selectPrev = document.getElementById("selectPrev");
 var selectUgazPersonal = document.getElementById('select_ugaz_personal');
+var selectUgazEmpresa = document.getElementById('select_ugaz_empresa');
+var selectUgazAll = document.getElementById('select_ugaz_all');
+var selectEgazFreguesia = document.getElementById('select_egaz_freguesia');
+var selectEgazConcelho = document.getElementById('select_egaz_concelho');
+var selectEgazExtra = document.getElementById('select_egaz_extra');
+var selectEgazGreen = document.getElementById('select_egaz_green');
+var selectEgazArchive = document.getElementById('select_egaz_archive');
+var selectNominatim = document.getElementById('select_nominatim');
+
 function searchGazPrev(gazetteer) {
-    
-    while (selectUgazPersonal.hasChildNodes()) {
-        selectUgazPersonal.removeChild(selectUgazPersonal.firstChild);
-    }
-    selectUgazPersonal.style.display="none";
-    var selectUgazEmpresa = document.getElementById('select_ugaz_empresa');
-    while (selectUgazEmpresa.hasChildNodes()) {
-        selectUgazEmpresa.removeChild(selectUgazEmpresa.firstChild);
-    }
-    selectUgazEmpresa.style.display="none";
-    var selectUgazAll = document.getElementById('select_ugaz_all');
-    while (selectUgazAll.hasChildNodes()) {
-        selectUgazAll.removeChild(selectUgazAll.firstChild);
-    }
-    selectUgazAll.style.display="none";
-    var selectEgazFreguesia = document.getElementById('select_egaz_freguesia');
-    while (selectEgazFreguesia.hasChildNodes()) {
-        selectEgazFreguesia.removeChild(selectEgazFreguesia.firstChild);
-    }
-    selectEgazFreguesia.style.display="none";
-    var selectEgazConcelho = document.getElementById('select_egaz_concelho');
-    while (selectEgazConcelho.hasChildNodes()) {
-        selectEgazConcelho.removeChild(selectEgazConcelho.firstChild);
-    }
-    selectEgazConcelho.style.display="none";
-    var selectEgazExtra = document.getElementById('select_egaz_extra');
-    while (selectEgazExtra.hasChildNodes()) {
-        selectEgazExtra.removeChild(selectEgazExtra.firstChild);
-    }
-    selectEgazExtra.style.display="none";
-    var selectEgazGreen = document.getElementById('select_egaz_green');
-    while (selectEgazGreen.hasChildNodes()) {
-        selectEgazGreen.removeChild(selectEgazGreen.firstChild);
-    }
-    selectEgazGreen.style.display="none";
-    var selectEgazArchive = document.getElementById('select_egaz_archive');
-    while (selectEgazArchive.hasChildNodes()) {
-        selectEgazArchive.removeChild(selectEgazArchive.firstChild);
-    }
-    selectEgazArchive.style.display="none";
-    var selectNominatim = document.getElementById('select_nominatim');
-    while (selectNominatim.hasChildNodes()){
-        selectNominatim.removeChild(selectNominatim.firstChild);
-    }
-    selectNominatim.style.display="none";
+    cleanSelectOptions(selectUgazPersonal);
+    cleanSelectOptions(selectUgazEmpresa);
+    cleanSelectOptions(selectUgazAll);
+    cleanSelectOptions(selectEgazFreguesia);
+    cleanSelectOptions(selectEgazConcelho);
+    cleanSelectOptions(selectEgazExtra);
+    cleanSelectOptions(selectEgazGreen);
+    cleanSelectOptions(selectEgazArchive);
+    cleanSelectOptions(selectNominatim);
+
     var bodyContent = {}
-    if (gazetteer == "gaz_prev"){
-        //var searchTerm = prompt("Pode especificar a pesquisa:");
-        var searchTerm = document.getElementById('gazSearch').value;
-        console.log("searchTerm: ",searchTerm);
-        invalidSearchTerm = [null,""," "];
-        if (invalidSearchTerm.includes(searchTerm)){
-            console.log("no valid searchTerm");
-            return;
-        };
-        bodyContent = JSON.stringify({
-            "gazetteer": gazetteer,
-            "searchTerm": searchTerm
-        });
-        console.log("bodyContent: ",bodyContent);
-        var searchTermDisplay = document.getElementById("searchTermDisplay");
-        searchTermDisplay.innerHTML = "<p>"+searchTerm+"</p>";
-        searchTermDisplay.style.display="block";
-    }
     var CSR = { //count search results
         "bUgazAll": 0,
         "bUgazMine": 0,
@@ -867,6 +717,29 @@ function searchGazPrev(gazetteer) {
         "bOgazAll": 0,
         "bOgazOsm": 0,
     };
+    if (gazetteer == "gaz_prev"){
+        //var searchTerm = prompt("Pode especificar a pesquisa:");
+        var searchTerm = document.getElementById('gazSearch').value;
+        console.log("searchTerm: ",searchTerm);
+        //Update search term visualiation
+        var searchTermDisplay = document.getElementById("searchTermDisplay");
+        searchTermDisplay.innerHTML = "<p>"+searchTerm+"</p>";
+        searchTermDisplay.style.display="block";
+        //Check for invalid search term
+        invalidSearchTerm = [null,""," "];
+        if (invalidSearchTerm.includes(searchTerm)){
+            console.log("no valid searchTerm");
+            updateReturnCounts(CSR, searchTerm);
+            return;
+        };
+        bodyContent = JSON.stringify({
+            "gazetteer": gazetteer,
+            "searchTerm": searchTerm,
+            "pubID": pubID,
+        });
+        console.log("bodyContent: ",bodyContent);
+        
+    }
     fetch(`${window.origin}/publisher/${sID}/gazetteer`, {
         method: "POST",
         credentials: "include",
@@ -990,13 +863,14 @@ function searchGazPrev(gazetteer) {
             //libraryNominatim = {};
             
             if (totalResults == 0) {
-                geonamesComment.innerHTML = "<i>Desculpa, pesquisa sem resultos</i>";
-                selectGeonames.style.display="none";
+                //geonamesComment.innerHTML = "<i>Desculpa, pesquisa sem resultos</i>";
+                //selectGeonames.style.display="none";
+                console.log("No geonames results")
             } else {
                 for (var i=0; i < nominatim.length; i++) {
                     var option = document.createElement("option");
                     option.textContent = nominatim[i]["display_name"];
-                    console.log("option text: ",option.textContent);
+                    //console.log("option text: ",option.textContent);
                     var valueN = {
                         "name": nominatim[i]["display_name"],
                         "geojson" : nominatim[i]["geojson"],
@@ -1019,7 +893,8 @@ function searchGazPrev(gazetteer) {
             }
             //console.log("libraryNominatim: ", libraryNominatim);
             console.log("CSR: ",CSR);
-            for (g in CSR){
+            updateReturnCounts(CSR, searchTerm)
+            /*for (g in CSR){
                 //console.log("g: ",g);
                 //console.log("CSR[g]: ",CSR[g]);
                 let updateText = document.getElementById(g);
@@ -1030,7 +905,7 @@ function searchGazPrev(gazetteer) {
                     updateText.textContent = "";
                     console.log("no new text: ",updateText);
                 };
-            };
+            };*/
             /*console.log(document.getElementById("bUgazAll"));
             bUgazAll.textContent = "("+CSR["bUgazAll"]+")";
             //Update */
@@ -1038,6 +913,22 @@ function searchGazPrev(gazetteer) {
             
         })
 }
+
+function updateReturnCounts(CSR, searchTerm){
+    for (g in CSR){
+        //console.log("g: ",g);
+        //console.log("CSR[g]: ",CSR[g]);
+        let updateText = document.getElementById(g);
+        if (CSR[g] > 0){
+            updateText.textContent = "("+searchTerm+": "+CSR[g]+")";
+            //console.log("new text: ",updateText);
+        } else {
+            updateText.textContent = "";
+            //console.log("no new text: ",updateText);
+        };
+    };
+
+};
 
 function styleSelectGaz(gaz) {
     maxOptions = 8;
@@ -1056,7 +947,10 @@ function loadGaz(gazetteer) {
     fetch(`${window.origin}/publisher/${sID}/gazetteer`, {
         method: "POST",
         credentials: "include",
-        body: JSON.stringify({"gazetteer": gazetteer}),
+        body: JSON.stringify({
+            "gazetteer": gazetteer,
+            "pubID": pubID,
+        }),
         cache: "no-cache",
         headers: new Headers({
             "content-type":"application/json"
@@ -1107,88 +1001,88 @@ console.log("POI Layer added");
 
 
 function prepGaz(selectedGaz,selectedInt) {
-    console.log("selectedGaz",selectedGaz); //New selected Gazetteer values
+    //selPolys="";
+    //console.log("selectedGaz",selectedGaz); //New selected Gazetteer values
     for (var i=0; i<selectedGaz.length; i++) {
         if (selectedGaz[i].selected){
-            console.log("Value checked: ",selectedGaz[i].value);
+            //console.log("Value checked: ",selectedGaz[i].value);
             selectedInt.push(selectedGaz[i].value);
-            console.log("selectedInt: ",selectedInt);
-        }
-    }
-    return selectedInt
+            //console.log("selectedInt: ",selectedInt);
+        };
+    };
+    return 
 }
 
 function initGaz(initSource){
-    console.log("initSource: ",initSource);
-    //spinner.removeAttribute('hidden');
-    console.log("Entering initGaz");
+    console.log("Entering initGaz("+initSource+")");
     // Initializing values
     var selectedIntE = [];
     var selectedIntU = [];
     // Preparing freguesias
     var selectEgazFreguesia = document.getElementsByName("selectEgazFreguesia")[0];
-    console.log("initGaz selectEgazFreguesia: ",selectEgazFreguesia);
+    //console.log("initGaz selectEgazFreguesia: ",selectEgazFreguesia);
     var result = prepGaz(selectedGaz = selectEgazFreguesia,selectedInt = selectedIntE);
     selectedIntE = selectedInt;
-    console.log("selectedIntE after Freguesia: ",selectedIntE);
+    //console.log("selectedIntE after Freguesia: ",selectedIntE);
     // Preparing concelhos
     var selectEgazConcelho = document.getElementsByName("selectEgazConcelho")[0];
     result = prepGaz(selectedGaz = selectEgazConcelho, selectedInt = selectedIntE);
     selectedIntE = selectedInt;
-    console.log("selectedIntE after Concelho: ",selectedIntE);
+    //console.log("selectedIntE after Concelho: ",selectedIntE);
     // Preparing Archive
     var selectEgazArchive = document.getElementsByName("selectEgazArchive")[0];
     result = prepGaz(selectedGaz = selectEgazArchive, selectedInt = selectedIntE);
     selectedIntE = selectedInt;
-    console.log("selectedIntE after Concelho: ",selectedIntE);
+    //console.log("selectedIntE after Concelho: ",selectedIntE);
     // Preparing Green Space
     var selectEgazGreen = document.getElementsByName("selectEgazGreen")[0];
     result = prepGaz(selectedGaz = selectEgazGreen, selectedInt = selectedIntE);
     selectedIntE = selectedInt;
-    console.log("selectedIntE after GreenSpace: ",selectedIntE);
+    //console.log("selectedIntE after GreenSpace: ",selectedIntE);
     // Preparing other administrative areas
     var selectEgazExtra = document.getElementsByName("selectEgazExtra")[0];
-    console.log("selectEgazExtra: ",selectEgazExtra);
+    //console.log("selectEgazExtra: ",selectEgazExtra);
     result = prepGaz(selectedGaz = selectEgazExtra, selectedInt = selectedIntE);
     selectedIntE = selectedInt;
-    console.log("selectedIntE after Extra: ",selectedIntE);
+    //console.log("selectedIntE after Extra: ",selectedIntE);
     // Preparing Sítios pessoais
     var selectUgazPersonal = document.getElementsByName("selectUgazPersonal")[0];
-    console.log("selectUgazPersonal: ",selectUgazPersonal);
-    result = prepGaz(selectedGaz = selectUgazPersonal, selectedInt = selectedIntU);
+    //console.log("selectUgazPersonal: ",selectUgazPersonal);
+    prepGaz(selectedGaz = selectUgazPersonal, selectedInt = selectedIntU);
     selectedIntU = selectedInt;
-    console.log("selectedIntU after Ugaz Personal: ",selectedIntU);
+    //console.log("selectedIntU after Ugaz Personal: ",selectedIntU);
     // Preparing Sítios Empresiais
     var selectUgazEmpresa = document.getElementsByName("selectUgazEmpresa")[0];
-    console.log("selectUgazEmpresa: ",selectUgazEmpresa);
+    //console.log("selectUgazEmpresa: ",selectUgazEmpresa);
     result = prepGaz(selectedGaz = selectUgazEmpresa, selectedInt = selectedIntU);
     selectedIntU = selectedInt;
-    console.log("selectedIntU after Ugaz Empresa: ",selectedIntU);
+    //console.log("selectedIntU after Ugaz Empresa: ",selectedIntU);
     // Preparing Sítios Empresiais
     var selectUgazAll = document.getElementsByName("selectUgazAll")[0];
-    console.log("selectUgazAll: ",selectUgazAll);
+    //console.log("selectUgazAll: ",selectUgazAll);
     result = prepGaz(selectedGaz = selectUgazAll, selectedInt = selectedIntU);
     selectedIntU = selectedInt;
-    console.log("selectedIntU after Ugaz All: ",selectedIntU);
+    //console.log("selectedIntU after Ugaz All: ",selectedIntU);
 
     
     // Preparing sítios Nominatim
     var selectedIntN = [];
+    
     sourceNominatimPoly.clear();
     mapGaz.removeLayer(layerNominatimPoly);
     var selectNominatim = document.getElementById("select_nominatim");
-    console.log("selectNominatim: ",selectNominatim);
+    //console.log("selectNominatim: ",selectNominatim);
     for (var i=0; i<selectNominatim.length; i++){
         if (selectNominatim[i].selected){
-            console.log("selectNominatim[i]: ",selectNominatim[i]);
-            console.log("selectNominatim[i]['value']: ",selectNominatim[i]['value']);
+            //console.log("selectNominatim[i]: ",selectNominatim[i]);
+            //console.log("selectNominatim[i]['value']: ",selectNominatim[i]['value']);
             const valueN = JSON.parse(selectNominatim[i]['value']);
             const geojson = valueN["geojson"];
-            console.log("geojson: ",geojson); 
+            //console.log("geojson: ",geojson); 
             const coords = geojson["coordinates"];
-            console.log("coords:", coords);
+            //console.log("coords:", coords);
             const geomType = geojson["type"];
-            console.log("geomType ",geomType);
+            //console.log("geomType ",geomType);
             //let feature;
             feature = new ol.Feature({
                 geometry: new ol.geom.Polygon(coords),
@@ -1196,18 +1090,15 @@ function initGaz(initSource){
             })
             selectedIntN.push(valueN);
             sourceNominatimPoly.addFeature(feature);
-            console.log("feature.getGeometry(): ",feature.getGeometry());
+            //console.log("feature.getGeometry(): ",feature.getGeometry());
         }
     }
     layerNominatimPoly.setSource(sourceNominatimPoly) 
     mapGaz.addLayer(layerNominatimPoly);
-    
-    
-    
+
     //Calcuate totals
     gazL = selectedIntE.length + selectedIntU.length + selectedIntN.length;
     tGaz = updateGazTotals(uGaz, gazL);
-    //
     results = vizGaz(selectedIntE,selectedIntU);
     //zoomGaz()
     zoomGaz(vectorSource=vectorSourceStories);
@@ -1235,24 +1126,24 @@ function vizGaz(selectedIntE,selectedIntU, selectedIntN){
     var vectorSource = vectorSourceStories;
     // Get EGaz map images
     if (selectedIntE.length > 0){
-        console.log("selectedIntE for Filter: ",selectedIntE);
+        //console.log("selectedIntE for Filter: ",selectedIntE);
         mapEgazFilter = "e_id IN ("+selectedIntE+")";
-        console.log("mapFilter: ",mapEgazFilter);
+        //console.log("mapFilter: ",mapEgazFilter);
         //Get Egaz extent
         var wfs_url_E = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=apregoar:egazetteer&cql_filter='+mapEgazFilter+'&outputFormat=application/json';
         fetch(wfs_url_E).then(function (response) {
             jsonE = response.json();
-            console.log("JSON: ",jsonE);
+            //console.log("JSON: ",jsonE);
             return jsonE;
         })
         .then(function (jsonE) {
             const featuresE = new ol.format.GeoJSON().readFeatures(jsonE);
-            console.log("Features: ",featuresE);
+            //console.log("Features: ",featuresE);
             if (featuresE.length < selectedIntE.length){
                 window.alert("Cuidade! Todos elementos não foram carregados (",featuresE.length," de ",selectedIntE.length," com successo).");
             }
             vectorSource.addFeatures(featuresE);
-            console.log("layerExtent: in Egaz",vectorSource.getExtent());
+            //console.log("layerExtent: in Egaz",vectorSource.getExtent());
             layerExtent = zoomGaz(vectorSource);
             //spinner.setAttribute('hidden', '');
             return vectorSource;
@@ -1263,34 +1154,34 @@ function vizGaz(selectedIntE,selectedIntU, selectedIntN){
             "LAYERS": "apreagoar:egazetteer",
             "cql_filter": mapEgazFilter
         });
-        console.log("source updated")
-        console.log("Egaz added to map")
+        //console.log("source updated")
+        //console.log("Egaz added to map")
     } else {
         wmsSourceEGaz.updateParams({
             "LAYERS": "apreagoar:egazetteer",
             "cql_filter": "e_id = 0"
         });
-        console.log("replaced Egaz layer with empty");
+        //console.log("replaced Egaz layer with empty");
     }
     if(selectedIntU.length > 0){
-        console.log("selectedIntU for Filter: ",selectedIntU);
+        //console.log("selectedIntU for Filter: ",selectedIntU);
         mapUgazFilter = "p_id IN ("+selectedIntU+")";
-        console.log("mapFilter: ",mapUgazFilter);
+        //console.log("mapFilter: ",mapUgazFilter);
         // Get Ugaz extent
         var wfs_url_U= 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=apregoar:access_ugaz&cql_filter='+mapUgazFilter+'&outputFormat=application/json';
         fetch(wfs_url_U).then(function (response) {
             jsonU = response.json();
-            console.log("JSON: ",jsonU);
+            //console.log("JSON: ",jsonU);
             return jsonU;
         })
         .then(function (jsonU) {
             const featuresU = new ol.format.GeoJSON().readFeatures(jsonU);
-            console.log("Features: ",featuresU);
+            //console.log("Features: ",featuresU);
             if (featuresU.length < selectedIntU.length){
                 window.alert('Cuidade! Todos elementos não foram carregados.');
             }
             vectorSource.addFeatures(featuresU);
-            console.log("layerExtent: in get Ugaz",vectorSource.getExtent());
+            //console.log("layerExtent: in get Ugaz",vectorSource.getExtent());
             layerExtent = zoomGaz(vectorSource);
             //spinner.setAttribute('hidden', '');
             return vectorSource;
@@ -1301,14 +1192,14 @@ function vizGaz(selectedIntE,selectedIntU, selectedIntN){
             "LAYERS": "apreagoar:access_ugaz",
             "cql_filter": mapUgazFilter
         });
-        console.log("source updated")
-        console.log("Ugaz added to map")
+        //console.log("source updated")
+        //console.log("Ugaz added to map")
     } else {
         wmsSourceUGaz.updateParams({
             "LAYERS": "apreagoar:access_ugaz",
             "cql_filter": "p_id = 0"
         });
-        console.log("replaced Ugaz layer with empty");
+        //console.log("replaced Ugaz layer with empty");
     }
 
     return {selectedIntE,selectedIntU}
@@ -1318,25 +1209,30 @@ function vizGaz(selectedIntE,selectedIntU, selectedIntN){
 
 //Update Gaz Totals
 function updateGazTotals(uGaz,gazL) {
+    console.log("entering updateGazTotals()");
     var totalEGaz = document.getElementById("totalEGaz");
     var totalUGaz = document.getElementById("totalUGaz");
     var totalNumGaz = document.getElementById("totalNumGaz");
     var alertPoly = document.getElementById("alertPoly");
+    var totalGazDiv = document.getElementById("totalGazDiv");
     tGaz = uGaz + gazL;
     totalEGaz.innerHTML = gazL;
     totalUGaz.innerHTML = uGaz;
     totalNumGaz.innerHTML = tGaz;
-    if (totalNumGaz == 0) {
+    if (tGaz == 0) {
         alertPoly.style.display="block";
         alertPoly.style.color="var(--danger-color)";
+        totalGazDiv.style.backgroundColor="var(--danger-colorL)";
         //totalNumGaz.style.color="red";
     } else {
         alertPoly.style.display="none";
+        totalGazDiv.style.backgroundColor="transparent";
         //totalNumGaz.style.color="green";
     }
-    console.log("total gaz features selected: ", tGaz)
+    //console.log("total gaz features selected: ", tGaz)
+    console.log("leaving updateGazTotals()")
     return tGaz;
-}
+};
 
 //Return to previous story button
 const btnReturn = document.getElementById("btnReturn");
@@ -1426,30 +1322,6 @@ function limparGazSelect(selectGaz) {
 
 // Clear the existing values
 function limparTudo() {
-    /*
-    document.getElementById("pName").value = '';
-    document.getElementById("pDesc").value = '';
-    document.getElementById("tBegin").value = '';
-    document.getElementById("tEnd").value = '';
-    document.getElementById("tDesc").value = '';
-    // Reset loaded gazetteer selections
-    var selectUgazPersonal = document.getElementsByName("selectUgazPersonal");
-    console.log("selectUgazPersonal for deconstructing: ",selectUgazPersonal);
-    limparGazSelect(selectGaz = selectUgazPersonal[0]);  
-    limparGazSelect(selectGaz = document.getElementsByName("selectUgazEmpresa")[0]);
-    limparGazSelect(selectGaz = document.getElementsByName("selectUgazAll")[0]);
-    limparGazSelect(selectGaz = document.getElementsByName("selectEgazFreguesia")[0]);
-    limparGazSelect(selectGaz = document.getElementsByName("selectEgazConcelho")[0]);
-    limparGazSelect(selectGaz = document.getElementsByName("selectEgazExtra")[0]);
-    initGaz();
-    
-
-    // Delete custom features
-    var allCustomFeatures = drawSource.getFeatures();
-    allCustomFeatures.forEach(function(feature){
-        drawSource.removeFeature(feature)
-    });
-    */
     location.reload();
     console.log("should be clean");
 
@@ -1459,7 +1331,7 @@ function submitInstance() {
     
     // Get all checked values
     console.log("Beginning Submit");
-    results = initGaz();
+    results = initGaz("submitInstance");
     tGaz = results.tGaz;
     selectedIntE = results.selectedIntE;
     selectedIntU = results.selectedIntU;
@@ -1596,14 +1468,13 @@ function submitInstance() {
         });
 
     }
-}
-
+};
 
 function validateFile() {
     console.log("Entering validateFile");
     let filesToLoad = document.getElementById("uploadFile").files;
     console.log("filesToLoad: ",filesToLoad);
-}
+};
 
 
 /*
@@ -1673,3 +1544,22 @@ for (c_index = 0; c_index < coll.length; c_index++) {
   });
 };
 
+
+/* On click identify selected items */
+function showSelected(selectElement,targetSpan){
+    var selectedNames = "";
+    for (let i=0;i<selectElement.children.length;i++){
+        if (selectElement.children[i].selected == true){
+            console.log("option name: ",selectElement.children[i]);
+            selectedNames = selectedNames + selectElement.children[i].outerText + ", ";
+        };
+    };
+    if (selectedNames.length > 0){
+        selectedNames = selectedNames.slice(0,-2);
+        //console.log("selectedNames: ",selectedNames);
+        document.getElementById(targetSpan).innerHTML = "(Selecionados: "+selectedNames+")";
+    } else {
+        document.getElementById(targetSpan).innerHTML = "";
+    };
+    
+};

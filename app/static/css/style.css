@@ -512,3 +512,7 @@ select {
     margin: 10px;
 }
 
+
+.prefilledVals {
+    font-size: smaller;
+}

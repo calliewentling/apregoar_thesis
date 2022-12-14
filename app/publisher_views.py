@@ -62,6 +62,8 @@ def delete_i_derivs(delete_inst, con):
                 print("Passed delete from instance_ngaz")        
                 cur.execute("DELETE FROM apregoar.instances WHERE i_id = ANY (%s);", (delete_inst,))
                 print("Passed delete from instances")
+                cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                print("Refreshed publication_info materialized view")
     except psycopg2.Error as e:
         print("e.pgerror:  ",e.pgerror)
         print("e.diag.message_primary: ", e.diag.message_primary)
@@ -311,7 +313,7 @@ def publisher_dashboard():
                     org_stories = []
                     for row in result:
                         pub_name = row["publication_name"]
-                        print("pub_name: ",pub_name)
+                        #print("pub_name: ",pub_name)
                         o_story = {
                             row["s_id"] : {
                                 "title": row["title"],
@@ -352,11 +354,19 @@ def addstory():
     else:
         publication_info = {}
         for row in result:
+            #print("row['authors']",row["authors"])
+            authors = row["authors"]
+            try:
+                authors.pop("1")
+                print("{1: '*sem valor'} removed")
+            except:
+                print("no need to remove {1: '*sem valor'}")
+            #print("authors: ",authors)
             pub_info = {
                 "publication_name": row["publication_name"],
                 "sections": row["main_sections"],
                 "tags": row["tags"],
-                "authors": row["authors"],                        
+                "authors": authors,                        
             }
             publication_info[row["publication_id"]] = pub_info
             #publication_info.append(pub_info)
@@ -420,6 +430,7 @@ def review_e(s_id):
                                 print("Passed delete from authoring")
                                 cur.execute("DELETE FROM apregoar.stories WHERE s_id = %s;", (s_id,))
                                 print("Story ",s_id," prepped for deletion")
+                                cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
                     except: 
                         con.rollback()
                         #con.close()
@@ -427,6 +438,7 @@ def review_e(s_id):
                         return redirect(url_for("publisher_dashboard"))
                     else:
                         con.commit()
+                        
                         con.close()
                         print("Successfully deleted story and ",len(delete_i),"associated instances")
                         #We should go to the next scenario
@@ -443,71 +455,68 @@ def review_e(s_id):
         
                     
 
-    # Normal behavior: load review
+    ### NORMAL BEHAVIOR: LOADING REVIEW ####
     try:
         with engine.connect() as conn:
-            SQL = text("SELECT * FROM apregoar.stories WHERE s_id = :x")
+            SQL = text("SELECT * FROM apregoar.geonoticias WHERE s_id = :x")
             SQL = SQL.bindparams(x=s_id)
+            print(SQL)
             result = conn.execute(SQL)
-            conn.close()
     except:
-        conn.close()
-        print("Error in extracting desired story from database")
-        feedback=f"Erro"
-        flash(feedback,"danger")
+        print("Error in extracting instances for this story")
+        feedback=f"Não consiguimos de procurar as instâncias da história"
+        flash(feedback, "warning")
+        return render_template("publisher/dashboard.html")
+        #return render_template("publisher/review.html", story=story, sID = s_id, instances=[])
     else:
+        print("successfully extracted story and instances from geonoticias")
+        instances = []
         story = {}
         for row in result:
-            story = row
-        print(story)
-        if story:
-            try:
-                with engine.connect() as conn:
-                    SQL = text("SELECT * FROM apregoar.geonoticias WHERE s_id = :x")
-                    SQL = SQL.bindparams(x=s_id)
-                    print(SQL)
-                    result = conn.execute(SQL)
-            except:
-                print("Error in extracting instances for this story")
-                feedback=f"Não consiguimos de procurar as instâncias da história"
-                flash(feedback, "warning")
-                return render_template("publisher/review.html", story=story, sID = s_id, instances=[])
+            if row["i_id"] != None: 
+                if row["t_begin"] is None:
+                    instance = {
+                        row["i_id"] : {
+                            "p_name": row["p_name"],
+                            "timeframe": ""
+                        }
+                    }
+                elif row["t_begin"] == row["t_end"]:
+                    instance = {
+                        row["i_id"] : {
+                            "p_name": row["p_name"],
+                            "timeframe": str(row["t_begin"].date()),
+                        }
+                    }
+                else:
+                    instance = {
+                        row["i_id"] : {
+                            "p_name": row["p_name"],
+                            "timeframe": str(row["t_begin"].date())+" - "+str(row["t_end"].date())
+                        }
+                    }
+                instances.append(instance)
             else:
-                instances = []
-                for row in result:
-                    if row["i_id"] != None: 
-                        if row["t_begin"] is None:
-                            instance = {
-                                row["i_id"] : {
-                                    "p_name": row["p_name"],
-                                    "timeframe": ""
-                                }
-                            }
-                        elif row["t_begin"] == row["t_end"]:
-                            instance = {
-                                row["i_id"] : {
-                                    "p_name": row["p_name"],
-                                    "timeframe": str(row["t_begin"].date()),
-                                }
-                            }
-                        else:
-                            instance = {
-                                row["i_id"] : {
-                                    "p_name": row["p_name"],
-                                    "timeframe": str(row["t_begin"].date())+" - "+str(row["t_end"].date())
-                                }
-                            }
-                        instances.append(instance)
-                    else:
-                        break
-                print("instances: ",instances)
-                return render_template("publisher/review.html", story=story, sID = s_id, instances=instances) #
-        else:
+                break
+        story = row
+        print("story: ",story)
+        print("instances: ",instances)
+        return render_template("publisher/review.html", story=story, sID = s_id, instances=instances) #
+        """else:
             feedback = f"No valid story selected"
-            flash(feedback, "danger")
+            flash(feedback, "danger")"""
 
     return render_template("publisher/dashboard.html")
 
+def coalesce(*values, valType):
+    #Return the first non-None value or None if all values are None
+    if valType == "str":
+        defaultVal = ""
+    if valType == "int":
+        defaultVal = 0
+    else:
+        defaultVal = None
+    return next((v for v in values if v is not None),defaultVal)
 
 @app.route("/publisher/review", methods=['POST'])
 def review():
@@ -517,6 +526,7 @@ def review():
     print()
 
     print("formType: ",request.form["formType"])
+    print("request form: ",request.form)
     if request.form["formType"] == "create_story":
         try:
             with engine.connect() as conn:
@@ -527,11 +537,11 @@ def review():
             feedback=f"Erro"
             flash(feedback,"danger")
         else:
+            print("successful extraction of previous web_links from DB")
             existing_urls = []
             for row in result:
                 existing_urls.append(row["web_link"])
-            print(existing_urls)
-        
+            #print(existing_urls)
             story = {
                 ##Required
                 "title": request.form["title"],
@@ -541,15 +551,14 @@ def review():
                 ##Optional 
                 "summary": request.form["summary"],
                     #Move these to review?
-                "section" : request.form["section"].lower(),
+                "section" : coalesce(request.form["section"].lower(),valType="str"),
                 "tags": request.form["tags"].lower(),
-                "author": request.form["author"].lower()
+                "author": coalesce(request.form["author"].lower(),valType="str"),
             }
 
             if story["web_link"] in existing_urls:
-                feedback = f"A história já existe no database: "+story["web_link"]
-                flash(feedback, "warning")
-                return render_template("publisher/create.html")
+                print("URL already associated with another story")                
+                return redirect(url_for("addstory"))
 
             #Prepare & Submit
             con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
@@ -565,6 +574,7 @@ def review():
                         )
                         s_id = cur.fetchone()[0]
                         print("Story added to database. s_id: ",s_id)
+                        
             except psycopg2.Error as e:
                 #If not submitted, attempt to create again
                 print(e.pgerror)
@@ -573,7 +583,8 @@ def review():
                 flash(feedback, "danger")
                 con.rollback()
                 con.close()
-                return render_template("publisher/create.html")
+                return redirect(url_for("addstory"))
+                #return render_template("publisher/create.html")
             else:
                 story["s_id"] = s_id
                 #Saving Tags
@@ -634,7 +645,15 @@ def review():
                 else:  
                     print("No authors associated")
                     emptyAttribute(attr="publication", s_id = s_id, con=con)
-                con.commit()
+                #RETURN HERE TO REFRESH VIEW: cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                try:
+                    with con:
+                        with con.cursor() as cur:
+                            cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                            print("successful refresh of publiction_info materialized view")
+                except:
+                    print("Unsuccessful refresh of publication_info materialized view")
+                con.commit()                   
                 con.close()
                 return redirect(url_for("review_e", s_id = s_id))
                 #return render_template("publisher/review.html", story=story, sID = s_id, instances = [])
@@ -696,9 +715,11 @@ def savingAttributes(attr,s_id,con,attr_vals):
                 print(e.diag.message_primary)
                 con.rollback()
                 con.close()
-                return render_template("publisher/create.html")
+                return redirect(url_for("addstory"))
+                #return render_template("publisher/create.html")
             else:
                 print("Successful association to existing "+attr+"!")
+    return
 
 
 def emptyAttribute(attr,s_id,con):
@@ -728,9 +749,11 @@ def emptyAttribute(attr,s_id,con):
         print(e.diag.message_primary)
         con.rollback()
         con.close()
-        return render_template("publisher/create.html")
+        return redirect(url_for("addstory"))
+        #return render_template("publisher/create.html") #
     else:
         print("Successful association to '*sem valor' of "+attr)
+    return
 
 
 #########################
@@ -806,12 +829,13 @@ def loadGaz(s_id):
     print(gazetteer)
     #Load relevant user and story info
     u_id = fsession["u_id"]
+    pub_id = req["pubID"]
     print("Story id: ",s_id,", User ID: ",u_id)
     #Access relevant queries
     if gazetteer == "ugaz_personal":
         SQL = text("""
             SELECT
-                p_id AS gaz_id,
+                DISTINCT p_id AS gaz_id,
                 p_name AS gaz_name,
                 p_desc AS gaz_desc,
                 u_id
@@ -822,38 +846,23 @@ def loadGaz(s_id):
         """)
         SQL = SQL.bindparams(x=u_id)
     elif gazetteer == "ugaz_empresa":
-        #Get Publisher
-        try:
-            with engine.connect() as conn:
-                SQL = text("SELECT * FROM apregoar.stories WHERE s_id = :x")
-                SQL = SQL.bindparams(x=s_id)
-                result = conn.execute(SQL)
-        except:
-            conn.close()
-            print("Error in extracting desired story from database")
-            res = make_response(jsonify("Não conseguimos carregar os dados"))
-        else:
-            conn.close()
-            #Extract publication to use in query
-            for row in result:
-                publication = row["publication"]
-            #Define query
-            SQL = text("""
-                SELECT
-                    p_id AS gaz_id,
-                    p_name AS gaz_name,
-                    p_desc AS gaz_desc,
-                    publication AS gaz_pub
-                FROM apregoar.access_ugaz
-                WHERE publication = :x AND u_id NOT IN (:y)
-                ORDER BY gaz_name ASC
-                ;
-            """)
-            SQL = SQL.bindparams(x=publication,y=u_id)
+        #Define query
+        SQL = text("""
+            SELECT
+                DISTINCT p_id AS gaz_id,
+                p_name AS gaz_name,
+                p_desc AS gaz_desc,
+                publication AS gaz_pub
+            FROM apregoar.access_ugaz
+            WHERE pub_id = :x AND u_id NOT IN (:y)
+            ORDER BY gaz_name ASC
+            ;
+        """)
+        SQL = SQL.bindparams(x=pub_id,y=u_id)
     elif gazetteer == "ugaz_all":
         SQL = text("""
             SELECT
-                p_id AS gaz_id,
+                DISTINCT p_id AS gaz_id,
                 p_name AS gaz_name,
                 p_desc AS gaz_desc,
                 u_id
@@ -866,58 +875,58 @@ def loadGaz(s_id):
     elif gazetteer == "egaz_freguesia":
         SQL = text("""
             SELECT
-                e_id AS gaz_id,
+                DISTINCT e_id AS gaz_id,
                 name AS gaz_name,
                 type AS gaz_desc
             FROM apregoar.egazetteer
             WHERE type = 'freguesia'
-            ORDER BY gaz_name
+            ORDER BY gaz_name ASC
             ;
         """)
     elif gazetteer == "egaz_concelho":
         SQL = text("""
             SELECT
-                e_id AS gaz_id,
+                DISTINCT e_id AS gaz_id,
                 name AS gaz_name,
                 type AS gaz_desc
             FROM apregoar.egazetteer
             WHERE type = 'concelho'
-            ORDER BY gaz_name
+            ORDER BY gaz_name ASC
             ;
         """)
     elif gazetteer == "egaz_green":
         SQL = text("""
             SELECT
-                e_id AS gaz_id,
+                DISTINCT e_id AS gaz_id,
                 name AS gaz_name,
                 type AS gaz_desc
             FROM apregoar.egazetteer
             WHERE type = 'espaço_verde'
-            ORDER BY gaz_name
+            ORDER BY gaz_name ASC
             ;
         """)
     elif gazetteer == "egaz_archive":
         print("egaz_archive")
         SQL = text("""
             SELECT
-                e_id AS gaz_id,
+                DISTINCT e_id AS gaz_id,
                 name AS gaz_name,
                 'archive' AS gaz_desc
             FROM apregoar.egazetteer
             WHERE type IN ('freguesia_archivo')
-            ORDER BY gaz_name
+            ORDER BY gaz_name ASC
             ;
         """)
     elif gazetteer == "egaz_extra":
         print("egaz_extra")
         SQL = text("""
             SELECT
-                e_id AS gaz_id,
+                DISTINCT e_id AS gaz_id,
                 name AS gaz_name,
                 type AS gaz_desc
             FROM apregoar.egazetteer
             WHERE type NOT IN ('concelho','freguesia','freguesia_archivo')
-            ORDER BY gaz_name
+            ORDER BY gaz_name ASC
             ;
         """)
     elif gazetteer == "poi_poi":
@@ -925,10 +934,12 @@ def loadGaz(s_id):
         print("search_term: ",search_term)
         query = """
             SELECT
-                id as gaz_id,
+                DISTINCT id as gaz_id,
                 name as gaz_name,
                 'poi' AS gaz_desc
             FROM apregoar.apregoar_poi
+            ORDER BY gaz_name ASC
+            ;
         """
         print("query:",query)
         if search_term:
@@ -937,36 +948,24 @@ def loadGaz(s_id):
             SQL = text(query+where_clause)
         else:
             SQL = text(query+";")
-        print("SQL: ",SQL)
+        #print("SQL: ",SQL)
         print("Successfull definition of SQL!")
     elif gazetteer == "gaz_prev":
         search_term = req["searchTerm"]
         print("search_term: ",search_term)
-        query_egaz = """
-            SELECT
-                e_id as gaz_id,
-                name as gaz_name,
-                type AS gaz_desc
-            FROM apregoar.egazetteer
-        """
+        query_egaz = "\nSELECT DISTINCT e_id as gaz_id, name as gaz_name, type AS gaz_desc\nFROM apregoar.egazetteer"
+        #Note: order by is in searchterm query
         print("query_egaz:",query_egaz)
-        query_ugaz = """
-            SELECT
-                p_id as gaz_id,
-                p_name as gaz_name,
-                concat('ugaz',u_id,'_',pub_id) as gaz_desc
-            FROM apregoar.access_ugaz
-        """
-        print("query_ugaz:",query_ugaz)
+        query_ugaz = "\nSELECT DISTINCT p_id as gaz_id, p_name as gaz_name, concat('ugaz',u_id,'_',pub_id) as gaz_desc\nFROM apregoar.access_ugaz"
+        #Note: order by is in searchterm query
+        #print("query_ugaz:",query_ugaz)
         if search_term:
-            where_clause_e = " WHERE LOWER(name) SIMILAR TO LOWER('%("+search_term.replace(", ","|")+")%')"
-            #where_clause_u = " WHERE LOWER(p_name) LIKE '%"+search_term.lower()+"%'"
-            where_clause_u = " WHERE LOWER(p_name) SIMILAR TO LOWER('%("+search_term.replace(", ","|")+")%')"
-            print("where_clause_e",where_clause_e,". where_clause_u: ",where_clause_u)
-            SQL = text(query_ugaz+where_clause_u+" UNION "+query_egaz+where_clause_e+";")
-            #SQL = text(query_ugaz+where_clause_u+";")
+            where_clause_e = "\nWHERE LOWER(name) SIMILAR TO LOWER('%("+search_term.replace(", ","|")+")%')"
+            where_clause_u = "\nWHERE LOWER(p_name) SIMILAR TO LOWER('%("+search_term.replace(", ","|")+")%') "
+            #print("where_clause_e",where_clause_e,". where_clause_u: ",where_clause_u)
+            SQL = text(query_ugaz+where_clause_u+"\nUNION "+query_egaz+where_clause_e+"\nORDER BY gaz_name ASC\n;")
         else:
-            SQL = text(query+";")
+            SQL = text(query+"\n;")
         print("SQL: ",SQL)
         print("Successfull definition of SQL!")
     elif gazetteer == "poi_locale":
@@ -974,10 +973,11 @@ def loadGaz(s_id):
         print("layer_extent: ",layer_extent)
         query = """
             SELECT
-                id as gaz_id,
+                DISTINCT id as gaz_id,
                 name as gaz_name,
                 'poi' as gaz_desc
             FROM apregoar.apregoar_poi
+            ORDER BY gaz_name ASC
             ;
         """
         print("query for locale: ",query)
@@ -1363,9 +1363,17 @@ def save_instance(s_id):
         return res
     else:
         #Commit all additions to database
-        con.commit()
-        con.close()
-        print("Successful save of instance and related places") 
+        try:
+            with con:
+                with con.cursor() as cur:
+                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                    print("Print successfully refreshed ")
+        except:
+            print("unsuccessful refresh of materialized view")
+        else:
+            con.commit()
+            con.close()
+            print("Successful save of instance and related places") 
     res = make_response(jsonify(req), 200) 
     return res
 

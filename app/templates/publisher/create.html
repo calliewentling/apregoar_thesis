@@ -14,8 +14,9 @@
         <div class="pageTitle">Publicar uma Notícia</div>
         <div class="card">
             <div class="card-body">
-                <h3>Entrar as detalhas da notícia</h3>
-                <form name="addStory" action="{{ url_for('review') }}" method="post">
+                
+                
+                <form name="addStory" id="formAddStory" action="{{ url_for('review') }}" method="post">
                     
                     <!-- Required fields -->
                     <div class="row_local">
@@ -36,9 +37,9 @@
 
                     <div class="row_local">
                         <label class="rigid" for="publication">Publicação: </label>
-                        <select name="publication" id="publication" onchange="updatePub()">
+                        <select name="publication" id="publication" class="prefilledVals" onchange="javascript: updatePub(this.options[this.selectedIndex].value);" required>
                             {% for pub_id,vals in publication_info.items() %}
-                                <option value="{{ vals.publication_name|lower }}">{{ vals.publication_name|upper }}</option>
+                                <option value="{{ vals.publication_name }}">{{ vals.publication_name|upper }}</option>
                             {% endfor %}
                         </select>
                         <!--
@@ -50,18 +51,8 @@
                             
                     <div class="row_local">
                         <label class="rigid" for="author">Jornalista(s): </label>
-                        <select multiple name="author">
-                            {% for pub_id,vals in publication_info.items() %}
-                                {% for cat,val in vals.items() %}
-                                    {% if cat == 'authors' %}
-                                        {% for id,author in val.items() %}
-                                            <option value="{{ author }}">{{ author|upper }}</options>
-                                        {% endfor %}
-                                    {% endif %}
-                                {% endfor %}
-                            {% endfor %}
-                            
-                        </select>
+                        <select multiple name="author" id="author" class="prefilledVals"></select>
+                        <button type="btn btn-add" id="addAuthor" onclick="addNew('author');"> + </button>
                         <!--<input type="text" name="author" placeholder="Jornalista(s)">-->
                     </div>
                     <div class="row_local">
@@ -71,7 +62,8 @@
                     </div>
                     <div class="row_local">
                         <label class="rigid" for="section">Secção:</label>
-                        <input type="text" name="section" placeholder="Secções">
+                        <select multiple name="section" id="section" class="prefilledVals"></select>
+                        <button type="btn btn-add" id="addAuthor" onclick="addNew('section');"> + </button>
                     </div>
                     <div class="row_local">
                         <label class="rigid" for="tags">Etiquetas: </label>
@@ -85,7 +77,7 @@
                     </div>
                 </form>
                 
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -95,23 +87,113 @@
     const publicationInfo = JSON.parse('{{ publication_info|tojson|safe }}');
     console.log("publicationInfo: ",publicationInfo);
     var pubInput = document.getElementById("publication");
-    pubInput.addEventListener("oninput",updatePub());
+    
 
-    document.querySelector('publication').querySelector('option')[0].selected="selected";
+    var authorInput = document.getElementById("author");
+    console.log("authorInput: ",authorInput);
+
+    var sectionInput = document.getElementById("section");
 
 
-    function updatePub(){
-        console.log("Entering updatePub()");
-        var pubVal = this.value;
-        console.log("pubVal: ",pubVal);
-        console.log("pubInput: ",pubInput);
-        for (publication in publicationInfo){
-            console.log("publication: ",publicationInfo[publication]);
+    function updateList(json_vals, inputType){
+        console.log("entering updateList");
+
+        let inputUpdatable;
+        
+        if (inputType == "author"){
+            inputUpdatable = authorInput;
+        } else if (inputType =="section"){
+            inputUpdatable = sectionInput;
         }
+
+        removeOptions(inputUpdatable);
+  
+        for (let key in json_vals){
+            //console.log("v: ",key,", ",json_vals[key]);
+            //string += '<option value = "'+json_vals[key]+'">'+json_vals[key].toUpperCase()+'</option>';
+            var option = document.createElement("option");
+            option.text = json_vals[key].toUpperCase();
+            option.value = json_vals[key];
+            inputUpdatable.add(option);
+        };
+
+        console.log("leaving updateList");
+        return
+    }
+
+    function removeOptions(inputUpdatable){
+        while(inputUpdatable.options.length > 0){
+            inputUpdatable.remove(0);
+        };
+        return
+    };
+
+
+    function updatePub(pub_name){
+        console.log("Entering updatePub(",pub_name,")");
+        let selectedPub;
+        for (let k in publicationInfo){
+            //console.log("k: ",k);
+            if (publicationInfo[k]["publication_name"]==pub_name){
+                selectedPub = publicationInfo[k];
+            };
+        };
+        
+        /* GET AUTHOR SPECIFIC VALUES */
+        author_options = selectedPub["authors"];
+        //console.log("author_options: ",author_options);
+        if (Object.keys(author_options).length === 0){
+            console.log("I should automatically add an area where the user can define a new author");
+            removeOptions(authorInput);
+        } else {
+            //authorInput.innerHTML = updateList(author_options);
+            updateList(json_vals = author_options, inputType = "author");
+        };
+
+        /* GET SECTION SPECIFIC VALUES */
+        section_options = selectedPub["sections"];
+        console.log("section_options: ",section_options);
+        if (Object.keys(section_options).length === 0) {
+            removeOptions(sectionInput);
+        } else {
+            //sectionInput.innerHTML = updateList(section_options);
+            updateList(json_vals = section_options, inputType = "section");
+        };
+        
         console.log("Leaving updatePub");
     };
+
+    function addNew(type){
+        console.log("entering addNew(type=",type,")");
+        let inputUpdatable;
+        let typeName;
+
+        if (type=="author"){
+            inputUpdatable =  authorInput;
+            typeName = "jornalista";
+        } else if (type=="section"){
+            inputUpdatable = sectionInput;
+            typeName = "secção";
+        };
+        const promptText = "Escreve mais um"+typeName+":";
+        let newVal = prompt(promptText);
+        event.preventDefault();
+        if (newVal != null){
+            var option = document.createElement("option");
+            option.text = newVal.toUpperCase();
+            option.value = newVal;
+            inputUpdatable.add(option);
+        };
+        
+        console.log("leaving addNew");
+    }
+
     
-    updatePub();
+    pubInput.selectedIndex = "0";
+    console.log("selectedindex is first");
+    console.log("first option:",pubInput.selectedOption);
+    updatePub(pubInput.selectedOptions[0].value);
+    
 </script>
 
 
