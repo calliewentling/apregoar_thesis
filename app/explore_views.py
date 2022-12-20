@@ -601,7 +601,7 @@ def prepare_explore():
             result = conn.execute(SQL)
     except: 
         conn.close()
-        print("Error in distracting filters from database")
+        print("Error in extracting geonoticias filters from database")
     else:
         sections = {}
         authors = {}
@@ -678,7 +678,7 @@ def prepare_explore():
                 result2 = conn.execute(SQL2)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting filters from database")
         else:
             for row in result2:
                 e_names[row["e_name"].lower()] = {
@@ -693,7 +693,7 @@ def prepare_explore():
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting tag filters from database")
         else:
             for row in result:
                 tags[row["tag_name"]] = {
@@ -711,7 +711,7 @@ def prepare_explore():
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting section filters from database")
         else:
             for row in result:
                 sections[row["section_name"]] = {
@@ -725,7 +725,7 @@ def prepare_explore():
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting author filters from database")
         else:
             for row in result:
                 authors[row["author_name"]] = {
@@ -739,7 +739,7 @@ def prepare_explore():
                 result = conn.execute(SQL)
         except: 
             conn.close()
-            print("Error in distracting filters from database")
+            print("Error in extracting publication filters from database")
         else:
             for row in result:
                 publications[row["publication_name"]] = {

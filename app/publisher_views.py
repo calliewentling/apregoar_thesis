@@ -64,6 +64,8 @@ def delete_i_derivs(delete_inst, con):
                 print("Passed delete from instances")
                 cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
                 print("Refreshed publication_info materialized view")
+                cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                print("Refreshed geonoticias materialized view")
     except psycopg2.Error as e:
         print("e.pgerror:  ",e.pgerror)
         print("e.diag.message_primary: ", e.diag.message_primary)
@@ -431,6 +433,9 @@ def review_e(s_id):
                                 cur.execute("DELETE FROM apregoar.stories WHERE s_id = %s;", (s_id,))
                                 print("Story ",s_id," prepped for deletion")
                                 cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                                print("Refreshed publication_info materialized view")
+                                cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                                print("Refreshed geonoticias materialized view")
                     except: 
                         con.rollback()
                         #con.close()
@@ -651,8 +656,10 @@ def review():
                         with con.cursor() as cur:
                             cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
                             print("successful refresh of publiction_info materialized view")
+                            cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                            print("Refreshed geonoticias materialized view")
                 except:
-                    print("Unsuccessful refresh of publication_info materialized view")
+                    print("Unsuccessful refresh of publication_info and/or geonoticias materialized view")
                 con.commit()                   
                 con.close()
                 return redirect(url_for("review_e", s_id = s_id))
@@ -1368,6 +1375,8 @@ def save_instance(s_id):
                 with con.cursor() as cur:
                     cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
                     print("Print successfully refreshed ")
+                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                    print("Refreshed geonoticias materialized view")
         except:
             print("unsuccessful refresh of materialized view")
         else:

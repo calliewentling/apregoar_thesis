@@ -73,6 +73,10 @@ def sign_upU(login_source):
                             )
                             u_id = cur.fetchone()[0]
                             print("New user id: ",u_id)
+                            cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                            print("Print successfully refreshed ")
+                            cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                            print("Refreshed geonoticias materialized view")
                 except:
                     print("Error in saving new user")
                     feedback=f"Erro"
@@ -94,6 +98,10 @@ def sign_upU(login_source):
                                     )
                                     p_id = cur.fetchone()[0]
                                     print("New publication id: ",p_id)
+                                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                                    print("Print successfully refreshed ")
+                                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                                    print("Refreshed geonoticias materialized view")
                         except:
                             print("error adding new publication")
                             con.rollback()
@@ -118,6 +126,10 @@ def sign_upU(login_source):
                                 print("associated affiliation to user")
                                 #u_id_conf = cur.fetchone()[0]
                                 #print("u_id_conf: ",u_id_conf)
+                                cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                                print("Print successfully refreshed ")
+                                cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                                print("Refreshed geonoticias materialized view")
                     except psycopg2.Error as e:
                         print("e: ",e)
                         print("e.pgerror:  ",e.pgerror)
