@@ -160,7 +160,7 @@ const attributions =
 
 
 //Styling layers
-const styleStory = [
+/*const styleStory = [
     new ol.style.Style({
         stroke: new ol.style.Stroke({
             color: 'transparent',
@@ -170,7 +170,7 @@ const styleStory = [
             color: aprColor1O,
         }),
     }),
-];
+];*/
 
 
 //Generic Map Setup
@@ -203,21 +203,27 @@ map.addLayer(backDrop);
 
 document.getElementById("map").classList.add("skeleton");
 
-// Add Story shapes
+// Add Story shapes~
+let selectedStyle = "apregoar:pub_dashboard";
+if (docTitle == "Review"){
+    selectedStyle = "apregoar:pub_review";
+};
+
+
 
 const wmsSourceStory = new ol.source.ImageWMS({
     url: 'http://localhost:8080/geoserver/apregoar/wms',
     /*params: {"LAYERS":"apregoar:geonoticias"},*/ //OG
     params: {"LAYERS":"apregoar:geonoticias",
+        "STYLES":selectedStyle,
         "cql_filter":mapStoryFilter}, //Set on each individual page
     serverType: 'geoserver',
     crossOrigin: 'anonymous',
 });
 const wmsLayerStory = new ol.layer.Image({
     source: wmsSourceStory,
-    style: styleStory,
 });
-wmsLayerStory.setOpacity(0.7);
+//wmsLayerStory.setOpacity(0.7);
 map.addLayer(wmsLayerStory);
 console.log("Story instances added");
 

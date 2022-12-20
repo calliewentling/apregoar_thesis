@@ -99,16 +99,26 @@
                         </span>
                     </div>
                 </div>
-                <div class="row_local">
-                    <label for="eName" style="flex:20%"> Nome do evento: </label>
-                    <input type="text" id="eName" name="eName" placeholder="Nome do evento" required>
+                <!-- TOGGLE -->
+                <div class="container1" style="flex:50%">
+                    <label class="switch">
+                        <input id ="cswitch" type="checkbox" onclick = "toggleContext()">
+                        <span class="slider round"></span>
+                    </label>
+                    <div id="ctoggleMode"><p>Modo: Evento</p></div>
                 </div>
-                <div class="row_local">
-                    <label for="eDesc" style="flex:20%">Descrição do evento:</label>
-                    <input type="text" id="eDesc" name="eDesc" placeholder="Descrição do evento">
+
+                <div id="eventName">
+                    <div class="row_local">
+                        <label for="eName" style="flex:20%"> Nome do evento: </label>
+                        <input type="text" id="eName" name="eName" placeholder="Nome do evento" required>
+                    </div>
+                    <div class="row_local">
+                        <label for="eDesc" style="flex:20%">Descrição do evento:</label>
+                        <input type="text" id="eDesc" name="eDesc" placeholder="Descrição do evento">
+                    </div>
                 </div>
             </div>
-            <br>
             
             <div class="card" id="temporal_dez">
                 <!-- TEMPORAL -->
@@ -137,7 +147,7 @@
                             <label for="allday_n">Horas específicas  </label>
                             <br>
                         </div>
-                        <div class="row_local">
+                        <div class="row_local" style="display:none;">
                             <input type="radio" id="allday_p" name="allDay" value="allday_p" onClick="timeDefP()">
                             <label for="allday_p">Persistente (sim datas específicas)  </label>
                             <br>
@@ -156,7 +166,6 @@
                     </div>
                 </div>
             </div>
-            <br>
 
             <div class="card">
                 <div class="row_local">
@@ -400,9 +409,7 @@
                     </div>
                 </div>
                 <em id="alertPoly" style="color:var(--danger-color)">Associar e/ou desenhar pelo menos um localização de notícia.</em>
-
             </div>
-            <br>
             
             <div class="card">
                 <h2> Guardar instância</h2>
@@ -414,7 +421,6 @@
                 <button type="button" class="btn btn-primary" onclick = submitInstance()> Associar instáncia</button>
             </div>
         </form>
-        <br>
 
         <div class="row_local">
             <div id="btnReturn"></div>

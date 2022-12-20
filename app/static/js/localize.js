@@ -114,6 +114,7 @@ const wmsSourceStory = new ol.source.ImageWMS({
     url: 'http://localhost:8080/geoserver/apregoar/wms',
     /*params: {"LAYERS":"apregoar:geonoticias"},*/ //OG
     params: {"LAYERS":"apregoar:geonoticias",
+        "STYLES": "apregoar:pub_localize",
         "cql_filter":mapStoryFilter}, //Set on each individual page
     serverType: 'geoserver',
     crossOrigin: 'anonymous',
@@ -262,7 +263,37 @@ const changeInteraction = function() {
 selectElement.onchange = changeInteraction;
 changeInteraction();
 
-
+////// TOGGLE FOR CONTEXT ////////
+function toggleContext(){
+    var cSwitch = document.getElementById("cswitch");
+    var cToggleMode = document.getElementById("ctoggleMode");
+    var temporalDez = document.getElementById("temporal_dez");
+    var eventName = document.getElementById("eventName");
+    var allDay = document.getElementsByName("allDay");
+    var tBeginf = document.getElementById("tBegin");
+    var tEndf = document.getElementById("tEnd");
+    var eName = document.getElementById("eName");
+    console.log("eName: ",eName.value);
+    if (cSwitch.checked == true){
+        console.log("context mode activiated");
+        cToggleMode.innerHTML = "Modo: Contextualização";
+        temporalDez.style.display = "none";
+        eventName.style.display = "none";
+        timeDefP();
+        if (eName.value.length < 1){
+            console.log("no ename saved");
+            eName.value = "context";
+        };
+        
+    } else {
+        console.log("event mode activated");
+        cToggleMode.innerHTML = "Modo: Eventos";
+        temporalDez.style.display = "block";
+        eventName.style.display = "block";
+        timeDefD();
+    };
+    console.log("Event name: ",eName.value);
+};
 
 ///// TOGGLE TO UGAZ /////////////
 //Toggle Map Views (using existing gaz vs. design new place)
