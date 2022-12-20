@@ -1,6 +1,9 @@
+@import './constants.css';
+
 .map {
     height: 400px;
     width: 100%;
+    cursor: pointer;
 }
 .map:-webkit-full-screen {
     height: 100%;
@@ -16,6 +19,11 @@ height: 100%;
 top: 3em;
 }
 
+.map.skeleton {
+    filter: blur(5px);
+    cursor: wait;
+}
+
 .wrapper {
     position:relative;
 }
@@ -24,7 +32,7 @@ top: 3em;
     bottom: 0;
     left: 0;
     height: 2px;
-    background: rgba(0,60,136,0.4);
+    background: var(--apr-color2);
     width: 0;
     transition: width 250ms;
 }
@@ -33,15 +41,41 @@ top: 3em;
 .ol-popup {
     position: absolute;
     background-color: white;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 4px var(--shadow-color);
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid #cccccc;
+    border: 1px solid var(--apr-color2);
     bottom: 12px;
     left: -50px;
     min-width: 280px;
     font-size: 12px; /*Added july 22 for jornal*/
+    cursor: default;
 }
+
+.popup-scroll{
+    height: 30px;
+    display:absolute;
+    position: center;
+    justify-content: center;
+    color: var(--apr-color3);
+    font-size: 11px;
+    font-weight: bold;
+    background-color:white;
+    padding: 10px;
+}
+
+.popup-direction, .popup-count{
+    display:inline;
+}
+
+.popup-direction {
+    cursor:pointer;
+}
+
+.popup-direction:hover {
+    font-size: 12px;
+}
+
 .ol-popup:after, .ol-popup:before {
     top: 100%;
     border: solid transparent;
@@ -58,7 +92,7 @@ top: 3em;
     margin-left: -10px;
 }
 .ol-popup:before {
-    border-top-color: #cccccc;
+    border-top-color: var(--apr-color2L);
     border-width: 11px;
     left: 48px;
     margin-left: -11px;
@@ -71,6 +105,7 @@ top: 3em;
 }
 .ol-popup-closer:after {
     content: "✖";
+    color: var(--apr-color1);
 }
 
 /*Testing scroll through pop up*/
@@ -82,6 +117,8 @@ top: 3em;
 }
 .ol-popup-pagebehind:after {
     content: '<';
+    cursor: pointer;
+    color: var(--apr-color1);
 }
 .ol-popup-pageahead {
     text-decoration: none;
@@ -91,6 +128,8 @@ top: 3em;
 }
 .ol-popup-pageahead:after {
     content: '>';
+    cursor: pointer;
+    color: var(--apr-color1);
 }
 
 div.scrollResults {

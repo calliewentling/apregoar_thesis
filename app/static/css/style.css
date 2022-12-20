@@ -1,20 +1,16 @@
-:root {
-    --pub-color1: black;
-    --pub-color1L: grey;
-    --danger-colorL: rgb(253, 240, 240);
-    --danger-color: rgb(144, 60, 60);
-    --shadow-color: rgba(0,0,0,0.3);
-    --shadow-dim: -10px 5px 20px;
-}
+@import './constants.css';
 
 body {
-    background-color: white;
-    color: rgb(56,56,56);
-    accent-color: var(--pub-color1);
+    background-color: var(--neutral-colorL);
+    color: var(--apr-color3);
+    accent-color: var(--apr-color1);
 }
 
-input {
-    border: 1px solid var(--pub-color1);
+input,select,textarea {
+    border: 1px solid var(--apr-color1);
+}
+input:focus,select:focus,textarea:focus{
+    outline: 3px solid var(--apr-color1);
 }
 h1 { 
     display: block;
@@ -89,21 +85,25 @@ label {
 .rigid {
     width: 200px;
 }
+
+.card{
+    border: 1px solid var(--apr-color2);
+}
+
 /* Inputs */
 input:required,
 textarea:required {
-
-    background-color: var(--danger-colorL);
+    background-color: var(--apr-color2L);
 }
 input:required:invalid {
-     background-color: var(--danger-colorL);
+     background-color: var(--apr-color2L);
 }
 
 input:required:valid {
     background-color: white;
 }
 input:required + label {
-    color: red;
+    color: var(--primary-color2);
 }
 
 form {
@@ -128,7 +128,7 @@ textarea {
 }
 
 .pageTitle{
-    background-color:var(--pub-color1L);
+    background-color:var(--apr-color3L);
     color: white;
     font-family:"Times New Roman";
     font-size:larger;
@@ -181,6 +181,7 @@ textarea {
     animation-duration: 0.4s
 }
 
+
 /* Add Animation */
 @keyframes animatetop {
     from {top: -300px; opacity: 0}
@@ -223,19 +224,29 @@ label {
 
 
 .btn-primary {
-    background-color: var(--pub-color1);
+    background-color: var(--apr-color1);
     padding: 15px, 30px;
 }
 
 .btn-load {
     margin: 30px;
-    background-color: var(--pub-color1);
+    background-color: var(--apr-color1);
 }
 
 .btn-big{
     padding: 15px;
     width: 90%;
     margin: 25px;
+}
+
+.btn-add{
+    background-color: var(--apr-color1L);
+    outline: 2px solid var(--apr-color1);
+    color: var(--apr-color3);
+}
+.btn-add:hover{
+    outline: 3px solid var(--apr-color3);
+
 }
 
     
@@ -262,7 +273,7 @@ label {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--pub-color1L);
+    background-color: var(--apr-color1L);
     -webkit-transition: .4s;
     transition: .4s;
 }
@@ -280,12 +291,12 @@ label {
 }
     
 input:checked + .slider {
-    background-color: var(--pub-color1); 
+    background-color: var(--apr-color1); 
     /*background-image: url(https://fonts.googleapis.com/icon?family=Material+Icons)*/
 }
     
 input:focus + .slider {
-    box-shadow: 0 0 1px var(--pub-color1);
+    box-shadow: 0 0 1px var(--apr-color1);
 }
     
 input:checked + .slider:before {
@@ -420,7 +431,7 @@ select {
 /* COLLAPSABLE AREAS*/
 .collapsible {
     background-color: white;
-    color: var(--pub-color1);
+    color: var(--apr-color1);
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -436,13 +447,13 @@ select {
     
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
 .active, .collapsible:hover {
-    background-color: var(--pub-color1);
+    background-color: var(--apr-color1);
     color: white;
     box-shadow: var(--shadow-dim) var(--shadow-color);
 }
 
 .comingSoonNav.active, .comingSoonNav:hover {
-    background-color: var(--pub-color1L);
+    background-color: var(--apr-color1L);
 }
     
 /* Style the collapsible content. Note: hidden by default */
@@ -452,7 +463,7 @@ select {
     overflow: hidden;
     background-color: white;
     border: solid;
-    border-color:var(--pub-color1);
+    border-color:var(--apr-color1);
     box-shadow: var(--shadow-dim) var(--shadow-color);
 }
 
@@ -475,7 +486,7 @@ select {
     vertical-align: center;
     position: relative;
     display: inline-block;
-    color: var(--pub-color1);
+    color: var(--apr-color1);
     max-width: max-content;
 }
 
@@ -492,7 +503,7 @@ select {
     text-align: left;
     padding: 20px;
     border-radius: 6px;
-    border: solid var(--pub-color1);
+    border: solid var(--apr-color1);
 
     position: absolute;
     z-index: 1;
@@ -503,7 +514,7 @@ select {
 }
 
 .tooltipL:hover {
-    background-color: var(--pub-color1);
+    background-color: var(--apr-color1);
     color: white;
 }
 

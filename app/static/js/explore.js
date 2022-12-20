@@ -1,22 +1,86 @@
+let colorOpac = .3;
 
-/*todayColor = 
-nowColor = todayColor;
-pastColor = ;
-futureColor = ;
-perpetualColor = ;*/
+String.prototype.convertToRGB = function(){
+    if(this.length != 6){
+        throw "Only six-digit hex colors are allowed.";
+    }
+
+    var aRgbHex = this.match(/.{1,2}/g);
+    var aRgb = [
+        parseInt(aRgbHex[0], 16),
+        parseInt(aRgbHex[1], 16),
+        parseInt(aRgbHex[2], 16)
+    ];
+    return aRgb;
+}
+
+let tempColor1 = getComputedStyle(document.documentElement).getPropertyValue('--apr-color1').replace('#','').trim();
+let aprColor1 = tempColor1.convertToRGB();
+let aprColor1O = tempColor1.convertToRGB();
+aprColor1O[3] = colorOpac;
+let tempColor1L = getComputedStyle(document.documentElement).getPropertyValue('--apr-color1L').replace('#','').trim();
+let aprColor1L = tempColor1L.convertToRGB();
+let aprColor1LO = tempColor1L.convertToRGB();
+aprColor1LO[3] = colorOpac;
+
+let tempColor2 = getComputedStyle(document.documentElement).getPropertyValue('--apr-color2').replace('#','').trim();
+let aprColor2 = tempColor2.convertToRGB();
+let aprColor2O = tempColor2.convertToRGB();
+aprColor2O[3] = colorOpac;
+let tempColor2L = getComputedStyle(document.documentElement).getPropertyValue('--apr-color2L').replace('#','').trim();
+let aprColor2L = tempColor2L.convertToRGB();
+let aprColor2LO = tempColor2L.convertToRGB();
+aprColor2LO[3] = colorOpac;
+
+let tempColor3 = getComputedStyle(document.documentElement).getPropertyValue('--apr-color3').replace('#','').trim();
+let aprColor3 = tempColor3.convertToRGB();
+let aprColor3O = tempColor3.convertToRGB();
+aprColor3O[3] = colorOpac;
+let tempColor3L = getComputedStyle(document.documentElement).getPropertyValue('--apr-color3L').replace('#','').trim();
+let aprColor3L = tempColor3L.convertToRGB();
+let aprColor3LO = tempColor3L.convertToRGB();
+aprColor3LO[3] = colorOpac;
 
 
+//aprColor1O[3] = colorOpac;
 
+//let aprColor1O = aprColor1.replace('#','#05');
+
+/*let aprColor2 = getComputedStyle(document.documentElement).getPropertyValue('--apr-color2');
+let aprColor2L = getComputedStyle(document.documentElement).getPropertyValue('--apr-color2L');
+let aprColor2O = aprColor2.replace('#',colorOpac);
+
+let aprColor3 = getComputedStyle(document.documentElement).getPropertyValue('--apr-color3');
+let aprColor3L = getComputedStyle(document.documentElement).getPropertyValue('--apr-color3L');
+let aprColor3O = aprColor3.replace('#',colorOpac);*/
+
+let neutralColorL = getComputedStyle(document.documentElement).getPropertyValue('--neutral-colorL');
+
+console.log("aprColor1L: ",aprColor1L);
+console.log("aprColor1: ",aprColor1);
+console.log("aprColor1O op:", aprColor1O);
+
+console.log("aprColor2O: ",aprColor2O);
 // MULTISELECT CHECKBOX //
 
+filterDisplayNames = {
+    "Tags": "Etiquetas",
+    "Sections": "Secções",
+    "Authors": "Jornalistas",
+    "Publications": "Fontes",
+    "T_types": "Definição temporal",
+    "P_types": "Definição espacial",
+    "E_names": "Áreas administrativas",
+}
+
 $(document).ready(function () {
-    $("#checksTags").CreateMultiCheckBox({ width: '230px', defaultText : 'Tags', height:'250px', multiName: "checkTags" });
-    $("#checksSections").CreateMultiCheckBox({ width: '230px', defaultText : 'Secções', height:'250px', multiName: "checkSections"});
-    $("#checksAuthors").CreateMultiCheckBox({ width: '230px', defaultText : 'Escritores', height:'250px', multiName: "checkAuthors"});
-    $("#checksPublications").CreateMultiCheckBox({ width: '230px', defaultText : 'Fontes', height:'250px', multiName: "checkPublications"});
-    $("#checksT_types").CreateMultiCheckBox({ width: '230px', defaultText : 'Definição Temporal', height:'250px', multiName: "checkT_types"});
-    $("#checksP_types").CreateMultiCheckBox({ width: '230px', defaultText : 'Definição Espacial', height:'250px', multiName: "checkP_types"});
-    $("#checksE_names").CreateMultiCheckBox({ width: '230px', defaultText : 'Areas Administrativas', height:'250px', multiName: "checkE_names"});
+    $("#checksTags").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["Tags"], height:'250px', multiName: "checkTags" });
+    $("#checksSections").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["Sections"], height:'250px', multiName: "checkSections"});
+    $("#checksAuthors").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["Authors"], height:'250px', multiName: "checkAuthors"});
+    $("#checksPublications").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["Publications"], height:'250px', multiName: "checkPublications"});
+    $("#checksT_types").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["T_types"], height:'250px', multiName: "checkT_types"});
+    $("#checksP_types").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["P_types"], height:'250px', multiName: "checkP_types"});
+    $("#checksE_names").CreateMultiCheckBox({ width: '230px', defaultText : filterDisplayNames["E_names"], height:'250px', multiName: "checkE_names"});
 });
 
 $(document).ready(function () {
@@ -138,6 +202,7 @@ jQuery.fn.extend({
 
     },
     UpdateSelect: function () {
+        
         var arr = [];
         var filterName = this[0].id.replace("checks","");
         var filterMultiName = this[0].id+'Vals';
@@ -158,7 +223,7 @@ jQuery.fn.extend({
         })*/
         const attrFilters = document.getElementById("attrFilters");
         if (arr.length < 1) {
-            filterVals = filterName;
+            filterVals = filterDisplayNames[filterName];
         } else if (arr.length > 3) {
             filterVals = "("+arr.length+" "+ filterName.toLowerCase() +" selecionados)"
         } else {
@@ -189,7 +254,7 @@ const view = new ol.View({
 
 const backDrop = new ol.layer.Tile({
     source: new ol.source.Stamen({
-        layer: 'toner-lite',
+        layer: 'toner-lines',
     }),
 });
 
@@ -216,9 +281,13 @@ const popupOverlay = new ol.Overlay({
         duration: 250,
     },
 });
-
+let ymax = 39.83801908704823;
+let xmax = -7.74577887999189;
+let ymin = 38.40907442337447;
+let xmin = -9.517104891617194;
+const maxExtent = ol.extent.boundingExtent([[xmin,ymin],[xmax,ymin],[xmin,ymax],[xmax,ymax]]);
+console.log("maxExtent: ",maxExtent);
 popupCloser.onclick = function (){
-    map.getView().fit(ol.extent.extend(brightlightLayer.getSource().getExtent(),highlightLayer.getSource().getExtent(),lowlightLayer.getSource().getExtent()))
     popupOverlay.setPosition(undefined);
     popupCloser.blur();
     return false;
@@ -286,8 +355,11 @@ map.on('singleclick',function(evt){
         if(popupInstances.length>1){
             popupScrollCount.innerHTML = popupIndex+1+"/"+popupInstances.length;
             popupScroll.style.display="block";
+            document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color3)');
+
         } else {
             popupScroll.style.display="none";
+            document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color1)');
         }
         popupOverlay.setPosition(coordinate);
     } else {
@@ -302,6 +374,7 @@ map.on('moveend',function(evt){
 
 function updatePopup(instanceID){
     console.log("Entering updatePopup");
+    document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color1)');
     for (i=0;i<instances.length;i++){
         if(instances[i]["i_id"]==instanceID){
             cardD = instances[i];
@@ -348,45 +421,49 @@ popupScrollR.onclick = function(){
 };
 
 /* Preparing highlight maps of selected instances */
-fill1 = 'rgba(156,34,15,0.2)';
-fill2 = 'rgba(156,34,15,1)';
-fill3 = 'rgba(0,0,0,0.5)';
-fill4 = 'rgba(155, 185, 193,0.4)';
-const style = new ol.style.Style({
+let fill1 = aprColor3;
+//fill1 = getComputedStyle(document.documentElement).getPropertyValue('--apr-color2');
+console.log("fill1: ",fill1);
+let fill2 = 'rgba(156,34,15,1)';
+let fill3 = 'rgba(0,0,0,0.5)';
+let fill4 = 'rgba(155, 185, 193,0.4)';
+
+
+/*const style = new ol.style.Style({
     fill: new ol.style.Fill({
-        color: fill1,
+        color: aprColor3,
     }),
     text: new ol.style.Text({
         font: '16px Calibri,sans-serif',
         fill: new ol.style.Fill({
-            color: 'rgba(255,255,255,1)',
+            color: neutralColorL,
         }),
         stroke: new ol.style.Stroke({
-            color: fill2,
+            color: aprColor3,
             width: 1,
         }),
     }),
-})
+})*/
 const filterStyle = new ol.style.Style({
     fill: new ol.style.Fill({
-        color: fill4,
+        color: aprColor1O,
     }),
     stroke: new ol.style.Stroke({
-        color: fill3,
-        width: 5,
+        color: 'transparent',
+        width: 1,
     }),
     text: new ol.style.Text({
         font: '12px Calibri,sans-serif',
         fill: new ol.style.Fill({
-            color: fill2,
+            color: 'transparent',
         }),
         stroke: new ol.style.Stroke({
-            color: '#fff',
+            color: 'transparent', //'#fff'
             width: 3,
         }),
     }),
 });
-const nullStyle = new ol.style.Style({
+/*const nullStyle = new ol.style.Style({
     fill: new ol.style.Fill({
         color: [255,255,255,0],
     }),
@@ -394,7 +471,7 @@ const nullStyle = new ol.style.Style({
         color: [244,244,255,0],
         width: 0,
     }),
-});
+});*/
 
 var popupSource = new ol.source.Vector();
 
@@ -427,27 +504,28 @@ function refineFeatures(feature){
     return feature
 }
 
-var maxLisbonExtent = [-9.500526607165842, 38.40907442337447,-8.490972125626802, 39.31772866134256];
-
 //General update of layerExtent to be called on filters
-function updateViewExtent(inputSource){
-    layerExtent = inputSource.getExtent();
-    console.log("Entering updateViewExtent with layerExtent: ",layerExtent);
-    filterMaxExtent = layerExtent;
-    if (layerExtent[0] < maxLisbonExtent[0]){
-        filterMaxExtent[0] = maxLisbonExtent[0];
+function updateViewExtent(inputExtent){
+    console.log("layerExtent: ",inputExtent);
+    console.log("maxExtent: ",maxExtent);
+    let bufferExtent;
+    let bufferPoly;
+    if (!isFinite(inputExtent[0])){
+        console.log("layerExtent is infinite. Redefining to maxExtent.");
+        bufferPoly = ol.geom.Polygon.fromExtent(maxExtent);
+    }else{
+        bufferExtent = ol.extent.getIntersection(inputExtent,maxExtent)
+        console.log("bufferExtent while extent (pre-polygon): ",bufferExtent);
+        //bufferExtent = ol.geom.Polygon.fromExtent(bufferExtent);
+        bufferPoly = ol.geom.Polygon.fromExtent(bufferExtent);
     };
-    if (layerExtent[1] < maxLisbonExtent[1]){
-        filterMaxExtent[1] = maxLisbonExtent[1];
-    };
-    if (layerExtent[2] > maxLisbonExtent[2]){
-        filterMaxExtent[2] = maxLisbonExtent[2];
-    };
-    if (layerExtent[3] > maxLisbonExtent[3]){
-        filterMaxExtent[3] = maxLisbonExtent[3];
-    };
-    map.getView().fit(ol.extent.buffer(filterMaxExtent, .01));
-    drawMap.getView().fit(ol.extent.buffer(filterMaxExtent, .01));
+    
+    console.log("bufferPoly before scale: ",bufferPoly.getCoordinates());
+    bufferPoly.scale(1);
+    console.log("bufferPoly after scale: ",bufferPoly.getCoordinates());
+    map.getView().fit(bufferPoly);
+    drawMap.getView().fit(bufferPoly);
+    //console.log("current view extent: ",map.getView().calculateExtent(map.getSize()));
     console.log("Leaving updateViewExtent");
 }
 
@@ -484,7 +562,7 @@ function loadSourceToExplore(wfs_url, loadType) {
                     }
                     success(features);
                     if (noFeatures == false) {
-                        updateViewExtent(inputSource = tempSource);
+                        updateViewExtent(inputExtent = tempSource.getExtent());
                         //Getting info of preloaded features
                         preloadF = [];
                         console.log("Will enter refineFeatures")
@@ -748,6 +826,16 @@ function saveDraw(){
     filterAllVals();
     console.log("Leaving saveDraw");
 }
+
+function cancelFilter(){
+    console.log("entering cancelFilter()");
+    drawSource.clear();
+    currentLayers = map.getLayers();
+    if (drawVector in currentLayers){
+        map.removeLayer(drawVector);
+    };    
+    document.getElementById("filterOverlay").style.display="none";
+};
 
 function addSkeletons(){
     console.log("Entering addSkeletons");
@@ -1153,18 +1241,33 @@ function renderDeets(cardD){
     mainIID = 0;
 
     yesInt = cardD["instances_yes"];
-
+    var newRow = true;
     for (subInst in cardD["instances_all"]){
+        let dRow;
+        if (newRow == true){
+            dRow = document.createElement('div');
+            dRow.className = 'rowI';
+            dOverlay.appendChild(dRow);
+        } else {
+            dRow = Array.from(document.getElementsByClassName('rowI')).pop();
+        }
+
+        newRow = !newRow;
+
+        var dColumn = document.createElement('div');
+        dColumn.className = "columnI";
+        dRow.appendChild(dColumn);
+
         if (yesInt.includes(subInst*1)){ //multiplying by 1 (*1) converts string subInst to number
             if (subInst*1 == cardD["i_id"]*1) {
-                subInstance(dOverlay = dOverlay, instance=cardD, lightLevel = "brightlight");
+                subInstance(dParent = dColumn, instance=cardD, lightLevel = "brightlight");
             } else {
                 //Instance filtered out
-                subInstance(dOverlay = dOverlay, instance = cardD["instances_all"][subInst], lightLevel = "highlight");
+                subInstance(dParent = dColumn, instance = cardD["instances_all"][subInst], lightLevel = "highlight");
             }
         } else {
             //Instance filtered In
-            subInstance(dOverlay = dOverlay, instance = cardD["instances_all"][subInst], lightLevel = "lowlight");
+            subInstance(dOverlay = dColumn, instance = cardD["instances_all"][subInst], lightLevel = "lowlight");
         };
     };
 
@@ -1188,12 +1291,12 @@ function renderDeets(cardD){
     dOverlay.appendChild(cButtonA);
 
     //THIS IS THE ACTUAL SOURCE
-    var dButtonA = document.createElement('div');
+    /*var dButtonA = document.createElement('div');
     dButtonA.className = 'dO-buttonA';
     dButtonA2 = document.createElement('div');
-    dButtonA2.className = 'dO-buttonA2';
+    dButtonA2.className = 'dO-buttonA2';*/
 
-    var dSource = document.createElement('a');
+    /*var dSource = document.createElement('a');
     dSource.href = cardD["web_link"];
     dSource.target = "_blank";
     var dButton = document.createElement('button');
@@ -1204,7 +1307,7 @@ function renderDeets(cardD){
 
     dButtonA2.appendChild(dSource);
     dButtonA.appendChild(dButtonA2);
-    dOverlay.appendChild(dButtonA);
+    dOverlay.appendChild(dButtonA);*/
     
 
     deetsOverlay.style.display = "block";
@@ -1212,7 +1315,7 @@ function renderDeets(cardD){
     console.log("Leaving renderDeets");
 };
 
-function subInstance(dOverlay, instance, lightLevel){
+function subInstance(dParent, instance, lightLevel){
     console.log("Entering subInstance");
     //CHANGE cardD to access the instace results
     //console.log(instance["i_id"],": ",lightLevel);
@@ -1220,13 +1323,14 @@ function subInstance(dOverlay, instance, lightLevel){
     dOInstance.className = 'dO-instance';
     dOInstance.classList.add(lightLevel);
     dOInstance.id = "i_"+instance["i_id"];
-    dOverlay.appendChild(dOInstance);
+    dOInstance.onclick = changeFocus;
+    dParent.appendChild(dOInstance);
 
     var dITitle = document.createElement('div');
     dITitle.className = "dO-ititle";
     dITitle.innerHTML = instance["p_name"];
     dITitle.id = "dITitle_"+instance["i_id"];
-    dITitle.onclick = changeFocus;
+    //dITitle.onclick = changeFocus;
     dOInstance.appendChild(dITitle);
 
     var dDateframe = document.createElement('div');
@@ -1255,8 +1359,14 @@ function changeFocus(input){
     console.log("entering changeFocus");
     if (input instanceof PointerEvent){
         popupContainer.style.display="none";
-        var iID = parseInt(input["path"][0].id.substring(8),10);
-        var sID = parseInt(input["path"][2].id.substring(7),10);
+        //var iID = parseInt(input["path"][0].id.substring(8),10);
+        var iID = parseInt(input["path"][1].id.substring(2),10);
+        var sID = parseInt(input["path"][4].id.substring(7),10);
+        console.log("sID: ",sID);
+        console.log("iID: ",iID);
+        console.log(input["path"]);
+        //console.log(input["path"].getElementsByClassName("dStory"));
+        
         var brightID = input["path"][1].id;
         var brightLightID = document.getElementById(brightID);
         type="iCard";
@@ -1353,11 +1463,11 @@ const brightlightLayer = new ol.layer.Vector({
     map: map,
     style: new ol.style.Style({
         stroke: new ol.style.Stroke({
-            color: 'rgba(255,255,0,1)',
+            color: aprColor2,
             width: 5,
         }),
         fill: new ol.style.Fill({
-            color: 'rgba(255,255,0,.5)',
+            color: aprColor2O,
         })
     }),
     zindex: 4,
@@ -1372,11 +1482,11 @@ const highlightLayer = new ol.layer.Vector({
     map: map,
     style: new ol.style.Style({
         stroke: new ol.style.Stroke({
-            color: 'rgba(155,185,193,1)',
+            color: aprColor2L,
             width: 5,
         }),
         fill: new ol.style.Fill({
-            color: 'rgba(255,255,0,.5)',
+            color: aprColor2LO,
         })
     }),
     zindex: 3,
@@ -1391,11 +1501,11 @@ const lowlightLayer = new ol.layer.Vector({
     map: map,
     style: new ol.style.Style({
         stroke: new ol.style.Stroke({
-            color: 'rgba(255,255,0,.2)',
+            color: aprColor1L,
             width: 1,
         }),
         fill: new ol.style.Fill({
-            color: 'rgba(255,255,0,.2)',
+            color: 'transparent',
         })
     }),
     zindex: 2,
@@ -1410,11 +1520,11 @@ const nolightLayer = new ol.layer.Vector({
     map: map,
     style: new ol.style.Style({
         stroke: new ol.style.Stroke({
-            color: 'rgba(250,250,250,.5)',
+            color: aprColor3L,
             width: 3,
         }),
         fill: new ol.style.Fill({
-            color: 'rgba(150,150,150,.2)',
+            color: aprColor3LO,
         })
     }),
     zindex: 1,
@@ -1507,14 +1617,24 @@ function updateMapHighlights(sourceID, type, relations){
         brightlightLayer.setZIndex(4);
 
         if (type=="sCard"){
-            try {
-                bhExtent = ol.extent.extend(brightlightLayer.getSource().getExtent(),highlightLayer.getSource().getExtent(),lowlightLayer.getSource().getExtent());
-                map.getView().fit(bhExtent);
+            /*try {
+                var bhExtent = ol.extent.extend(brightlightLayer.getSource().getExtent(),highlightLayer.getSource().getExtent(),lowlightLayer.getSource().getExtent());
+                console.log("bhExtent: ",bhExtent);
+                if (!isFinite(bhExtent[0])){
+                    console.log("bhExtent is infinite. Redefining to maxExtent");
+                    bhExtent = maxExtent;
+                };
+                var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(bhExtent,maxExtent));
+                bufferExtent.scale(1.2);
+                console.log("bufferExtent: ",bufferExtent);
+                map.getView().fit(bufferExtent);
+                //map.getView().fit(bhExtent);
             } catch(error) {
                 console.log("error: ",error);
                 return;
-            }
-            
+            }*/
+            var bhExtent = ol.extent.extend(brightlightLayer.getSource().getExtent(),highlightLayer.getSource().getExtent(),lowlightLayer.getSource().getExtent());
+            updateViewExtent(inputExtent = bhExtent);
             
         } else if (type=="map"){
             popupTitle.innerHTML = cardD["p_name"];
@@ -1527,7 +1647,14 @@ function updateMapHighlights(sourceID, type, relations){
             //console.log("brightlight feature(s): ");
             popupOverlay.setPosition(brightCentroid);
             popupContainer.style.display="block";
-            map.getView().fit(brightlightLayer.getSource().getExtent());
+
+            var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(brightlightLayer.getSource().getExtent(),maxExtent));
+            bufferExtent.scale(1);
+            console.log("bufferExtent: ",bufferExtent);
+            map.getView().fit(bufferExtent);
+
+
+            //map.getView().fit(brightlightLayer.getSource().getExtent());
         }
     }
     console.log("Leaving updateMapHighlights");

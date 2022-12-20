@@ -1,3 +1,8 @@
+<head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+
 {% extends "publisher/templates/publisher_template.html" %}
 
 {% block title %}Review{% endblock %}
@@ -16,21 +21,40 @@
         <!-- SUMMARY  -->
         <div class ="card">
           <div class = "card-body">
-            <h2>{{ story["section"] }}, {{ story["pub_date"] }}</h2>
+            <h2>{{ story["section"]|upper }}, {{ story["pub_date"] }}</h2>
             <h3>{{ story["publication"] }} </h3>
             <p>{{ story["summary"] }}</p>
             <div class="align-right">
               <p><i>{{ story["tags"] }}</i> </p>
             </div>
+            <div id="goToContext"></div>
           </div>
             
-          </div>
         </div>
-        
+      </div>
+    </div><br>
+
+    <div class="row">
+      <div class="column">
         <!-- INSTANCES -->
         <div class="card">
           <div class = "card-body">
-            <h2>Instâncias</h2> 
+            <div class="row_local">
+              <h2>Instâncias</h2>
+              <div class="toolTipL">
+                  <i class="material-icons">info_outline</i>
+                  <span class="tooltiptext">
+                    <p>Instâncias descrevem os aspetos spaciais e temporais dos conteudos das instâncias.</p><br>
+                    <p>Podem descrever os eventos, no futuro ou passado, ou ajuda com a contextualização da história.</p><br>
+                    <p>Pode associar zero, um, ou algumas instâncias à notícia.</p><br>
+                    <p>O mapa mostra as instâncias já associadas com a notícia.</p><br>
+                    <p>Para remover uma ou mais instâncias, seleciona as instâncias e carrega "Eliminar".</p><br>
+                    <p>Para remover a notícia completa, seleciona "Eliminar notícia e todas as instâncias associadas" e carrega "Eliminar".</p><br>
+                    <p>Acções de eliminação não podem ser desfeitas.</p>
+                  </span>
+              </div>
+            </div>
+                
 
             <!-- TOGGLE -->
             <div id="toggleDiv" class="container1">
@@ -80,22 +104,29 @@
                   <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                   <div id="popup-instances"></div>
                   <div id="popup-story" display="none"></div>
+                  <div id="popupScroll" class="popup-scroll" style="display:block">
+                    <div id="scrollL" class="popup-direction">&larr;</div>
+                    <div id="scrollCount" class="popup-count"></div>
+                    <div id="scrollR" class="popup-direction">&rarr;</div>
+                  </div>
                 </div>
                 <div id="progress"></div>
-
               </div>
-              
-              <div id="info">&nbsp;</div>
             </div>
           </div>
         </div>
+
       </div>
-    </div>
+      
+    </div>    
   </div>
 
   <!-- JAVASCRIPT -->
   
   <script>
+    var goToContext = document.getElementById("goToContext");
+    goToContext.innerHTML=`<a href="../../jornal/${storyID}/historia"><button type="button" class="btn btn-primary">Ver a versão publicada</button></a>`;
+    console.log("goToContext: ",goToContext);
     var instances = '{{ instances|tojson }}';
     instances = JSON.parse(instances);
     console.log("instances: ",instances);
@@ -143,6 +174,8 @@
     function temCerteza(){
       console.log("Entered temCerteza")
     }
+
+    
 
     
   </script>

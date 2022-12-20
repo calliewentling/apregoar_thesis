@@ -1,21 +1,16 @@
 /* Variable Definition */
-:root {
-    --primary-color: rgba(155, 185, 193);
-    --secondary-color: #666;
-    --dark-color: black;
-    --light-color: white;
-    --shadow-color: rgba(0,0,0,0.3);
-    
-    --brightlight-color: rgb(255, 255, 0,1);
-    --highlight-color: rgba(255, 255, 150, 1);
-    --lowlight-color: rgb(69, 108, 131);
+@import './constants.css';
+:root {   
+    --brightlight-color: var(--apr-color2);
+    --highlight-color: var(--apr-color2L);
+    --lowlight-color: var(--apr-color1L);
     padding: 10px;
 
     --card-height: 100px;
     --card-width: 300px;
     --card-margin: 10px;
     --card-box-shadow: -10px 5px 20px;
-    --card-box-shadow-hover: -10px 10px 20px rgba(0,0,0,0.4);
+    --card-box-shadow-hover: -10px 10px 20px var(--shadow-color);
     --card-border-radius: 5px;
     --card-border: 3px solid;
 
@@ -26,13 +21,64 @@
 
     --card-details-margin: 5px 5px 5px 0px;
     --card-details-width: 90%;
+    --arrow-color: var(--apr-color1);
+}
+
+body {
+    background-color: var(--neutral-colorL);
+    color: var(--apr-color3);
+    accent-color: var(--apr-color1);
+}
+
+input,select,textarea {
+    border: 1px solid var(--apr-color1);
+}
+input:focus,select:focus,textarea:focus{
+    outline: 3px solid var(--apr-color1);
+}
+
+input[type=checkbox]:focus{
+    outline: 3px transparent;
+}
+
+
+input[type=checkbox].regCheck{
+    display: none;
+}
+
+input[type=checkbox].regCheck + *::before{
+    content: "";
+    display: inline-block;
+    vertical-align: bottom;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 10%;
+    border-style: solid;
+    border-width: 0.1rem;
+    border-color: var(--apr-color1);
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+input[type=checkbox].regCheck:checked + *::before{
+    content: "✓";
+    color: var(--neutral-colorL);
+    text-align: center;
+    padding-bottom: .2rem;
+    background: var(--apr-color1);
+    border-color: var(--apr-color1);
+}
+
+input[type="checkbox"].regCheck:checked + *{
+    color: var(--apr-color1);
 }
 
 .button1 {
-    background-color: var(--secondary-color);
+    background-color: var(--apr-color1);
     border: none;
-    color: white;
-    padding: 15px 32px;
+    outline: 2px solid var(--apr-color3);
+    color: var(--neutral-colorL);
+    padding: 15px 25px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -41,14 +87,17 @@
     box-shadow: -10px 5px 20px var(--shadow-color); 
 }
 .button1:hover {
-    box-shadow: -10px 10px 20px rgba(0,0,0,0.4);
+    box-shadow: -10px 10px 20px var(--shadow-color);
     font-weight: bold;
+    outline: 3px solid var(--apr-color3);
+    
 }
 .button2 {
-    background-color: var(--primary-color);
+    background-color: var(--apr-color1L);
+    outline: 2px solid var(--apr-color1);
     border: none;
-    color: white;
-    padding: 10px 25px;
+    color: var(--apr-color3);
+    padding: 15px 25px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -57,13 +106,14 @@
     box-shadow: -10px 5px 20px var(--shadow-color); 
 }
 .button2:hover {
-    box-shadow: -10px 10px 20px rgba(0,0,0,0.4);
+    box-shadow: -10px 10px 20px var(--shadow-color);
     font-weight: bold;
+    outline: 3px solid var(--apr-color3);
 }
 
 .buttonHide {
-    background-color: black;
-    color: grey;
+    background-color: var(--apr-color3);
+    color: var(--apr-color3L);
 }
 
 .map {
@@ -98,7 +148,7 @@ top: 3em;
     bottom: 0;
     left: 0;
     height: 2px;
-    background: rgba(0,60,136,0.4);
+    background: var(--apr-color2);
     width: 0;
     transition: width 250ms;
 }
@@ -107,26 +157,28 @@ top: 3em;
 /*POPUP DEFINITIONS */
 .ol-popup {
     position: absolute;
-    background-color: var(--primary-color);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    background-color: var(--apr-color1);
+    box-shadow: -5px 5px 4px var(--shadow-color);
     border-radius: 10px;
-    border: 2px solid var(--brightlight-color);
+    border: 2px solid var(--apr-color2);
     bottom: 12px;
     left: -50px;
     min-width: 280px;
 }
 
 .popup-ititle {
-    background-color: white;
+    background-color: var(--neutral-colorL);
     padding: 10px;
-    color: black;
+    border-top-left-radius: 8px;
+    border-top-right-radius:8px;
+    color: var(--apr-color3);
     font-size: 14px;
     font-weight: bold;
 }
 
 .popup-stitle{
     padding: 10px;
-    color: white;
+    color: var(--neutral-colorL);
     font-size: 12px;
 }
 
@@ -135,11 +187,13 @@ top: 3em;
     display:absolute;
     position: center;
     justify-content: center;
-    color: white;
+    color: var(--neutral-colorL);
     font-size: 11px;
     font-weight: bold;
-    background-color:var(--secondary-color);
+    background-color:var(--apr-color3);
     padding: 10px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .popup-direction, .popup-count{
@@ -164,13 +218,14 @@ top: 3em;
     pointer-events: none;
   }
   .ol-popup:after {
-    border-top-color: var(--secondary-color);
+    border-top-color: var(--arrow-color);
     border-width: 10px;
     left: 48px;
     margin-left: -10px;
   }
+
   .ol-popup:before {
-    border-top-color: var(--brightlight-color);
+    border-top-color: var(--apr-color2);
     border-width: 12px;
     left: 48px;
     margin-left: -12px;
@@ -178,20 +233,50 @@ top: 3em;
   .ol-popup-closer {
     text-decoration: none;
     position: absolute;
-    color: black;
+    color: var(--apr-color1L);
     top: 2px;
     right: 8px;
   }
   .ol-popup-closer:after {
     content: "✖";
+    color: var(--apr-color1L);
   }
   
+  /*Testing scroll through pop up*/
+.ol-popup-pagebehind {
+    text-decoration: none;
+    position: absolute;
+    bottom: 0px;
+    left: 100px;
+}
+.ol-popup-pagebehind:after {
+    content: '<';
+}
+.ol-popup-pageahead {
+    text-decoration: none;
+    position: absolute;
+    bottom: 0px;
+    right: 100px;
+}
+.ol-popup-pageahead:after {
+    content: '>';
+}
+
+div.scrollResults {
+    margin:4px, 4px;
+    margin-top: 10px;
+    padding:4px;
+    height: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-align:justify;
+}
   
 
 /* MULTICHECK BOX */
 
 .MultiCheckBox {
-    border:1px solid #e2e2e2;
+    border:1px solid var(--apr-color1);
     padding: 5px;
     border-radius:5px;
     cursor:pointer;
@@ -204,14 +289,14 @@ top: 3em;
     margin-top: -7px;
     height: 10px;
     width: 14px;
-    color:#787878;
+    color:var(--apr-color1);
 } 
 
 .MultiCheckBoxDetail {
     display:none;
     position:relative; /*cgw updated! Originally absolute (must scroll to find if filter is already scrolled). Fixed gets lost if scrolled. Sticky & static makes incur spaces to accommodate the list but its clear where it is and returns after*/
-    border:1px solid #e2e2e2;
-    background-color:#ffffff;
+    border:1px solid var(--apr-color1);
+    background-color:var(--neutral-colorL);
     overflow-y:hidden;
 }
 
@@ -222,11 +307,15 @@ top: 3em;
     .MultiCheckBoxDetail .cont  {
         clear:both;
         overflow: hidden;
-        padding: 2px;
+        padding: 5px;
     }
 
     .MultiCheckBoxDetail .cont:hover  {
-        background-color:#cfcfcf;
+        background-color:var(--apr-color1L);
+    }
+
+    input.MultiCheckBoxDetail {
+        padding: 5px;
     }
 
     .MultiCheckBoxDetailBody > div > div {
@@ -241,7 +330,8 @@ top: 3em;
     overflow:hidden;
     position:relative;
     height: 28px;
-    background-color:#3d3d3d;
+    background-color: var(--apr-color1);
+    font-weight:bold;
 }
 
     .MultiCheckBoxDetailHeader>input {
@@ -254,7 +344,7 @@ top: 3em;
         position: absolute;
         top: 5px;
         left: 24px;
-        color:#fff;
+        color: var(--neutral-colorL);
     }
 
     /* Distributing screen */
@@ -350,15 +440,16 @@ top: 3em;
         line-height: .7;
         letter-spacing: 2px;
         text-transform: uppercase;
-        background: var(--primary-color);
-        color: #fff;
+        background: var(--apr-color3);
+        color: var(--neutral-colorL);
         padding: 10px 10px;
         transform-origin:  0 0px;
-        transform: rotate(90deg);
+        transform: rotate(-90deg);
         position: absolute;
-        width: 130px;
+        left: -50px;
+        width: 150px;
         height: 50px;
-        border: 1px solid #d9d9d9;
+        border: 1px solid var(--apr-color2);
         border-radius: 5px;
         /*top: 0;
         left: 15px;*/
@@ -367,7 +458,7 @@ top: 3em;
     .resultsStory {
         align-items: left;
         justify-content: left;
-        background: #d9d9d9;
+        background: var(--apr-color3L);
         overflow-x: auto;
         white-space: nowrap;
         height: 150px;
@@ -379,10 +470,10 @@ top: 3em;
         margin: var(--card-margin);
         box-shadow: var(--card-box-shadow) var(--shadow-color);
         border-radius: var(--card-border-radius);
-        border: var(--card-border) var(--light-color);
+        border: var(--card-border) var(--neutral-colorL);
         overflow: hidden;
-        background: var(--dark-color);
-        color: var(--light-color);
+        background: var(--neutral-colorL);
+        color: var(--apr-color3);
         display: inline-block; /*previously: flex*/
         flex-direction: column; /*column*/
         align-items: center;
@@ -403,13 +494,15 @@ top: 3em;
         padding: var(--card-title-padding);
         text-align: left;
         position: relative;
-        background: var(--primary-color);
+        background: var(--apr-color1);
+        color: var(--neutral-colorL);
     }
 
     .story-card .story-details{
         text-align: center;
         margin: var(--card-details-margin);
         width: var(--card-details-width);
+        content: center;
     }
 
     .story-card .story-details .pub-date {
@@ -419,15 +512,25 @@ top: 3em;
     }
 
     .story-card .story-details .story-section {
-        font-size: 10px;
-        color: var(--primary-color);
+        font-size: 12px;
+        color: var(--apr-color3);
         font-weight: 500;
     }
 
     .story-card .story-details .story-tags {
-        margin-top: 5px;
+
         font-size: 12px;
-        color: var(--secondary-color);
+        color: var(--apr-color1);
+        /*background-color: var(--apr-color3L);
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        width: 200px;
+        left: 40px;*/
+        position: relative;
+        overflow:hidden;
+        font-weight:bold;
+
+
     }
 
     .resultsInstance {
@@ -435,7 +538,7 @@ top: 3em;
         align-items: left;
         justify-content: left;
         /*height: 135px;*/
-        background: #d9d9d9;
+        background: var(--apr-color3L);
         overflow-x: auto;
         white-space: nowrap;
         height: 150px;
@@ -448,11 +551,11 @@ top: 3em;
         margin: var(--card-margin);
         box-shadow: var(--card-box-shadow) var(--shadow-color);
         border-radius: var(--card-border-radius);
-        border: var(--card-border) var(--light-color);
+        border: var(--card-border) var(--neutral-colorL);
         overflow: hidden;
         /*background: var(--primary-color);*/
-        background-color: rgb(235,247,250);
-        color: var(--light-color);
+        background-color: var(--neutral-colorL);
+        color: var(--apr-color3);
         display: inline-block; /*previously: flex*/
         flex-direction: column; /*column*/
         align-items: center;
@@ -473,8 +576,8 @@ top: 3em;
         padding: var(--card-title-padding);
         text-align: left;
         position: relative;
-        background: var(--light-color);
-        color: var(--dark-color);
+        background: var(--apr-color1L);
+        color: var(--apr-color3);
     }
 
     .instance-card .instance-details{
@@ -489,39 +592,46 @@ top: 3em;
 
     .instance-card .instance-details {
         font-size: 12px;
-        color: var(--light-color);
+        color: var(--apr-color1L);
         font-weight: bold;
     }
 
     .instance-dateframe {
         font-size: 12px;
         font-weight: bold;
+        background-color: var(--apr-color1);
+        padding: 0 5px;
+        border-radius: 4px;
+        width: 150px;
+        left: 65px;
+        position: relative;
+        overflow:hidden;
     }
 
     .past {
-        color: rgb(103,140,110);
+        color: var(--apr-color2L);
     }
 
     .future {
-        color: rgb(103,132,140);
+        color: var(--apr-color2L);
     }
 
     .perpetual {
-        color: rgb(92,92,92);
+        color: var(--neutral-colorL);
     }
 
     .today{
-        color: rgba(229,140,211);
+        color: var(--apr-color2);
     }
      
     .now{
-        color: rgba(229,140,211);
+        color: var(--apr-color2);
     }
 
     .instance-card .instance-details .instance-stitle {
         margin-top: 5px;
         font-size: 10px;
-        color: var(--secondary-color);
+        color: var(--apr-color3);
     }
 
 
@@ -584,7 +694,7 @@ top: 3em;
     /*LOADING DETAIL OVERLAY*/
     .dO {
         border-radius: 5px;
-        border: 10px solid var(--light-color);
+        border: 10px solid var(--neutral-colorL);
         position: relative;
         width: 97%;
         /*
@@ -593,9 +703,9 @@ top: 3em;
         max-height: 80%;
         */
         font-size: 14px;
-        background-color: rgba(0,0,0,.75);
+        background-color: var(--neutral-colorL);
         box-shadow: var(--card-box-shadow) var(--shadow-color);
-        color: var(--light-color);
+        color: var(--apr-color3);
         margin: 10px;
         overflow-y: auto;
     }
@@ -607,8 +717,8 @@ top: 3em;
         font-weight: bold;
         padding-right: 10px;
         text-align: right;
-        background-color: var(--primary-color);
-        color: var(--dark-color);
+        background-color: var(--apr-color1);
+        color: var(--apr-color3);
         cursor:pointer;
     }
 
@@ -621,29 +731,29 @@ top: 3em;
         top: 2%;
         font-size: 20px;
         font-weight: bold;
-        color: var(--light-color);
-        background-color:var(--primary-color);
+        color: var(--neutral-colorL);
+        background-color:var(--apr-color1);
     }
 
     .dO .dO-story{
-        color: var(--primary-color);
+        color: var(--apr-color3);
     }
 
     .dO .dO-story .dO-author {
         padding-top: 10px;
         text-align: center;
         font-weight: bold;
-        color: white;
+        
     }
 
     .dO .dO-story .dO-section {
         text-align: center;
-        color: white;
+     
     }
 
     .dO .dO-story .dO-pubdate {
         text-align: center;
-        color: white;
+       
     }
 
     .dO .dO-story .dO-tags {
@@ -660,18 +770,19 @@ top: 3em;
     }
 
     .dO-instance {
-        background-color: var(--primary-color);
-        color: white;
+        background-color: var(--neutral-colorL);
+        color: var(--apr-color3);
         margin: 15px;
         border-radius: 4px;
-        box-shadow: -10px 5px 20px var(--primary-color);
+        box-shadow: -10px 5px 20px var(--shadow-color);
+
     }
 
     .dO-instance .dO-ititle {
-        color: black;
+        color: var(--apr-color3);
         height: 30px;
-        border-radius: 4px;
-        background-color:white;
+        border-radius: 0px;
+        background-color:var(--apr-color1L);
         padding-top: 5px;
         padding-bottom: 5px;
         padding-left: 10px;
@@ -681,9 +792,10 @@ top: 3em;
         cursor:pointer;
     }
 
-    .dO-ititle:hover{
-        box-shadow: -10px 10px 20px rgba(0,0,0,0.4);
+    .dO-instance:hover{
+        box-shadow: -10px 10px 20px var(--shadow-color);
         font-weight: bold;
+        background-color: var(--apr-color1L);
     }
 
     .dO-instance .dO-dateframe {
@@ -691,18 +803,18 @@ top: 3em;
         padding-right: 10px;
         text-align: right;
         font-weight: bold;
-        color: var(--secondary-color);
+        color: var(--apr-color3);
     }
 
     .dO-instance .dO-timeframe{
         text-align: right;
         padding-right: 10px;
-        color: var(--secondary-color);
+        color: var(--apr-color3);
     }
 
     .dO-instance .dO-tdesc{
         padding-right: 10px;
-        color: var(--secondary-color);
+        color: var(--apr-color3);
         font-size: 14px;
         text-align: right;
         font-style: italic;
@@ -710,7 +822,7 @@ top: 3em;
 
     .dO-instance .dO-pdesc{
         padding: 10px;
-        color: white;
+        color: var(--apr-color3);
         font-size: 14px;
 
     }
@@ -724,9 +836,13 @@ top: 3em;
 
     
 
-    .dO-buttonA2:hover {
-        box-shadow: -10px 5px 20px var(--light-color);
+    /*.dO-buttonA2:hover {
+        box-shadow: -10px 5px 20px var(--neutral-colorL);
         bottom: 5px;
+    }*/
+    .highlight {
+        border: 3px solid var(--highlight-color);
+        box-shadow:  -10px 5px 20px var(--highlight-color);
     }
 
     .brightlight {
@@ -734,9 +850,7 @@ top: 3em;
         box-shadow: -10px 5px 20px var(--brightlight-color);
     }
 
-    .highlight {
-        border: 3px solid var(--highlight-color);
-    }
+    
 
     .lowlight {
         border: 3px solid var(--lowlight-color);
@@ -766,7 +880,7 @@ top: 3em;
 
 
     /* INSTANCE CARD DEETS*/
-    .instance-deets {
+    /*.instance-deets {
         border-radius: 5px;
         position: fixed;
         width: 80%;
@@ -774,9 +888,9 @@ top: 3em;
         top: 10%;
         left: 10%;
         font-size: 14px;
-        background-color: var(--primary-color);
+        background-color: var(--neutral-colorL);
         box-shadow: -10px 5px 20px var(--shadow-color);
-        color: white;
+        color: var(--apr-color3);
         margin: 10px;
         overflow-y: auto;
     }
@@ -787,8 +901,8 @@ top: 3em;
         font-weight: bold;
         padding-right: 10px;
         text-align: right;
-        background-color: white;
-        color: black;
+        background-color: var(--neutral-colorL);
+        color: var(--apr-color3);
         cursor:pointer;
     }
 
@@ -838,7 +952,7 @@ top: 3em;
     .story-deets .deets-button:hover {
         font-size: 20px;
         padding: 5px;
-    }
+    }*/
 
     /*FILTER OVERLAY*/
     .filterOverlay {
@@ -849,9 +963,9 @@ top: 3em;
         top: 10%;
         left: 10%;
         font-size: 14px;
-        background-color: white;
+        background-color: var(--neutral-colorL);
         box-shadow: -10px 5px 20px var(--shadow-color);
-        color: black;
+        color: var(--apr-color3);
         margin: 10px;
         overflow-y: auto;
         padding: 10px;
@@ -859,3 +973,30 @@ top: 3em;
     }
 
     
+    /* CREATING COLUMNS FOR INSTANCES CARDS IN DEETS from https://www.w3schools.com/howto/howto_css_column_cards.asp */
+    /* Float four columns side by side */
+    .columnI {
+        float: left;
+        width: 50%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding in columns */
+    .rowI {
+        margin: 0 -5px;
+    }
+
+    .rowI:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    /* Responsive columns - one column layout (vertical) on small screens */
+    @media screen and (max-width: 600px) {
+        .columnI {
+            width: 100%;
+            display: block;
+            margin-bottom: 20px;
+        }
+    }

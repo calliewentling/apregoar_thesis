@@ -1,10 +1,15 @@
+<head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+
 {% extends "publisher/templates/publisher_template.html" %}
 
 {% block title %}Notícia Nova{% endblock %}
 
 {% block main %}
 
-<script src="{{ url_for('static', filename='js/create.js') }}"></script>
+
 
 
 
@@ -14,7 +19,18 @@
         <div class="pageTitle">Publicar uma Notícia</div>
         <div class="card">
             <div class="card-body">
-                
+                <div class="row_local">
+                    <h3>Entrar as detalhas da notícia</h3>
+                    <div class="toolTipL">
+                        <i class="material-icons">info_outline</i>
+                        <span class="tooltiptext">
+                            <p>Preencha os campos para criar uma nova notícia.</p><br>
+                            <p>Depois, pode associar instâncias dos eventos à história.</p><br>
+                            <p>Escolha uma das agências que pertence. As opções das jornalistas e secçãos vão atualizar automaticamente.</p><br>
+                            <p>Se pretende de adicionar um novo autor ou nova secção, pode addicionar pelas butões na direta dos campos.</p>
+                        </span>
+                    </div>
+                </div>
                 
                 <form name="addStory" id="formAddStory" action="{{ url_for('review') }}" method="post">
                     
@@ -52,7 +68,7 @@
                     <div class="row_local">
                         <label class="rigid" for="author">Jornalista(s): </label>
                         <select multiple name="author" id="author" class="prefilledVals"></select>
-                        <button type="btn btn-add" id="addAuthor" onclick="addNew('author');"> + </button>
+                        <button type="button" class="btn btn-add" id="addAuthor" onclick="addNew('author');"> + </button>
                         <!--<input type="text" name="author" placeholder="Jornalista(s)">-->
                     </div>
                     <div class="row_local">
@@ -63,7 +79,7 @@
                     <div class="row_local">
                         <label class="rigid" for="section">Secção:</label>
                         <select multiple name="section" id="section" class="prefilledVals"></select>
-                        <button type="btn btn-add" id="addAuthor" onclick="addNew('section');"> + </button>
+                        <button type="button" class="btn btn-add" id="addAuthor" onclick="addNew('section');"> + </button>
                     </div>
                     <div class="row_local">
                         <label class="rigid" for="tags">Etiquetas: </label>

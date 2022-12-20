@@ -1,0 +1,14 @@
+:root {
+    --danger-colorL: var(--apr-color2L);
+    --danger-color: var(--apr-color2);
+    --shadow-color: var(--apr-color3L);
+    --shadow-dim: -10px 5px 20px;
+    --apr-color1: #5B9BD5;
+    --apr-color1L: #BFD8EF;
+    --apr-color2: #FFC000;
+    --apr-color2L: #FFEEB9;
+    --apr-color3: #595959;
+    --apr-color3L: #B6b6b6;
+    --neutral-colorL: white;
+
+}
