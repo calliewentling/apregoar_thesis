@@ -367,14 +367,14 @@ map.on('singleclick',function(evt){
     }    
 });
 
-map.on('moveend',function(evt){
+/*map.on('moveend',function(evt){
     console.log("moveend triggered: ",evt);
     map.render();
-});
+});*/
 
 function updatePopup(instanceID){
     console.log("Entering updatePopup");
-    document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color1)');
+    
     for (i=0;i<instances.length;i++){
         if(instances[i]["i_id"]==instanceID){
             cardD = instances[i];
@@ -889,7 +889,16 @@ function filterAllVals(){
         map.addLayer(drawVector);
     }
     filteredSource.clear();
-    //console.log("allFilters: ",allFilters);
+    console.log("allFilters: ",allFilters);
+    for (i = 0; i<allFilters["T_types"].length; i++){
+        if (allFilters["T_types"][i] == "contextual"){
+            allFilters["T_types"][i] = "allday_p";
+        } else if (allFilters["T_types"][i] == "data"){
+            allFilters["T_types"][i] = "allday_y";
+        } else {
+            allFilters["T_types"][i] = "allday_n";
+        };
+    };
     bodyContent = JSON.stringify(allFilters);
     //console.log("bodyContent: ",bodyContent);
     fetch(`${window.origin}/explore/map`, {
@@ -1436,6 +1445,10 @@ function closeDeets(){
     console.log("Leaving closeDeets");
 }
 
+function drawSpatialF(){
+
+}
+
 function showFilters() {
     console.log("Entering showFilters");
     closeDeets();
@@ -1617,22 +1630,7 @@ function updateMapHighlights(sourceID, type, relations){
         brightlightLayer.setZIndex(4);
 
         if (type=="sCard"){
-            /*try {
-                var bhExtent = ol.extent.extend(brightlightLayer.getSource().getExtent(),highlightLayer.getSource().getExtent(),lowlightLayer.getSource().getExtent());
-                console.log("bhExtent: ",bhExtent);
-                if (!isFinite(bhExtent[0])){
-                    console.log("bhExtent is infinite. Redefining to maxExtent");
-                    bhExtent = maxExtent;
-                };
-                var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(bhExtent,maxExtent));
-                bufferExtent.scale(1.2);
-                console.log("bufferExtent: ",bufferExtent);
-                map.getView().fit(bufferExtent);
-                //map.getView().fit(bhExtent);
-            } catch(error) {
-                console.log("error: ",error);
-                return;
-            }*/
+
             var bhExtent = ol.extent.extend(brightlightLayer.getSource().getExtent(),highlightLayer.getSource().getExtent(),lowlightLayer.getSource().getExtent());
             updateViewExtent(inputExtent = bhExtent);
             

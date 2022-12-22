@@ -53,12 +53,21 @@ from app.models import Users, Stories, Tags, Tagging, Instances, Sectioning, Sec
 session = Session(engine)
 
 #Normal stuff here
-def cleanLists(list_in, s_id, i_id,list_out):
+def cleanLists(list_in, s_id, i_id,list_out,attr):
     for item in list_in:
-        if not item:
-            item = "*sem valor"
-        if item == " ":
-            item = "*sem valor"
+        if attr == "t_types":
+            if item == "allday_n":
+                item = "data e hora"
+            elif item == "allday_y":
+                item = "data"
+            else:
+                item = "contextual"
+        else:
+            if not item:
+                item = "*sem valor"
+            if item == " ":
+                item = "*sem valor"
+        
         #print(item," - ",type(item))
         if isinstance(item,str):
             item_p = item.strip().lower()
@@ -284,7 +293,7 @@ def process_explore(req):
             print("Personalizado")
             stmtP = (stmtP.where(Instance_ugaz.p_id !=None).subquery())    
 
-    #If no """instance filters, defaultot story level filters (using the left join)
+    #If no """instance filters, defaultot story level filters (using the left join) 
     if instance_filtered is False:
         print("No instance filters applied")
     else:
@@ -421,7 +430,7 @@ def process_explore(req):
                     now = datetime.datetime.now()
                     today = datetime.date.today()
                     if ttype=="allday_p":
-                        i_D = "Temporada continual"
+                        i_D = "Contextual"
                         i_frame = 0 #timeframe is perpetual
                         t_class = "perpetual"
                         t_delt = 0
@@ -636,8 +645,8 @@ def prepare_explore():
         }
         print("Result: ",result)
         for row in result:
-            t_types = cleanLists(list_in = [row["t_type"]], s_id = row["s_id"],i_id=row["i_id"],list_out = t_types)
-            pub_dates = cleanLists(list_in = [row["pub_date"]], s_id = row["s_id"],i_id=row["i_id"],list_out = pub_dates)
+            t_types = cleanLists(list_in = [row["t_type"]], s_id = row["s_id"],i_id=row["i_id"],list_out = t_types,attr="t_types")
+            pub_dates = cleanLists(list_in = [row["pub_date"]], s_id = row["s_id"],i_id=row["i_id"],list_out = pub_dates,attr ="pub_dates")
             if not row["i_id"]:
                 p_types["sem lugares"]["s_ids"].append(row["s_id"])
             else: 

@@ -364,8 +364,8 @@ def prepare_exploreJ(p_id):
         }
         print("Result: ",result)
         for row in result:
-            t_types = cleanLists(list_in = [row["t_type"]], s_id = row["s_id"],i_id=row["i_id"],list_out = t_types)
-            pub_dates = cleanLists(list_in = [row["pub_date"]], s_id = row["s_id"],i_id=row["i_id"],list_out = pub_dates)
+            t_types = cleanLists(list_in = [row["t_type"]], s_id = row["s_id"],i_id=row["i_id"],list_out = t_types,attr="t_types")
+            pub_dates = cleanLists(list_in = [row["pub_date"]], s_id = row["s_id"],i_id=row["i_id"],list_out = pub_dates,attr="pub_dates")
             if not row["i_id"]:
                 p_types["sem lugares"]["s_ids"].append(row["s_id"])
             else: 
