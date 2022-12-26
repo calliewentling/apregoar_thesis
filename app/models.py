@@ -309,8 +309,10 @@ class Instances(Base):
     s_id = Column(Integer, ForeignKey("apregoar.stories.s_id"))
     u_id = Column(Integer, ForeignKey("apregoar.users.u_id"))
     p_name = Column(Text)
-    #created = db.Column(db.DateTime)
-    #edited = db.Column(db.DateTime)
+    created = db.Column(db.DateTime)
+    edited = db.Column(db.DateTime)
+    i_name = Column(Text)
+    i_desc = Column(Text)
 
     __table_args__ = {
         "schema":"apregoar"

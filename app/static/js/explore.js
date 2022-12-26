@@ -288,6 +288,7 @@ let xmin = -9.517104891617194;
 const maxExtent = ol.extent.boundingExtent([[xmin,ymin],[xmax,ymin],[xmin,ymax],[xmax,ymax]]);
 console.log("maxExtent: ",maxExtent);
 popupCloser.onclick = function (){
+    closeDeets();
     popupOverlay.setPosition(undefined);
     popupCloser.blur();
     return false;
@@ -300,6 +301,7 @@ var map = new ol.Map({
     interactions: ol.interaction.defaults({mouseWheelZoom:true}),
 });
 map.addLayer(backDrop);
+
 
 let popupFeatures;
 map.on('singleclick',function(evt){
@@ -374,7 +376,7 @@ map.on('singleclick',function(evt){
 
 function updatePopup(instanceID){
     console.log("Entering updatePopup");
-    
+    console.log("classList in updatePopup: ",document.getElementById("deetsAll").classList);
     for (i=0;i<instances.length;i++){
         if(instances[i]["i_id"]==instanceID){
             cardD = instances[i];
@@ -479,20 +481,27 @@ var popupSource = new ol.source.Vector();
 var drawSource = new ol.source.Vector({wrapX: false});
 var drawVector = new ol.layer.Vector({
     source: drawSource,
+    properties: {
+        layerName: "drawVector",
+    },
 });
+map.addLayer(drawVector);
+console.log("currentLayers: ",map.getLayers());
 
-const drawMap = new ol.Map({
+/*const drawMap = new ol.Map({
     layers: [backDrop, drawVector], //includes basemap layer (backDrop) for consistency
     target: 'filterMap', //create target called 'filterMap'
     view: view, //use hte same base view as the main map ('map'). When 'map' view is updated, also setting 'filterMap'.
-});
+});*/
 
 let draw = new ol.interaction.Draw({
     source: drawSource,
     type: "Polygon",
     freehand: true,
 });
-drawMap.addInteraction(draw);
+//drawMap.addInteraction(draw);
+
+
 
 
 function refineFeatures(feature){
@@ -524,7 +533,7 @@ function updateViewExtent(inputExtent){
     bufferPoly.scale(1);
     console.log("bufferPoly after scale: ",bufferPoly.getCoordinates());
     map.getView().fit(bufferPoly);
-    drawMap.getView().fit(bufferPoly);
+    //drawMap.getView().fit(bufferPoly);
     //console.log("current view extent: ",map.getView().calculateExtent(map.getSize()));
     console.log("Leaving updateViewExtent");
 }
@@ -810,9 +819,11 @@ function clearDraw(){
     allFilters["boundaryPolys"] = [];
     drawSource.clear();
     currentLayers = map.getLayers();
+    console.log("currentLayers: ",currentLayers);
     if (drawVector in currentLayers) {
         map.removeLayer(drawVector);
     }
+    console.log("currentLayers after delete: ",currentLayers);
     console.log("Leaving clearDraw");
 }
 
@@ -822,12 +833,12 @@ function saveDraw(){
     allFilters["boundaryDefinition"] = drawFType;
     allFilters["boundaryPolys"] = [];
     allFilters["boundaryPolys"] = drawResults();
-    document.getElementById("filterOverlay").style.display="none";
+    //document.getElementById("filterOverlay").style.display="none";
     filterAllVals();
     console.log("Leaving saveDraw");
 }
 
-function cancelFilter(){
+/*function cancelFilter(){
     console.log("entering cancelFilter()");
     drawSource.clear();
     currentLayers = map.getLayers();
@@ -835,7 +846,7 @@ function cancelFilter(){
         map.removeLayer(drawVector);
     };    
     document.getElementById("filterOverlay").style.display="none";
-};
+};*/
 
 function addSkeletons(){
     console.log("Entering addSkeletons");
@@ -878,9 +889,9 @@ function filterAllVals(){
     document.getElementById("resultsArea").classList.add("skeleton");
     document.getElementById("map").classList.add("skeleton");
     var storyCount = document.getElementById("storyCount");
-    storyCount.innerHTML = '<p>notícias</p>' ;
+    storyCount.innerHTML = '<h4>Notícias</h4>' ;
     var instanceCount = document.getElementById("instanceCount");
-    instanceCount.innerHTML = '<p>instâncias</p>' ;
+    instanceCount.innerHTML = '<h4>Instâncias</h4>' ;
     addSkeletons();  
     currentLayers = map.getLayers();
     map.removeLayer(filteredLayer);
@@ -946,10 +957,10 @@ function filterAllVals(){
                 window.alert("A sua pesquisa não resultou nos resultados. Por favor, tenta outra vez.");
             }
             refreshStoryCards(stories=stories);
-            storyCount.innerHTML = '<p>notícias</p><p>'+stories.length+' / '+countAllStories+'</p>' ;
+            storyCount.innerHTML = '<h4>'+stories.length+' / '+countAllStories+' notícias</h4>' ;
 
             refreshInstanceCards(instances=instances);
-            instanceCount.innerHTML = '<p>instáncias</p><p>'+instances.length+' / '+countAllInstances+'</p>' ;
+            instanceCount.innerHTML = '<h4>'+instances.length+' / '+countAllInstances+' instâncias<h4>' ;
             
             if (typeof instances != "undefined" && instances.length > 0){
                 iIDFilter = "i_id IN ("+iIDs+")";
@@ -1043,7 +1054,7 @@ function refreshInstanceCards(instances){
 
         var iCardTitle = document.createElement('div');
         iCardTitle.className = 'instance-title hide-text';
-        iCardTitle.innerHTML = instances[i]["p_name"];
+        iCardTitle.innerHTML = instances[i]["i_name"]; //previously: p_name
         iCard.appendChild(iCardTitle);
 
         var iCardDetails = document.createElement('div');
@@ -1056,11 +1067,13 @@ function refreshInstanceCards(instances){
         iCardDFrame.classList.add(instances[i]["t_class"]);
         iCardDetails.appendChild(iCardDFrame);
 
-        var iCardTFrame = document.createElement('div');
-        iCardTFrame.className = 'instance-timeframe hide-text';
-        iCardTFrame.innerHTML = instances[i]["i_T"]+'<br>';
-        iCardTFrame.classList.add(instances[i]["t_class"]);
-        iCardDetails.appendChild(iCardTFrame);
+        if (instances[i]["i_T"].length > 0){
+            var iCardTFrame = document.createElement('div');
+            iCardTFrame.className = 'instance-timeframe hide-text';
+            iCardTFrame.innerHTML = instances[i]["i_T"]+'<br>';
+            iCardTFrame.classList.add(instances[i]["t_class"]);
+            iCardDetails.appendChild(iCardTFrame);
+        };        
 
         var iCardSTitle = document.createElement('div');
         iCardSTitle.className = 'instance-stitle hide-text';
@@ -1132,6 +1145,7 @@ function loadInstanceDeets(card){
     console.log("Entering loadInstanceDeets");
     closeDeets();
     removeHighlights(itsTime = true);
+    document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color1)');
     stopVar = "unkown";
     cardD = {};
 
@@ -1188,8 +1202,17 @@ function removeHighlights(itsTime){
 
 function renderDeets(cardD){
     console.log("Entering renderDeets w cardD: ",cardD);
-    
-    var deetsOverlay = document.getElementById('deetsOverlay');
+    console.log("noDeets: ",document.getElementById("noDeets"));
+
+    document.getElementById("noDeets").style.display="none";
+        
+    var deetsAll = document.getElementById('deetsAll');
+    console.log("deetsOverlay: ",deetsOverlay);
+
+    var deetsOverlay = document.createElement('div');
+    deetsOverlay.id = "deetsOverlay";
+    deetsOverlay.className = "dO";
+    deetsAll.appendChild(deetsOverlay);
     openOverlay = true;
 
     var dOverlay = document.createElement('div');
@@ -1198,16 +1221,22 @@ function renderDeets(cardD){
     deetsOverlay.appendChild(dOverlay);
 
 
-    var dClose = document.createElement('div');
+    /*var dClose = document.createElement('div');
     dClose.innerHTML = 'X'
     dClose.className = 'close';
     dClose.onclick = closeDeets;
-    dOverlay.appendChild(dClose);
+    dOverlay.appendChild(dClose);*/
+
+    var contextSource = document.createElement('a');
+    contextSource.href = "/jornal/"+cardD["s_id"]+"/historia";
+    contextSource.target = "_blank";
+    dOverlay.appendChild(contextSource);
 
     var dTitle = document.createElement('div');
     dTitle.className = 'dO-title';
     dTitle.innerHTML = cardD["title"];
-    dOverlay.appendChild(dTitle);
+    //dOverlay.appendChild(dTitle);
+    contextSource.appendChild(dTitle);
 
     var dOStory = document.createElement('div');
     dOStory.className = 'dO-story';
@@ -1249,39 +1278,31 @@ function renderDeets(cardD){
 
     mainIID = 0;
 
+    
+    
+
     yesInt = cardD["instances_yes"];
-    var newRow = true;
+    //var newRow = true;
     for (subInst in cardD["instances_all"]){
-        let dRow;
-        if (newRow == true){
-            dRow = document.createElement('div');
-            dRow.className = 'rowI';
-            dOverlay.appendChild(dRow);
-        } else {
-            dRow = Array.from(document.getElementsByClassName('rowI')).pop();
-        }
 
-        newRow = !newRow;
 
-        var dColumn = document.createElement('div');
-        dColumn.className = "columnI";
-        dRow.appendChild(dColumn);
+
 
         if (yesInt.includes(subInst*1)){ //multiplying by 1 (*1) converts string subInst to number
             if (subInst*1 == cardD["i_id"]*1) {
-                subInstance(dParent = dColumn, instance=cardD, lightLevel = "brightlight");
+                subInstance(dParent = dOverlay, instance=cardD, lightLevel = "brightlight");
             } else {
                 //Instance filtered out
-                subInstance(dParent = dColumn, instance = cardD["instances_all"][subInst], lightLevel = "highlight");
+                subInstance(dParent = dOverlay, instance = cardD["instances_all"][subInst], lightLevel = "highlight");
             }
         } else {
             //Instance filtered In
-            subInstance(dOverlay = dColumn, instance = cardD["instances_all"][subInst], lightLevel = "lowlight");
+            subInstance(dOverlay = dOverlay, instance = cardD["instances_all"][subInst], lightLevel = "lowlight");
         };
     };
 
     //THIS IS THE MOCK SOURCE
-    var cButtonA = document.createElement('div');
+    /*var cButtonA = document.createElement('div');
     cButtonA.className = 'dO-buttonA';
     cButtonA2 = document.createElement('div');
     cButtonA2.className = 'dO-buttonA2';
@@ -1297,7 +1318,7 @@ function renderDeets(cardD){
 
     cButtonA2.appendChild(contextSource);
     cButtonA.appendChild(cButtonA2);
-    dOverlay.appendChild(cButtonA);
+    dOverlay.appendChild(cButtonA);*/
 
     //THIS IS THE ACTUAL SOURCE
     /*var dButtonA = document.createElement('div');
@@ -1319,10 +1340,18 @@ function renderDeets(cardD){
     dOverlay.appendChild(dButtonA);*/
     
 
-    deetsOverlay.style.display = "block";
+    //deetsOverlay.style.display = "block";
+   
+
+    openTab('tabDeets', 'deetsAll');
 
     console.log("Leaving renderDeets");
 };
+
+function changeFocusPre(input){
+    document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color1)');
+    changeFocus(input);
+}
 
 function subInstance(dParent, instance, lightLevel){
     console.log("Entering subInstance");
@@ -1332,12 +1361,12 @@ function subInstance(dParent, instance, lightLevel){
     dOInstance.className = 'dO-instance';
     dOInstance.classList.add(lightLevel);
     dOInstance.id = "i_"+instance["i_id"];
-    dOInstance.onclick = changeFocus;
+    dOInstance.onclick = changeFocusPre;
     dParent.appendChild(dOInstance);
 
     var dITitle = document.createElement('div');
     dITitle.className = "dO-ititle";
-    dITitle.innerHTML = instance["p_name"];
+    dITitle.innerHTML = instance["i_name"]; //previously: p_name
     dITitle.id = "dITitle_"+instance["i_id"];
     //dITitle.onclick = changeFocus;
     dOInstance.appendChild(dITitle);
@@ -1359,7 +1388,7 @@ function subInstance(dParent, instance, lightLevel){
 
     var dPDesc = document.createElement('div');
     dPDesc.className = 'dO-pdesc';
-    dPDesc.innerHTML = instance["p_desc"];
+    dPDesc.innerHTML = instance["i_desc"]; //previously: p_desc
     dOInstance.appendChild(dPDesc);
     console.log("leaving subInstance");
 }
@@ -1369,8 +1398,9 @@ function changeFocus(input){
     if (input instanceof PointerEvent){
         popupContainer.style.display="none";
         //var iID = parseInt(input["path"][0].id.substring(8),10);
+        console.log("input path: ",input["path"]);
         var iID = parseInt(input["path"][1].id.substring(2),10);
-        var sID = parseInt(input["path"][4].id.substring(7),10);
+        var sID = parseInt(input["path"][2].id.substring(7),10);
         console.log("sID: ",sID);
         console.log("iID: ",iID);
         console.log(input["path"]);
@@ -1417,6 +1447,7 @@ function changeFocus(input){
             relations["instances_yes"]=cardD["instances_yes"];
             updateMapHighlights(sourceID = iID, type = type, relations = relations);
             brightLightID.classList.add("brightlight"); //Focus on chosen instance within dO
+            console.log("sID_"+sID);
             document.getElementById("sID_"+sID).classList.add("highlight"); //highlight associated story
             document.getElementById("iID_"+iID).classList.add("brightlight"); //brightlight chosen istance
             //console.log("instances_yes", cardD["instances_yes"]);
@@ -1433,13 +1464,23 @@ let itsTime = false;
 function closeDeets(){
     console.log("Entering closeDeets");
     popupContainer.style.display="none";
-    var deetsOverlay = document.getElementById('deetsOverlay');
+    var deetsOverlay = document.getElementById('deetsAll');
     var first = deetsOverlay.firstElementChild;
     while (first) {
         first.remove();
         first = deetsOverlay.firstElementChild;
-    }
-    deetsOverlay.style.display="none";
+    };
+    var noDeets = document.createElement('div');
+    noDeets.className = 'tabCard';
+    noDeets.id = "noDeets";
+    noDeets.innerHTML = "<p>Por favor, escolha uma instância ou história para ver uns detalhes relevantes.</p>";
+    deetsOverlay.append(noDeets);
+    
+    //deetsOverlay.style.display="none";
+    console.log("classList: ",document.getElementById("deetsAll").classList);
+    if (document.getElementById("deetsAll").classList.contains("active")){
+        openTab('tabInstances', 'resultsI');
+    };
     removeHighlights(itsTime = true);
     itsTime = false;
     console.log("Leaving closeDeets");
@@ -1453,7 +1494,7 @@ function showFilters() {
     console.log("Entering showFilters");
     closeDeets();
     document.getElementById("filterOverlay").style.display="block";
-    drawMap.updateSize();
+    //drawMap.updateSize();
     console.log("Leaving showFilters");
 };
 
@@ -1635,21 +1676,22 @@ function updateMapHighlights(sourceID, type, relations){
             updateViewExtent(inputExtent = bhExtent);
             
         } else if (type=="map"){
-            popupTitle.innerHTML = cardD["p_name"];
+            popupTitle.innerHTML = cardD["i_name"]; //previously: p_name
             popupContent.innerHTML = cardD["title"];            
             popupContainer.style.display="block";
         } else {
-            popupTitle.innerHTML = cardD["p_name"];
+            popupTitle.innerHTML = cardD["i_name"]; //previously: p_name
             popupContent.innerHTML = cardD["title"];
             popupScroll.style.display="none";
             //console.log("brightlight feature(s): ");
             popupOverlay.setPosition(brightCentroid);
             popupContainer.style.display="block";
-
-            var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(brightlightLayer.getSource().getExtent(),maxExtent));
+            var bhExtent = brightlightLayer.getSource().getExtent();
+            updateViewExtent(inputExtrent = bhExtent);
+            /*var bufferExtent = ol.geom.Polygon.fromExtent(ol.extent.getIntersection(brightlightLayer.getSource().getExtent(),maxExtent));
             bufferExtent.scale(1);
             console.log("bufferExtent: ",bufferExtent);
-            map.getView().fit(bufferExtent);
+            map.getView().fit(bufferExtent);*/
 
 
             //map.getView().fit(brightlightLayer.getSource().getExtent());
@@ -1657,3 +1699,47 @@ function updateMapHighlights(sourceID, type, relations){
     }
     console.log("Leaving updateMapHighlights");
 };
+
+function openTab(tabBID, tabType) {
+    var i, tabContent, tabLinks;
+
+    console.log("tabBID: ",tabBID);
+    console.log("tabBID: ",document.getElementById(tabBID));
+
+    tabContent = document.getElementsByClassName("tabContent");
+    for (i=0; i < tabContent.length; i++){
+        tabContent[i].style.display = "none";
+    }
+
+    tabLinks = document.getElementsByClassName("tabLinks");
+    for (i=0; i< tabLinks.length; i++){
+        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabType).style.display = "block";
+    document.getElementById(tabBID).classList.toggle("active");
+    console.log("classList (in opentab) for ",tabBID,": ", document.getElementById(tabBID).classList)
+};
+
+document.getElementById("filtros").style.display="block";
+document.getElementById("tabFilters").className += " active";
+
+
+function addDraw(){
+    var toggleDraw = document.getElementById('addDraw');
+    if (toggleDraw.classList.contains("drawActivated")){
+        console.log("removing draw function");
+        map.removeInteraction(draw);
+    } else {
+        console.log("adding draw function");
+        try {
+            map.addLayer(drawVector);
+        }
+        catch (exceptionVar){
+            console.log("exceptionVar: ",exceptionVar);
+        }
+        finally {
+            map.addInteraction(draw);
+        }
+    }
+    toggleDraw.classList.toggle("drawActivated");
+}

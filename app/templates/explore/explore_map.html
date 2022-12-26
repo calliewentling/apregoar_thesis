@@ -5,27 +5,172 @@
 {% block main %}
 
 
-<h1>Apregoar</h1>
-<h2>O que é que se passa</h2>
-<div class="inlineSection">
-    <button class="button1" id="filtrarHistorias" onclick="showFilters()">Filtros</button>
-    <!--
-        <button class="button1" id="saveFilters" onclick="saveFilters()">Guardar definições</button>
-        <button class="button1" id="saveResults" onclick="saveResults()">Guardar resultados</button>
-    -->
-</div>
+<h1>Explorar: o que é que se passa</h1>
 
-<div class="resultsArea" id="resultsArea">
-    <div id="storyArea" class="cardArea">
+
+
+
+
+
+
+<div id="tabbedResults" class="tabArea">
+    <!--TABS BUTTONS-->
+    <div class="tab">
+        <button class="tabLinks" id="tabInfo" onclick="openTab('tabInfo','infoHelp')">Ajuda</button>
+        <button class="tabLinks" id="tabFilters" onclick="openTab('tabFilters','filtros')">Filtros</button>
+        <button class="tabLinks" id="tabInstances" onclick="openTab('tabInstances','resultsI')">Instâncias</button>
+        <button class="tabLinks" id="tabStories" onclick="openTab('tabStories','resultsS')">Histórias</button>
+        <button class="tabLinks" id="tabDeets" onclick="openTab('tabDeets', 'deetsAll')">Detalhes</button>
+    </div>
+
+    <!-- FILTROS -->
+    <div id="filtros" class="tabContent">
+        <div class="tabCard">
+            <!-- STORY LEVEL FILTERS -->
+            <h4>Nivel de história</h4>
+            <label for="from">De</label>
+            <input type="text" id="from" name="from" autocomplete="off">
+            <label for="to">a</label>
+            <input type="text" id="to" name="to" autocomplete="off">
+            <input type="checkbox" class="regCheck" id="allPub"></input>
+            <label for="allPub">Todos</label>
+            <select id="checksTags">
+                {% for i in tags %}
+                    {% set name = i %}
+                    {% set count = tags[i]["total_t"] %}
+                    <option value="{{ name }}">{{ name }} </option>
+                {% endfor %}
+            </select>
+            <select id="checksSections">
+                {% for i in sections %}
+                    {% set name = i %}
+                    {% set count = sections[i]["total_s"] %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <select id="checksPublications">
+                {% for i in publications %}
+                    {% set name = i %}
+                    {% set count = publications[i]["total_p"] %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <select id="checksAuthors">
+                {% for i in authors %}
+                    {% set name = i %}
+                    {% set count = authors[i]["total_a"] %}
+                    <option value="{{ name }}">{{ name }} </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="tabCard">
+            <h4>Nivel de instância</h4>
+            <label for="fromI">De</label>
+            <input type="text" id="fromI" name="fromI">
+            <label for="to">à</label>
+            <input type="text" id="toI" name="toI">
+            <input type="checkbox" class="regCheck" id="allInst"></input>
+            <label for="allInst">Todas datas</label>
+            <select id="checksT_types">
+                {% for i in t_types %}
+                    {% set name = i[0] %}
+                    {% set count = i[1].total_s %}
+                    <option value="{{ name }}">{{ name }} </option>
+                {% endfor %}
+            </select>
+            <select id="checksP_types">
+                {% for i in p_types %}
+                    {% set name = i[0] %}
+                    {% set count = i[1].total_s %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <select id="checksE_names">
+                {% for i in e_names %}
+                    {% set name = i[0] %}
+                    {% set count = i[1].total_i %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" id="pNameSearch" placeholder="Pesquisar lugares">           
+        </div>
+
+        <div class="tabCard">
+            <!-- SPATIAL MAP FILTER -->
+   
+            <h4>Localizar</h4>
+            <button class="button2 inlineB" id="addDraw" onclick="addDraw(event)">Desenhar áreas de pesquisa</button><br>
+            <input type="radio" id="containTotal" name="drawFType" value="containTotal">
+            <label for="containTotal">Contêm completamente</label><br>
+            <input type="radio" id="containPartial" name="drawFType" value="containPartial" checked="checked">
+            <label for="containPartial">Contêm completamente ou partialmente</label><br>
+            <input type="radio" id="intersects" name="drawFType" value="intersects">
+            <label for="intersects">Contêm ou por quais são contidos </label><br>
+            <input type="radio" id="disjoint" name="drawFType" value="disjoint">
+            <label for="disjoint">Não correspondem</label><br>
+            <button class="button2 inlineB" id="limparDraw" onclick="clearDraw()">Limpar mapa</button>
+        </div>
+
+        <!-- SAVE AND CLEAN BUTTONS -->
+        <button class="button1 filterB" id="saveFilters" onclick="saveDraw()">Filtrar</button>
+    </div>
+
+    <!-- INSTANCE RESULTS -->
+    <div id="resultsI" class="tabContent">
+        <div id="instanceCount" class="tabCard"></div>
+        <div class="resultsStory" id="resultsInstance"></div>
+        <div id="instanceArea" class="cardArea"></div>
+    </div>
+
+    <!-- STORY RESULTS -->
+    <div id="resultsS" class="tabContent">
+        <div id="storyCount" class="tabCard"></div>
         <div class="resultsStory" id="resultsStory"></div>
-        <div id="storyCount" class="cardCount"></div>
+        <div id="storyArea" class="cardArea"></div>
     </div>
-    <div id="instanceArea" class="cardArea">
-        <div class="resultsInstance" id="resultsInstance"></div>
-        <div id="instanceCount" class="cardCount"></div>
+
+    <div id="deetsAll" class="tabContent">
+        <div id="noDeets" class="tabCard">
+            <p> Por favor, escolha uma instância ou história para ver as detalhas relevantes.</p>
+        </div>
     </div>
+
+    <div id="infoHelp" class="tabContent">
+       <div class="tabCard">
+        <p><span style="font-weight:bold;">Apregoar: Explorar</span> é uma ferramenta para pesquisar notícias de várias fontes na área maior de Lisboa.</p>
+        <p>Não só consegue pesquisar com filtros comuns (tipo: autor, etiquetas, data de publicação, etc.) no nivel da história, mas também pode pesquisar as localizações e datas dos conteúdos (instâncias).</p>
+       </div>
+       <div class="tabCard">
+        <p>Uma <span style="font-weight:bold;">história</span> refere-se a uma notícia publicada por um jornal digital.</p>
+        <p>Cada história pode ter zero, um, ou várias instâncias.</p>
+       </div>
+       <div class="tabCard">
+        <p>Uma <span style="font-weight:bold;">instância</span> refere-se a um evento descrevido em uma história, ou uma localização contextual.</p>
+        <p>Cada instância tem uma representação espacial de um ou alguns polígonos. Eles podem pertencer às áreas administrativas (como distritos, municipais, ou freguesias), ou podem ser desenhada pelo autor da história.</p>
+        <p>Instáncias dos eventos têm datas ou mesmo tempos associados. Instâncias contextuais não tem alturas definidas.</p>
+       </div>
+       <div class="tabCard">
+        <p>O mapa mostra as localizações das instâncias resultadas em <span style="color:var(--apr-color1);font-weight:bold;">azul</span>. Áreas escuras representam mais instâncias.</p>
+       </div>
+       <div class="tabCard">
+        <p>Carrega no mapa para ver um resumo de instâncias que occorem nesta localização num popup.</p>
+        <p>Se mais de um resultado aconteceu nesses coordinadas, pode percorrer-lhes através das setas na parte inferior do popup.</p>
+        <p>Alternativamente, explora as listas das instâncias e histórias (através as separadores a esquerda do mapa).</p>
+       </div>
+       <div class="tabCard">
+        <p>Uma instância em destaque aparece em <span style="color:var(--apr-color2);font-weight:bold;">dourado</span>, e instâncias relacionadas (acontecendo na mesma história) aparecem em <span style="color:var(--apr-color2L);font-weight:bold;background-color:var(--apr-color3);">amarelho</span></p>
+       </div>
+       <div class="tabCard">
+        <p>Detalhes vão aparacer com o resumo da história e suas instâncias.</p>
+        <p>Pode seguir os links para ler a história original.</p>
+       </div>
+    </div>
+
+    
     
 </div>
+
 <div id="mapContainer" class="mapContainer">
     <div id="map" class="map"></div>
 </div>
@@ -45,150 +190,21 @@
     <div id="deetsOverlay" style="display:none" class="dO"></div>
 </div>
 
-<br>
 
-<div id="filterOverlay" class="filterOverlay" style="display:none">
-    <h3>Filtrar</h3>
-    <br>
-    <!-- STORY LEVEL FILTERS -->
-    <div class="filterSection">
-        <div class="filterLine" id="datesP">
-            <div class = "filterItem">
-                <h5>Filtros Histórias</h5>
-            </div>
-            <div class = "filterItem">
-                <label for="from">De</label>
-                <input type="text" id="from" name="from" autocomplete="off" >
-                <label for="to">à</label>
-                <input type="text" id="to" name="to" autocomplete="off" >
-            </div>
-            <div class = "filterItem">
-                <input type="checkbox" class="regCheck" id="allPub"></input>
-                <label for="allPub">Todos</label>
-            </div>
-        </div>
-        <br>
-        <div class="filterLine" id="filtersP">
-            <div class = "filterItem">
-                <select id="checksTags">
-                    {% for i in tags %}
-                        {% set name = i %}
-                        {% set count = tags[i]["total_t"] %}
-                        <option value="{{ name }}">{{ name }} </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class = "filterItem">
-                <select id="checksSections">
-                    {% for i in sections %}
-                        {% set name = i %}
-                        {% set count = sections[i]["total_s"] %}
-                        <option value="{{ name }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class = "filterItem">
-                <select id="checksPublications">
-                    {% for i in publications %}
-                        {% set name = i %}
-                        {% set count = publications[i]["total_p"] %}
-                        <option value="{{ name }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class = "filterItem">
-                <select id="checksAuthors">
-                    {% for i in authors %}
-                        {% set name = i %}
-                        {% set count = authors[i]["total_a"] %}
-                        <option value="{{ name }}">{{ name }} </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </div>
-    
-    <br>
-
-    <!-- Instance LEVEL FILTERS -->
-    <div class="filterSection">
-        <div class="filterLine" id="datesI">
-            <div class = "filterItem">
-                <h5>Filtros de Instâncias</h5>
-            </div>
-            <div class = "filterItem">
-                <label for="fromI">De</label>
-                <input type="text" id="fromI" name="fromI">
-                <label for="to">à</label>
-                <input type="text" id="toI" name="toI">
-                <input type="checkbox" class="regCheck" id="allInst"></input>
-                <label for="allInst">Todas datas</label>
-            </div>
-        </div>
-        <div class="filterLine" id="filtersI">
-            <div class = "filterItem">
-                <select id="checksT_types">
-                    {% for i in t_types %}
-                        {% set name = i[0] %}
-                        {% set count = i[1].total_s %}
-                        <option value="{{ name }}">{{ name }} </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class = "filterItem">
-                <select id="checksP_types">
-                    {% for i in p_types %}
-                        {% set name = i[0] %}
-                        {% set count = i[1].total_s %}
-                        <option value="{{ name }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class = "filterItem">
-                <select id="checksE_names">
-                    {% for i in e_names %}
-                        {% set name = i[0] %}
-                        {% set count = i[1].total_i %}
-                        <option value="{{ name }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class = "filterItem">
-                <input type="text" id="pNameSearch" placeholder="Pesquisar lugares">
-            </div>
-        </div>
-    </div>
-
-    <br>
-    <!-- SPATIAL MAP FILTER -->
-    <div class="filterSection">
-        <div class="filterLine">
-            <h5>Desenhar uns áreas de pesquisa</h5>
-            <div class="filterItem">
-                <p>Filtra os resultados para lhes que as áreas desenhadas:</p>
-                <input type="radio" id="containTotal" name="drawFType" value="containTotal">
-                <label for="containTotal">Contêm completamente</label>
-                <input type="radio" id="containPartial" name="drawFType" value="containPartial" checked="checked">
-                <label for="containPartial">Contêm completamente ou partialmente</label>
-                <input type="radio" id="intersects" name="drawFType" value="intersects">
-                <label for="intersects">Contêm ou por quais são contidos </label>
-                <input type="radio" id="disjoint" name="drawFType" value="disjoint">
-                <label for="disjoint">Não correspondem</label>
-            </div>
-        </div>
-        <button class="button2" id="limparDraw" onclick="clearDraw()">Limpar mapa</button>
-        <div id="filterMap" class = "map" style="cursor:crosshair;"></div>
-    </div> 
-    <br>
-    <!-- SAVE AND CLEAN BUTTONS -->
-    <button class="button1" id="saveFilters" onclick="saveDraw()">Filtrar</button>
-    <button class="button2" id="cancelFilter" style="margin: 10px;" onclick="cancelFilter()">Cancelar</button>
-    
+<!--PREVIOUS THINGS TO BE INTEGRATED-->
+<div class="inlineSection" style="display:none;">
+    <button class="button1" id="filtrarHistorias" onclick="showFilters()">Filtros</button>
 </div>
-
-
-
-
+<div class="resultsArea" id="resultsArea" style="display:none;">
+    <!--<div id="storyArea" class="cardArea">
+        <div class="resultsStory" id="resultsStory"></div>
+        <div id="storyCount" class="cardCount"></div>
+    </div>
+    <div id="instanceArea" class="cardArea">
+        <div class="resultsInstance" id="resultsInstance"></div>
+        <div id="instanceCount" class="cardCount"></div>
+    </div>-->
+</div>
 
 <div id="filterResults" style="display:none">
     <div id="recentResults"></div>

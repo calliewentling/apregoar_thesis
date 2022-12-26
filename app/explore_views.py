@@ -100,7 +100,9 @@ def cleanLists(list_in, s_id, i_id,list_out,attr):
 def processInstance(instanceResult):
     i_T = ""
     if instanceResult.t_type=="allday_p":
-        i_D = "Temporada continual"
+        i_D = "Contextual"
+        i_name = instanceResult.p_name
+        i_desc = instanceResult.p_desc
     else:
         if instanceResult.t_begin.date() == instanceResult.t_end.date():
             i_D = str(instanceResult.t_begin.date())
@@ -108,6 +110,14 @@ def processInstance(instanceResult):
             i_D = str(instanceResult.t_begin.date())+" - "+str(instanceResult.t_end.date())
         if instanceResult.t_type == "allday_no":
             i_T = str(instanceResult.t_begin.time())+" - "+str(instanceResult.t_end.time())
+        if instanceResult.i_name is not None:
+            i_name = instanceResult.i_name
+        else:
+            i_name = instanceResult.p_name
+        if instanceResult.i_desc is not None:
+            i_desc = instanceResult.i_desc
+        else:
+            i_desc = instanceResult.p_desc
     
     instance_def = {
         "i_id": instanceResult.i_id,
@@ -119,6 +129,8 @@ def processInstance(instanceResult):
         "p_name": instanceResult.p_name,
         "i_D": i_D,
         "i_T": i_T,
+        "i_name": i_name,
+        "i_desc": i_desc,
     }
 
     return instance_def
@@ -434,6 +446,9 @@ def process_explore(req):
                         i_frame = 0 #timeframe is perpetual
                         t_class = "perpetual"
                         t_delt = 0
+                        i_name = result.Instances.p_name
+                        i_desc = result.Instances.p_desc
+                        
                     else:
                         t_med = round((int(t_begin.toordinal())+int(t_end.toordinal()))/2)
                         t_med = datetime.date.fromordinal(t_med)
@@ -454,6 +469,15 @@ def process_explore(req):
                             i_frame = 3 #happening today
                             t_class = "today"
 
+                        if result.Instances.i_name is not None:
+                            i_name = result.Instances.i_name
+                        else:
+                            i_name = result.Instances.p_name
+                        if result.Instances.i_desc is not None:
+                            i_desc = result.Instances.i_desc
+                        else:
+                            i_desc = result.Instances.p_desc
+
                         if ttype == "allday_no":
                             i_T = str(t_begin.time())+" - "+str(t_end.time())
                             if t_end.datetime() < now:
@@ -465,7 +489,9 @@ def process_explore(req):
                             else:
                                 i_frame = 4 #happening right now
                                 t_class = "now"
-                        
+
+                    
+                    
 
                     instance = {
                         "s_id": result.Stories.s_id,
@@ -489,6 +515,8 @@ def process_explore(req):
                         "i_frame": i_frame,
                         "t_class": t_class,
                         "t_delt": t_delt,
+                        "i_name": i_name,
+                        "i_desc": i_desc,
                     }
                     instancesJSON.append(instance)
                     for story in storiesJSON:
@@ -566,12 +594,12 @@ def process_explore(req):
                 instance["instances_no"] = story["instances_no"]
                 break
     #print()
-    print("storiesJSON: ",storiesJSON)
-    print("storiesJSON keys: ",storiesJSON[0].keys())
+    #print("storiesJSON: ",storiesJSON)
+    #print("storiesJSON keys: ",storiesJSON[0].keys())
     storiesJSON = sorted(storiesJSON, key=lambda k: k['pub_date'], reverse=True)
     instancesJSON = sorted(instancesJSON, key=lambda k: (-k['i_frame'],k['t_delt']))
-    print("instancesJSON keys: ",instancesJSON[0].keys())
-    #print("instancesJSON: ",instancesJSON)
+    #print("instancesJSON keys: ",instancesJSON[0].keys())
+    print("instancesJSON: ",instancesJSON)
     #print()
     response["stories"] = storiesJSON
     response["instances"] = instancesJSON
