@@ -901,6 +901,69 @@ function filterAllVals(){
     }
     filteredSource.clear();
     console.log("allFilters: ",allFilters);
+    // Update bubble indications of current filters
+    var bubbleArea = document.getElementById("bubbleArea");
+    var first = bubbleArea.firstElementChild;
+    while(first){
+        first.remove();
+        first = bubbleArea.firstElementChild;
+    };
+    const sFilters = ["Tags", "Sections", "Authors", "Publications"];
+    const iFilters = ["T_types","P_types", "E_names"];
+    for (element in allFilters){
+        if (sFilters.includes(element)){
+            console.log(element," in sFilters");
+            if (allFilters[element].length > 0){
+                for (var i=0; i<allFilters[element].length; i++){
+                    bubblefy(val = allFilters[element][i], level = "story");
+                };
+            };
+        } else if (iFilters.includes(element)){
+            console.log(element," in iFilters");
+            if (allFilters[element].length>0){
+                for (var i=0; i<allFilters[element].length; i++){
+                    bubblefy(val = allFilters[element][i], level = "inst");
+                };
+            };
+        } else {
+            console.log(element," not in easy filters");
+        }
+    }
+    if (allFilters["pNameSearch"].length > 0){
+        bubblefy(val = allFilters["pNameSearch"], level = "inst");
+    };
+    //Determinging publication range
+    let text;
+    if (allFilters["pubDateR1"] == pubDate1){
+        if (allFilters["pubDateR2"]== pubDate2){ //If all filters are maxed
+            text = "Todas datas de publicação";
+            bubblefy(val = text, level = "story");
+        } else { //If pub filter range is min to x
+            text = "Publicadas antes do "+textDate(allFilters["pubDateR2"]);
+            bubblefy(val = text, level = "story");
+        }
+    } else if (allFilters["pubDateR2"] == pubDate2){//If pub filter range is x to max
+        text = "Publicada depois o "+textDate(allFilters["pubDateR1"]);
+        bubblefy(val = text, level="story");
+    } else {
+        text = "Publicadas entre "+textDate(allFilters["pubDateR1"],allFilters["pubDateR2"]);
+        console.log("text: ",text);
+        bubblefy(val = text, level="story");
+    };
+
+    // Determining instance date range
+    if (allFilters["iDateFilter"]==true){
+        text = "Eventos acontecendos entre do "+textDate(allFilters["iDateR1"],allFilters["iDateR2"]);
+        bubblefy(val = text, level="inst");
+    };
+
+    // Determining number of drawn boundaries
+    if (allFilters["boundaryPolys"].length > 0){
+        text = "Área(s) desenhada(s) applicada(s)";
+        bubblefy(val=text, level = "inst");
+    };
+    
+    //Replace human readable terms for data consistency
     for (i = 0; i<allFilters["T_types"].length; i++){
         if (allFilters["T_types"][i] == "contextual"){
             allFilters["T_types"][i] = "allday_p";
@@ -910,6 +973,8 @@ function filterAllVals(){
             allFilters["T_types"][i] = "allday_n";
         };
     };
+    
+    
     bodyContent = JSON.stringify(allFilters);
     //console.log("bodyContent: ",bodyContent);
     fetch(`${window.origin}/explore/map`, {
@@ -984,6 +1049,44 @@ function filterAllVals(){
     console.log("Leaving filterAllVals");
     //Connect to python for dynamic filtering. Return SIDs, search these in OL (OR WFS) and load.
 };
+
+function bubblefy(val, level){
+    console.log("bubblefy(",val,",",level,")");
+    var newBubble = document.createElement('div');
+    newBubble.className = "filterBubble";
+    if (level == "inst"){
+        newBubble.classList.add('instLevel');
+    }
+    newBubble.innerHTML = val;
+    bubbleArea.appendChild(newBubble);
+};
+
+function textDate(){
+    let monthA = ["jan", "fev","mar","abr","maio","jun","jul","ago","set","out","nov","dez"];
+    let output;
+    console.log("textDate(",arguments,")");
+
+    if (arguments.length > 1){
+        if (arguments[1].getFullYear() === arguments[0].getFullYear()){
+            if (arguments[1].getMonth() === arguments[0].getMonth()){
+                if (arguments[1].getDate() === arguments[0].getDate()){ //If the same dates
+                    output = "dia "+arguments[1].getDate+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+                } else { //If same months
+                    output = "dias "+arguments[0].getDate()+" e "+arguments[1].getDate()+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+                }
+            } else {//If same years
+                output = "dias "+arguments[0].getDate()+" de "+monthA[arguments[0].getMonth()]+" e "+arguments[1].getDate()+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+            }
+        } else {
+            output = "dias "+ arguments[0].getDate()+" de "+monthA[arguments[0].getMonth()]+", "+arguments[0].getFullYear()+" e "+arguments[1].getDate()+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+        }
+    } else {
+        output = "dia "+arguments[0].getDate()+" de "+monthA[arguments[0].getMonth()]+", "+arguments[0].getFullYear();
+    }
+    
+    console.log("output of textDate: ",output);
+    return output
+}
 
 const resultsStory = document.getElementById("resultsStory"); 
 const resultsInstance = document.getElementById("resultsInstance");
@@ -1743,3 +1846,10 @@ function addDraw(){
     }
     toggleDraw.classList.toggle("drawActivated");
 }
+
+function clearAllFilters(){
+    //Reset multiselects and inputs
+    $("#checksTags option:selected").removeAttr("selected");
+    clearDraw();
+    allFilters = baseFilters;
+};
