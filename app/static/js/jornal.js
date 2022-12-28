@@ -453,8 +453,8 @@ if (doc_source == "historias"){
     //const instanceAreaH = document.getElementById("map").style.height;
     //console.log("instanceAreaH: ",instanceAreaH);
     var iframeH = document.getElementById("iframeH");
-    document.getElementById('noArticle').style.height = "510px";
-    iframeH.style.height = (viewHeight * .59)+"px";
+    /*document.getElementById('noArticle').style.height = "100%";
+    iframeH.style.height = "100%";*/
     var timePast = false;
     setTimeout(function() {
         timePast = true;
@@ -507,6 +507,29 @@ if (doc_source == "historias"){
                 nearbyButtonArea.appendChild(nearbyA);
             };
         }
+        //Add instances so that these can be easily identified on the map!
+        if (geonoticia["instances"].length > 0){
+            const instRoundup = document.getElementById('instRoundup');
+            for (i=0; i<geonoticia["instances"].length; i++){
+                var instanceLocator = document.createElement('button');
+                instanceLocator.className = "button3";
+                instanceLocator.id = "id_"+geonoticia["instances"][i]["i_id"];
+
+                var eTitle = document.createElement('div');
+                eTitle.className = "eTitle";
+                eTitle.innerHTML = geonoticia["instances"][i]["e_name"];
+                instanceLocator.appendChild(eTitle);
+
+                var eDesc = document.createElement('div');
+                eDesc.className = "eDesc";
+                eDesc.innerHTML = geonoticia["instances"][i]["e_desc"];
+                instanceLocator.appendChild(eDesc);
+
+                instRoundup.appendChild(instanceLocator);
+
+
+            }
+        }
     } else {
         document.getElementById('instanceArea').style.display="none";
         var instanceAreaNo = document.getElementById('instanceAreaNo');
@@ -522,8 +545,9 @@ if (doc_source == "historias"){
         aSeeAll.appendChild(buttonSeeAll);
 
         instanceAreaNo.style.display="block";
-        iframeH.style.height = (viewHeight - 100)+"px";
-        document.getElementById('noArticle').style.height = (viewHeight - 100)+"px";
+        document.getElementById("newsArea").style.height = (viewHeight - 100)+"px";
+        /*iframeH.style.height = (viewHeight - 100)+"px";
+        document.getElementById('noArticle').style.height = (viewHeight - 100)+"px";*/
     };
 } /** VIEWING JORNAL MAP */
 else if (doc_source == "jornal_map"){
@@ -859,7 +883,7 @@ else {
     console.log("how did we get here?");
 };
 
-
+ 
 
 
 /**
@@ -1185,3 +1209,19 @@ function defineEBoundary(eID){
     console.log("leaving defineEBoundary");
     return eBoundary;
 };
+
+  /* Collapsible */
+  var coll = document.getElementsByClassName("collapsible");
+  var c_index;
+  
+  for (c_index = 0; c_index < coll.length; c_index++) {
+    coll[c_index].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        content.style.display = "block";
+      }
+    });
+  };

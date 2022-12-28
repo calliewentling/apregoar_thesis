@@ -68,9 +68,9 @@ def historia(s_id):
                     "t_begin": row["t_begin"],
                     "t_end": row["t_end"],
                     "t_type": row["t_type"],
-                    "t_desc": row["t_desc"].replace('"','\\\"').replace("'","\\\'"),
-                    "p_name": row["p_name"].replace('"','\\\"').replace("'","\\\'"),
-                    "p_desc": row["p_desc"].replace('"','\\\"').replace("'","\\\'"),
+                    "t_desc": row["t_desc"].replace('"','\\\"').replace("'","\\\'"), 
+                    "e_name": row["p_name"].replace('"','\\\"').replace("'","\\\'"), #Add logic to use i_name or p_name if not exist
+                    "e_desc": row["p_desc"].replace('"','\\\"').replace("'","\\\'"),
                     #"geom": row["all_gaz"]
                 }
                 instances.append(instance)

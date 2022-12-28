@@ -6,7 +6,7 @@
 
 
 
-<div>
+<div class="newsArea">
     <iframe id ="iframeH" src="{{ geonoticia['web_link'] }}" onerror="badIFrame()" onload="goodIFrame()"></iframe>
     <div id="noArticle" class="noticiaArea" style="display:none;">
         <div class="noticiaPublication">{{ geonoticia.publication }}</div>
@@ -22,31 +22,46 @@
         </a>
         
     </div>
-</div>
+</div> 
 <div id="instanceArea">
-    <div class="split left">
-        <div id="jornalMap" style="display:block">
-            <div class="wrapper">
-                <div id="map" class="map"></div>
-                <div id="popup" class="ol-popup">
-                    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-                    <div class="popupContent">
-                        <div id="popup-instances"></div>
-                        <div id="popup-story" display="none"></div>
-                    </div>
-                    <br>
-                    <div id="instanceScroll" style="position:absolute; left: 8px; bottom: 2px; right:8px;">
-                        <a href="#" id="popup-pageahead" class="ol-popup-pageahead"></a>
-                        <div id="popup-instance-count" style="text-align: center; font-size: 11px"></div>
-                        <a href="#" id="popup-pagebehind" class="ol-popup-pagebehind"></a>
-                    </div>
+    <div id="jornalMap" style="display:block" class="jornalMap">
+        <div class="wrapperJ">
+            <div id="map" class="map"></div>
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div class="popupContent">
+                    <div id="popup-instances"></div>
+                    <div id="popup-story" display="none"></div>
+                </div>
+                <br>
+                <div id="instanceScroll" style="position:absolute; left: 8px; bottom: 2px; right:8px;">
+                    <a href="#" id="popup-pageahead" class="ol-popup-pageahead"></a>
+                    <div id="popup-instance-count" style="text-align: center; font-size: 11px"></div>
+                    <a href="#" id="popup-pagebehind" class="ol-popup-pagebehind"></a>
                 </div>
             </div>
         </div>
     </div>
-    <div class = "split right instanceInst" id="info">
-            <p class="instInstText">Ver mais a pé</p>
-        <div id="nearbyButtonArea" class="mapSelect"></div>
+    <div class = "instanceInst" id="info">
+        <button type="button" class="collapsible collapsibleJ">
+            <div class="row_local">
+                <p>Instâncias</p>
+            </div>
+        </button>
+        <div class="contentCollapse contentCollapseJ">
+            <div id="instRoundup" class="mapSelect"></div>
+        </div>
+        <button type="button" class="collapsible collapsibleJ">
+            <div class="row_local">
+                <p>Ver mais a pé</p>
+            </div>
+        </button>
+        <div class="contentCollapse contentCollapseJ">
+            <div id="nearbyButtonArea" class="mapSelect nearbyButtonArea"></div>
+        </div>
+        <!--
+        <p class="instInstText">Ver mais a pé</p>
+        <div id="nearbyButtonArea" class="mapSelect"></div>-->
     </div>
 </div>
 <div id="instanceAreaNo" class="noInstanceArea" style="display:none">
