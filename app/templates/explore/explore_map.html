@@ -1,3 +1,7 @@
+<head>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
 {% extends "explore/templates/explore_template.html" %}
 
 {% block title %} Explorar a Mapa {% endblock %}
@@ -24,13 +28,18 @@
     </div>
     <div class="tabContainer">
         <!-- FILTROS -->
-        <div id="filtros" class="tabContent">
+        <div id="filtros" class="tabContent" >
             <div class="tabCard">
+                <p>Os filtros são aplicados para todos os campos (dos níveis de história e instância) ao clicar em "Filtrar".</p>
+                <p>Estes filtros aplicam a lógica "E" ("AND") entre os campos, e a lógica "OR" para múltiplas opções dentro do mesmo campo.</p>
+                <p>Os filtros aplicados ficam em cima da mapa, para <span style="border:solid 2px var(--apr-color3);border-radius:10px;padding:2px;">histórias</span> e <span style="border:solid 2px var(--apr-color1);border-radius:10px;padding:2px;color:var(--apr-color1);">instâncias</span>.</p>
+            </div>
+            <div class="tabCard" style="border:solid 2px var(--apr-color3);">
                 <!-- STORY LEVEL FILTERS -->
                 <h4>Nivel de história</h4>
-                <label for="from">De</label>
+                <label for="from">Publicada entre </label>
                 <input type="text" id="from" name="from" autocomplete="off">
-                <label for="to">a</label>
+                <label for="to">e</label>
                 <input type="text" id="to" name="to" autocomplete="off">
                 <input type="checkbox" class="regCheck" id="allPub"></input>
                 <label for="allPub">Todos</label>
@@ -64,11 +73,11 @@
                 </select>
             </div>
             
-            <div class="tabCard">
+            <div class="tabCard" style="border:solid 2px var(--apr-color1);">
                 <h4>Nivel de instância</h4>
-                <label for="fromI">De</label>
+                <label for="fromI">Eventos que ocorrem entre</label>
                 <input type="text" id="fromI" name="fromI">
-                <label for="to">a</label>
+                <label for="to">e</label>
                 <input type="text" id="toI" name="toI">
                 <input type="checkbox" class="regCheck" id="allInst"></input>
                 <label for="allInst">Todas datas</label>
@@ -96,7 +105,7 @@
                 <input type="text" id="pNameSearch" placeholder="Pesquisar lugares">           
             </div>
 
-            <div class="tabCard">
+            <div class="tabCard" style="border:solid 2px var(--apr-color1);">
                 <!-- SPATIAL MAP FILTER -->
     
                 <h4>Localizar</h4>
@@ -119,14 +128,14 @@
 
         <!-- INSTANCE RESULTS -->
         <div id="resultsI" class="tabContent">
-            <div id="instanceCount" class="tabCard"></div>
+            <div id="instanceCount" class="tabCard" style="background-color:var(--apr-color1);color:var(--neutral-colorL);"></div>
             <div class="resultsStory" id="resultsInstance"></div>
             <div id="instanceArea" class="cardArea"></div>
         </div>
 
         <!-- STORY RESULTS -->
         <div id="resultsS" class="tabContent">
-            <div id="storyCount" class="tabCard"></div>
+            <div id="storyCount" class="tabCard" style="background-color:var(--apr-color3);color:var(--neutral-colorL);"></div>
             <div class="resultsStory" id="resultsStory"></div>
             <div id="storyArea" class="cardArea"></div>
         </div>
@@ -147,12 +156,12 @@
             <p>Cada história pode ter zero, um, ou várias instâncias.</p>
         </div>
         <div class="tabCard">
-            <p>Uma <span style="font-weight:bold;">instância</span> refere-se a um evento descrevido em uma história, ou uma localização contextual.</p>
+            <p>Uma <span style="color:var(--apr-color1);font-weight:bold;">instância</span> refere-se a um evento descrevido em uma história, ou uma localização contextual.</p>
             <p>Cada instância tem uma representação espacial de um ou alguns polígonos. Eles podem pertencer às áreas administrativas (como distritos, municipais, ou freguesias), ou podem ser desenhada pelo autor da história.</p>
             <p>Instáncias dos eventos têm datas ou mesmo tempos associados. Instâncias contextuais não tem alturas definidas.</p>
         </div>
         <div class="tabCard">
-            <p>O mapa mostra as localizações das instâncias resultadas em <span style="color:var(--apr-color1);font-weight:bold;">azul</span>. Áreas escuras representam mais instâncias.</p>
+            <p>O mapa mostra as localizações das instâncias resultadas em <span style="color:var(--apr-color1);font-weight:bold;">azul</span>. Áreas escuras representam onde mais instâncias acontecem.</p>
         </div>
         <div class="tabCard">
             <p>Carrega no mapa para ver um resumo de instâncias que occorem nesta localização num popup.</p>

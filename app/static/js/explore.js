@@ -902,12 +902,33 @@ function filterAllVals(){
     filteredSource.clear();
     console.log("allFilters: ",allFilters);
     // Update bubble indications of current filters
+    //These should be done in the preferred order of viewing
     var bubbleArea = document.getElementById("bubbleArea");
     var first = bubbleArea.firstElementChild;
     while(first){
         first.remove();
         first = bubbleArea.firstElementChild;
     };
+
+    //Determinging publication range
+    let text;
+    if (allFilters["pubDateR1"] == pubDate1){
+        if (allFilters["pubDateR2"]== pubDate2){ //If all filters are maxed
+            text = "Todas datas de publicação";
+            bubblefy(val = text, level = "story");
+        } else { //If pub filter range is min to x
+            text = "Publicadas antes do "+textDate(allFilters["pubDateR2"]);
+            bubblefy(val = text, level = "story");
+        }
+    } else if (allFilters["pubDateR2"] == pubDate2){//If pub filter range is x to max
+        text = "Publicada depois o "+textDate(allFilters["pubDateR1"]);
+        bubblefy(val = text, level="story");
+    } else {
+        text = "Publicadas entre "+textDate(allFilters["pubDateR1"],allFilters["pubDateR2"]);
+        console.log("text: ",text);
+        bubblefy(val = text, level="story");
+    };
+    //Basic filters. Do story then instance
     const sFilters = ["Tags", "Sections", "Authors", "Publications"];
     const iFilters = ["T_types","P_types", "E_names"];
     for (element in allFilters){
@@ -932,25 +953,6 @@ function filterAllVals(){
     if (allFilters["pNameSearch"].length > 0){
         bubblefy(val = allFilters["pNameSearch"], level = "inst");
     };
-    //Determinging publication range
-    let text;
-    if (allFilters["pubDateR1"] == pubDate1){
-        if (allFilters["pubDateR2"]== pubDate2){ //If all filters are maxed
-            text = "Todas datas de publicação";
-            bubblefy(val = text, level = "story");
-        } else { //If pub filter range is min to x
-            text = "Publicadas antes do "+textDate(allFilters["pubDateR2"]);
-            bubblefy(val = text, level = "story");
-        }
-    } else if (allFilters["pubDateR2"] == pubDate2){//If pub filter range is x to max
-        text = "Publicada depois o "+textDate(allFilters["pubDateR1"]);
-        bubblefy(val = text, level="story");
-    } else {
-        text = "Publicadas entre "+textDate(allFilters["pubDateR1"],allFilters["pubDateR2"]);
-        console.log("text: ",text);
-        bubblefy(val = text, level="story");
-    };
-
     // Determining instance date range
     if (allFilters["iDateFilter"]==true){
         text = "Eventos acontecendos entre do "+textDate(allFilters["iDateR1"],allFilters["iDateR2"]);
@@ -1019,7 +1021,7 @@ function filterAllVals(){
             if (typeof stories == "undefined"){
                 stories = [];
                 instances = [];
-                window.alert("A sua pesquisa não resultou nos resultados. Por favor, tenta outra vez.");
+                window.alert("A sua pesquisa não resultou nos resultados. Por favor, rever os filtros e tentar outra vez. (Uma dica: confirma que as datas de publicação são abragentes)");
             }
             refreshStoryCards(stories=stories);
             storyCount.innerHTML = '<h4>'+stories.length+' / '+countAllStories+' notícias</h4>' ;
@@ -1215,7 +1217,7 @@ function loadStoryDeets(card){
     for (i=0; i<card["path"].length; i++){
         console.log(card["path"][i].className);
         //if(card["path"][i].className == "story-card"){
-        if(card["path"][i].classList.contains("story-card")){
+        if(card["path"][i].classList.contains("story-card")==true){
             card["path"][i].classList.add('brightlight');
             console.log("great success!")
             console.log(card["path"][i].className);
@@ -1237,7 +1239,8 @@ function loadStoryDeets(card){
                         document.getElementById("iID_"+iHigh).classList.add("highlight");
                     };
                 }
-            }
+            };
+            break;
         }
     }
     renderDeets(cardD = cardD);
@@ -1248,12 +1251,14 @@ function loadInstanceDeets(card){
     console.log("Entering loadInstanceDeets");
     closeDeets();
     removeHighlights(itsTime = true);
-    document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color1)');
+    document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color2)');
     stopVar = "unkown";
     cardD = {};
 
     for (k=0; k<card["path"].length; k++){
-        if(card["path"][k].className == "instance-card"){
+        console.log("card['path'][k].classList: ",card["path"][k].classList);
+        if(card["path"][k].classList.contains("instance-card")==true){
+        //if(card["path"][k].className == "instance-card"){
             card["path"][k].classList.add('brightlight');
             iID = parseInt(card["path"][k].id.substring(4),10);
             console.log("iID: ",iID);
@@ -1276,6 +1281,7 @@ function loadInstanceDeets(card){
                     };
                 }
             }
+            break;
         }
 
     }
@@ -1823,8 +1829,9 @@ function openTab(tabBID, tabType) {
     console.log("classList (in opentab) for ",tabBID,": ", document.getElementById(tabBID).classList)
 };
 
-document.getElementById("filtros").style.display="block";
-document.getElementById("tabFilters").className += " active";
+//Open page to "HELP" tab
+document.getElementById("infoHelp").style.display="block";
+document.getElementById("tabInfo").className += " active";
 
 
 function addDraw(){

@@ -77,7 +77,7 @@ input[type="checkbox"].regCheck:checked + *{
 .button1 {
     background-color: var(--apr-color1);
     border: none;
-    outline: 2px solid var(--apr-color3);
+    outline: 2px solid var(--neutral-colorL);
     color: var(--neutral-colorL);
     padding: 15px 25px;
     text-align: center;
@@ -182,7 +182,7 @@ top: 3em;
 /*POPUP DEFINITIONS */
 .ol-popup {
     position: absolute;
-    background-color: var(--apr-color1);
+    background-color: var(--apr-color3);
     box-shadow: -5px 5px 4px var(--shadow-color);
     border-radius: 10px;
     border: 2px solid var(--apr-color2);
@@ -193,11 +193,11 @@ top: 3em;
 }
 
 .popup-ititle {
-    background-color: var(--neutral-colorL);
+    color: var(--neutral-colorL);
     padding: 10px;
     border-top-left-radius: 8px;
     border-top-right-radius:8px;
-    color: var(--apr-color3);
+    background-color: var(--apr-color1);
     font-size: 14px;
     font-weight: bold;
 }
@@ -244,7 +244,7 @@ top: 3em;
     pointer-events: none;
   }
   .ol-popup:after {
-    border-top-color: var(--arrow-color);
+    border-top-color: var(--arrow-color2);
     border-width: 10px;
     left: 48px;
     margin-left: -10px;
@@ -259,7 +259,7 @@ top: 3em;
   .ol-popup-closer {
     text-decoration: none;
     position: absolute;
-    color: var(--apr-color1L);
+    color: var(--neutral-colorL);
     top: 2px;
     right: 8px;
   }
@@ -505,6 +505,7 @@ div.scrollResults {
     .story-card:hover {
         box-shadow: var(--card-box-shadow-hover);
         font-weight: bold;
+        background-color:var(--apr-color3L);
     }
 
     .story-card .story-title {
@@ -514,7 +515,7 @@ div.scrollResults {
         padding: var(--card-title-padding);
         text-align: left;
         position: relative;
-        background: var(--apr-color1);
+        background: var(--apr-color3);
         color: var(--neutral-colorL);
         overflow: hidden;
     }
@@ -541,7 +542,7 @@ div.scrollResults {
     .story-card .story-details .story-tags {
 
         font-size: 12px;
-        color: var(--apr-color1);
+        color: var(--apr-color3);
         /*background-color: var(--apr-color3L);
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
@@ -587,6 +588,7 @@ div.scrollResults {
     .instance-card:hover {
         box-shadow: var(--box-shadow-hover);
         font-weight: bold;
+        background-color: var(--apr-color1L);
     }
 
     .instance-card .instance-title {
@@ -596,8 +598,8 @@ div.scrollResults {
         padding: var(--card-title-padding);
         text-align: left;
         position: relative;
-        background: var(--apr-color1L);
-        color: var(--apr-color3);
+        background: var(--apr-color1);
+        color: var(--neutral-colorL);
         overflow: hidden;
     }
 
@@ -725,7 +727,7 @@ div.scrollResults {
     }
 
 
-    .dO .close{
+    /*.dO .close{
         font-size: 20px;
         height: 30px;
         font-weight: bold;
@@ -738,7 +740,7 @@ div.scrollResults {
 
     .dO .close:hover{
         font-size:30px;
-    }
+    }*/
 
     
     .dO a:link {
@@ -752,14 +754,14 @@ div.scrollResults {
         font-size: 20px;
         font-weight: bold;
         color: var(--neutral-colorL);
-        background-color:var(--apr-color1);
+        background-color:var(--apr-color3);
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         text-decoration: none;
     }
 
     .dO-title:hover {
-        outline: 2px solid var(--apr-color3);
+        outline: 2px solid var(--apr-color3L);
     }
 
     .dO .dO-story{
@@ -806,11 +808,11 @@ div.scrollResults {
     }
 
     .dO-instance .dO-ititle {
-        color: var(--apr-color3);
+        color: var(--neutral-colorL);
         /*height: 30px;*/
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
-        background-color:var(--apr-color1L);
+        background-color:var(--apr-color1);
         padding-top: 5px;
         padding-bottom: 5px;
         padding-left: 10px;
@@ -831,18 +833,18 @@ div.scrollResults {
         padding-right: 10px;
         text-align: right;
         font-weight: bold;
-        color: var(--apr-color3);
+        color: var(--apr-color1);
     }
 
     .dO-instance .dO-timeframe{
         text-align: right;
         padding-right: 10px;
-        color: var(--apr-color3);
+        color: var(--apr-color1);
     }
 
     .dO-instance .dO-tdesc{
         padding-right: 10px;
-        color: var(--apr-color3);
+        color: var(--apr-color1);
         font-size: 14px;
         text-align: right;
         font-style: italic;
@@ -850,7 +852,7 @@ div.scrollResults {
 
     .dO-instance .dO-pdesc{
         padding: 10px;
-        color: var(--apr-color3);
+        color: var(--apr-color1);
         font-size: 14px;
 
     }
@@ -1102,20 +1104,62 @@ div.scrollResults {
     flex-flow: row nowrap;
     overflow-y:hidden;
     overflow-x:auto;
+    
 }
 
 
 .filterBubble{
     margin: 5px;
     padding: 5px;
-    border-radius: 10px;
+    font-weight:bold;
+    border-radius: 15px;
     height: 35px;
     white-space: nowrap;
-    background-color: var(--apr-color2);
+    background-color: var(--neutral-colorL);
+    border:solid 2px var(--apr-color3);
     color: var(--apr-color3);
     
 }
 .instLevel{
-    background-color: var(--apr-color3);
-    color: var(--apr-color2L);
+    background-color: var(--neutral-colorL);
+    border:solid 2px var(--apr-color1);
+    color: var(--apr-color1);
+}
+
+/* TOOLTIP */
+
+.tooltipL {
+    vertical-align: center;
+    position: relative;
+    display: inline-block;
+    color: var(--apr-color1);
+    max-width: max-content;
+}
+
+.tooltipL .tooltiptext {
+    visibility: hidden;
+    width: 600px;
+    top: 100%;
+    left: 50%;
+
+    overflow:visible;
+    overflow-wrap:break-word;
+    background-color: white;
+    color: black;
+    text-align: left;
+    padding: 20px;
+    border-radius: 6px;
+    border: solid var(--apr-color1);
+
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltipL:hover .tooltiptext{
+    visibility: visible;
+}
+
+.tooltipL:hover {
+    background-color: var(--apr-color1);
+    color: white;
 }
