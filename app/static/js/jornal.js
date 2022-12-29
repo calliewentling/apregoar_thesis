@@ -135,8 +135,20 @@ var map = new ol.Map({
     controls: ol.control.defaults().extend([new ol.control.FullScreen()])
 });
 
+/*ADJUST BASEMAP COLORING */
+//https://codesandbox.io/s/globalcompositeoperation-fktwf
+map.render();
+map.getLayers().getArray()[0].on("postrender", function(evt){
+    evt.context.globalCompositeOperation = "color";
+    if (evt.context.globalCompositeOperation === "color"){
+        evt.context.fillStyle = "rgba(255,255,255,.5)";
+        evt.context.fillRect(0,0,evt.context.canvas.width,evt.context.canvas.height);
+    }
+    evt.context.globalCompositeOperation = "source-over";
+});
+
 /* Preparing highlight maps of selected instances */
-fillColor = 'rgba(255,255,255,0.05)';
+fillColor = 'rgba(255,255,255,.75)';
 const style = new ol.style.Style({
     fill: new ol.style.Fill({
         color: fillColor,
@@ -305,7 +317,7 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
                     var vizDate = '<p><em>'+tBegin.toDateString()+'</em>'+tBegin.toTimeString()+' - <em>'+tEnd.toDateString()+'</em> '+tEnd.toTimeString()+'</p>'; 
                 }
             } else {
-                vizDate = '';
+                vizDate = 'Sem prazo';
             }
             console.log("vizDate: ",vizDate);
             var tDesc = popupFeatures[f]["A"]["t_desc"];
@@ -342,9 +354,36 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
                 "pDesc": pDesc,
                 "pName": pName,
             }
+            let priority = []
+            const priorityEval = ["i_name","i_desc","p_name","p_desc"];
+            let block;
             if (type == "article") {
-                popupInstances[f]["instanceBlock"] = instanceBlock;
+                for (var k=0; k<priorityEval.length; k++){
+                    console.log("popupFeatures[f]['A'][priorityEval[k]]: ",popupFeatures[f]["A"][priorityEval[k]]);
+                    if (popupFeatures[f]["A"].hasOwnProperty(priorityEval[k])){
+                        if (popupFeatures[f]["A"][priorityEval[k]] === "context"){
+                            priority.push("Contextual");
+                        } else if (popupFeatures[f]["A"][priorityEval[k]].length>0){
+                            priority.push(popupFeatures[f]["A"][priorityEval[k]]);
+                        } 
+                    }
+                }                               
+                console.log("priority: ",priority);
+                block = '<h3 class="blockTitle">'+priority[0]+'</h3>';
+                if (priority.length>1){
+                    block = block + '<p style="font-weight:bold">'+priority[1]+'</p>';
+                    if (priority.length>2){
+                        block = block + '<p>'+priority[2];
+                        if (priority.length>3){
+                            block = block + ': '+priority[3];
+                        }
+                        block = block+'</p>';
+                    }
+                }
+                block = block + '<p>'+vizDate+'</p>'+tDesc;
 
+                //popupInstances[f]["instanceBlock"] = instanceBlock;
+                popupInstances[f]["instanceBlock"] = block;
             } else if (type == "explore"){
                 popupInstances[f]["instanceBlock"] = storyBlock; //change this
 
@@ -434,8 +473,9 @@ map.on('click', function (evt) {
     console.log("Leaving map on click");
 });
 let currentZIndex;
-
+//////////////////////////////////////////////////////////////////////////////
 /** VIEWING INDIVIDUAL STORIES FOR A JORNAL ENTRY */
+/////////////////////////////////////////////////////////////////////////////
 if (doc_source == "historias"){
     currentZIndex = 1;
     console.log("doc_source: ",doc_source);
@@ -496,7 +536,7 @@ if (doc_source == "historias"){
         map.addLayer(vectorLayer);
         const nearbyButtonArea = document.getElementById('nearbyButtonArea');
         if (nearbys.length > 0){
-            for (i=0;i<nearbys.length;i++){
+            for (var i=0;i<nearbys.length;i++){
                 var nearbyButton = document.createElement('button');
                 nearbyButton.className = "button2";
                 nearbyButton.innerHTML = nearbys[i]["name"]+" ("+nearbys[i]["count"]+")";
@@ -510,22 +550,59 @@ if (doc_source == "historias"){
         //Add instances so that these can be easily identified on the map!
         if (geonoticia["instances"].length > 0){
             const instRoundup = document.getElementById('instRoundup');
-            for (i=0; i<geonoticia["instances"].length; i++){
+            for (var i=0; i<geonoticia["instances"].length; i++){
                 var instanceLocator = document.createElement('button');
                 instanceLocator.className = "button3";
                 instanceLocator.id = "id_"+geonoticia["instances"][i]["i_id"];
+            
+                instanceLocator.onclick = function(){
+                    const iID = parseInt(this.id.substring(3),10);
+                    console.log("Show instance iID: ",iID);
+                    var features = vSource.getFeatures();
+                    console.log("vSource.getFeatures() ",vSource.getFeatures());
+                    for (var j=0; j<features.length; j++){
+                        if (features[j]["A"]["i_id"] == iID){
+                            //ACT AS IF CLICK OCCURRED
+                            hoverOverlay.getSource().clear();
+                            featureFocus.getSource().clear();
+                            hoverOverlay.getSource().addFeature(features[j]);
+                            featureFocus.getSource().addFeature(features[j]);
+                            layerExtent = hoverOverlay.getSource().getExtent();
+                            map.getView().fit(ol.extent.buffer(layerExtent, .001));
+                            break;
+                        }
+                    }
+                }
 
-                var eTitle = document.createElement('div');
-                eTitle.className = "eTitle";
-                eTitle.innerHTML = geonoticia["instances"][i]["e_name"];
-                instanceLocator.appendChild(eTitle);
-
-                var eDesc = document.createElement('div');
-                eDesc.className = "eDesc";
-                eDesc.innerHTML = geonoticia["instances"][i]["e_desc"];
-                instanceLocator.appendChild(eDesc);
-
+                var iTitle = document.createElement('div');
+                iTitle.className = "iTitle";               
+                instanceLocator.appendChild(iTitle);
+                var iDesc = document.createElement('div');
+                iDesc.className = "iDesc";
+                instanceLocator.appendChild(iDesc);
                 instRoundup.appendChild(instanceLocator);
+
+                /* Define values shown in instance list. Ideally these will be i_names and descriptions, but during the transition p_names may be used.*/
+                if (geonoticia["instances"][i].hasOwnProperty("i_name")){
+                    if (geonoticia["instances"][i]["i_name"]==="context"){ 
+                        //If contextual instance
+                        iTitle.innerHTML = geonoticia["instances"][i]["p_name"];
+                        iDesc.innerHTML = "Contextual";
+                    } else {
+                        //If iname exists use it
+                        iTitle.innerHTML = geonoticia["instances"][i]["i_name"];
+                        if (geonoticia["instances"][i].hasOwnProperty("i_desc")){
+                            //If idesc exists use it
+                            iDesc.innerHTML = geonoticia["instances"][i]["i_desc"];
+                        }
+                    }
+                } else {
+                    iTitle.innerHTML = geonoticia["instances"][i]["p_name"];
+                    iDesc.innerHTML = geonoticia["instances"][i]["p_desc"];
+                }; 
+    
+
+                
 
 
             }
@@ -549,7 +626,10 @@ if (doc_source == "historias"){
         /*iframeH.style.height = (viewHeight - 100)+"px";
         document.getElementById('noArticle').style.height = (viewHeight - 100)+"px";*/
     };
-} /** VIEWING JORNAL MAP */
+} 
+//////////////////////////////////////////////////////////////////
+/** VIEWING JORNAL MAP */
+////////////////////////////////////////////////////////////////////
 else if (doc_source == "jornal_map"){
     currentZIndex = 1;
     console.log("jornal_map");
@@ -1210,18 +1290,21 @@ function defineEBoundary(eID){
     return eBoundary;
 };
 
-  /* Collapsible */
-  var coll = document.getElementsByClassName("collapsible");
-  var c_index;
-  
-  for (c_index = 0; c_index < coll.length; c_index++) {
-    coll[c_index].addEventListener("click", function() {
-      this.classList.toggle("active");
-      var content = this.nextElementSibling;
-      if (content.style.display === "block") {
-        content.style.display = "none";
-      } else {
-        content.style.display = "block";
-      }
-    });
-  };
+/* Collapsible */
+var coll = document.getElementsByClassName("collapsible");
+var c_index;
+
+for (c_index = 0; c_index < coll.length; c_index++) {
+coll[c_index].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+    content.style.display = "none";
+    } else {
+    content.style.display = "block";
+    }
+});
+};
+
+document.getElementById('instRoundupButton').classList.toggle("active");
+document.getElementById('instRoundupButton').nextElementSibling.style.display = "block";

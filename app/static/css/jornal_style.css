@@ -121,12 +121,27 @@ body {
 .ol-popup {
     color: var(--pub-color);
     /*background-color: white;*/
-    font-size: 12px; /*This only changes hte size of hte x. Where is the size of hte content??*/
+    font-size: 12px; /*This only changes hte size of hte x (closer). Where is the size of hte content??*/
     z-index:10;
+    padding: 0px;
+}
+
+.blockTitle {
+    background-color: var(--pub-color);
+    color: white;
+    padding: 10px;
+    margin: 0px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 .popupContent {
-    font-size: 8px;
+    font-size: 12px;
+    padding: 5px;
+}
+
+.popupInstances {
+    background-color: white;
 }
 
 /*View nearby area*/
@@ -640,7 +655,14 @@ input[type="range"]:active::-webkit-slider-thumb{
 }
 
 .button3 {
-    background-color: var(--pub-color);
+    background-color: var(--pub-colorL);
     border-radius: 10px;
+    border: 2px solid var(--pub-color);
     color: white;
+    font-size: 12px;
+    margin: 5px;
+}
+
+.button3 .iTitle{
+    font-weight: bold;
 }

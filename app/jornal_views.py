@@ -69,10 +69,14 @@ def historia(s_id):
                     "t_end": row["t_end"],
                     "t_type": row["t_type"],
                     "t_desc": row["t_desc"].replace('"','\\\"').replace("'","\\\'"), 
-                    "e_name": row["p_name"].replace('"','\\\"').replace("'","\\\'"), #Add logic to use i_name or p_name if not exist
-                    "e_desc": row["p_desc"].replace('"','\\\"').replace("'","\\\'"),
+                    "p_name": row["p_name"].replace('"','\\\"').replace("'","\\\'"),
+                    "p_desc": row["p_desc"].replace('"','\\\"').replace("'","\\\'"),                   
                     #"geom": row["all_gaz"]
                 }
+                if row["i_name"] is not None:
+                    instance["i_name"] = row["i_name"].replace('"','\\\"').replace("'","\\\'")
+                if row["i_desc"] is not None:
+                    instance["i_desc"] = row["i_desc"].replace('"','\\\"').replace("'","\\\'")
                 instances.append(instance)
         print("instances: ",instances)
         if sExists == True: #Ensure the story is real
