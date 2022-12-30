@@ -18,6 +18,7 @@ console.log("publication: ",publication);
  let eLayerExtent;
  var eBounds = false;
 
+ $(':root').css("--windowHeight", $( window ).height() );
 
 pubColor = setColors();
 
@@ -57,13 +58,17 @@ const overlay = new ol.Overlay({
 */
 if (closer) {
     closer.onclick = function () {
-        overlay.setPosition(undefined);
-        featureFocus.getSource().clear();
-        featureOverlay.getSource().clear();
-        closer.blur();
-        return false;
+        closePopup();
     };
 }
+
+function closePopup(){
+    overlay.setPosition(undefined);
+    featureFocus.getSource().clear();
+    featureOverlay.getSource().clear();
+    closer.blur();
+    return false;
+};
 
 /**
 * Add a click handler to page through popups.
@@ -148,7 +153,7 @@ map.getLayers().getArray()[0].on("postrender", function(evt){
 });
 
 /* Preparing highlight maps of selected instances */
-fillColor = 'rgba(255,255,255,.75)';
+fillColor = 'rgba(255,255,255,.25)';
 const style = new ol.style.Style({
     fill: new ol.style.Fill({
         color: fillColor,
@@ -170,15 +175,24 @@ const style = new ol.style.Style({
     }),
 })
 
+
+const styleJE = new ol.style.Style({
+    fill: new ol.style.Fill({
+        color: pubColor+'33', //1A: 10%, 33: 20%
+    }),
+    stroke: new ol.style.Stroke({
+        color: pubColor,
+        width: 1,
+    }),
+})
 //Setting styles of vector layers
 const highlightStyle = new ol.style.Style({
     stroke: new ol.style.Stroke({
-        color: pubColor,
+        color: pubColor+'1A',
         width: 3,
     }),
     fill: new ol.style.Fill({
         color: fillColor,
-        opacity: .2,
     }),
     text: new ol.style.Text({
         font: '14px Calibri,sans-serif',
@@ -198,10 +212,9 @@ const infoStyle = new ol.style.Style({
         width: 3,
     }),
     fill: new ol.style.Fill({
-        color: pubColor+'80',
-        opacity: .2,
+        color: pubColor+'1A',
     }),
-    text: new ol.style.Text({
+    /*text: new ol.style.Text({
         font: '14px Calibri,sans-serif',
         fill: new ol.style.Fill({
             color: pubColor,
@@ -210,7 +223,7 @@ const infoStyle = new ol.style.Style({
             color: '#fff',
             width: 3,
         }),
-    }),
+    }),*/
 });
 
 const highlightFocus = new ol.style.Style({
@@ -231,10 +244,11 @@ const hoverOverlay = new ol.layer.Vector({
 const featureOverlay = new ol.layer.Vector({
     source: new ol.source.Vector(),
     map: map,
-    style: function (feature) {
+    style: infoStyle,
+    /*style: function (feature) {
         infoStyle.getText().setText(feature.get('p_name'));
         return infoStyle;
-    },
+    },*/
 });
 const featureFocus = new ol.layer.Vector({
     source: new ol.source.Vector(),
@@ -359,8 +373,9 @@ const displayFeatureInfo = function (pixel, popupFeatures, type) {
             let block;
             if (type == "article") {
                 for (var k=0; k<priorityEval.length; k++){
+                    console.log("priorityEval[k]: ",priorityEval[k]);
                     console.log("popupFeatures[f]['A'][priorityEval[k]]: ",popupFeatures[f]["A"][priorityEval[k]]);
-                    if (popupFeatures[f]["A"].hasOwnProperty(priorityEval[k])){
+                    if (popupFeatures[f]["A"].hasOwnProperty(priorityEval[k]) && popupFeatures[f]["A"][priorityEval[k]] != null){
                         if (popupFeatures[f]["A"][priorityEval[k]] === "context"){
                             priority.push("Contextual");
                         } else if (popupFeatures[f]["A"][priorityEval[k]].length>0){
@@ -556,6 +571,7 @@ if (doc_source == "historias"){
                 instanceLocator.id = "id_"+geonoticia["instances"][i]["i_id"];
             
                 instanceLocator.onclick = function(){
+                    closePopup();
                     const iID = parseInt(this.id.substring(3),10);
                     console.log("Show instance iID: ",iID);
                     var features = vSource.getFeatures();
@@ -607,6 +623,8 @@ if (doc_source == "historias"){
 
             }
         }
+        document.getElementById('instRoundupButton').classList.toggle("active");
+        document.getElementById('instRoundupButton').nextElementSibling.style.display = "block";
     } else {
         document.getElementById('instanceArea').style.display="none";
         var instanceAreaNo = document.getElementById('instanceAreaNo');
@@ -622,10 +640,12 @@ if (doc_source == "historias"){
         aSeeAll.appendChild(buttonSeeAll);
 
         instanceAreaNo.style.display="block";
+        console.log("newsArea:",document.getElementById("newsArea"));
         document.getElementById("newsArea").style.height = (viewHeight - 100)+"px";
         /*iframeH.style.height = (viewHeight - 100)+"px";
         document.getElementById('noArticle').style.height = (viewHeight - 100)+"px";*/
     };
+    
 } 
 //////////////////////////////////////////////////////////////////
 /** VIEWING JORNAL MAP */
@@ -656,32 +676,20 @@ else if (doc_source == "jornal_map"){
     };
     var allFilters = baseFilters;
     if (eID > 0){
-        var bubbleFilters = document.getElementsByClassName("bubbleFilters")[0];
+        var bubbleFilterArea = document.getElementById("bubbleFilterArea");
+        var bubbleFilter = document.createElement('div');
+        bubbleFilter.className = 'buffleFilter';
+        bubbleFilterArea.appendChild(bubbleFilter);
 
         var eName = document.createElement('div');
-        eName.className = 'egaz';
+        eName.className = 'bubble bubbleEgaz';
         eName.id = "eID_"+eID;
         eName.innerHTML = e_name;
-        bubbleFilters.appendChild(eName);
+        bubbleFilter.appendChild(eName);
         eName.onmouseenter = function(){
             map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001)); //What does this number mean??
         };
-        /*
-        var eCloser = document.createElement('div');
-        eCloser.className = 'ename-closer';
-        eCloser.href = '#';
-        eCloser.text="decoration:none";
-        eCloser.position = "absolute";
-        eCloser.top = "2px";
-        eCloser.right = "8px";
-        eCloser.after.content = "✖";
-        eCloser.color = "black";
-        eCloser.onclick = function () {
-            allFilters["e_ids"] = "";
-            this.parentElement.remove();
-            this.remove();
-            filterAllVals();
-        };*/
+ 
 
         //Elsewhere, when filtering the eName element should be removed if no longer applicable
         allFilters["e_ids"] = [eID];
@@ -692,17 +700,14 @@ else if (doc_source == "jornal_map"){
     vSource = new ol.source.Vector();
     vectorLayer = new ol.layer.Vector({
         source: vSource,
-        style: function (feature) {
-            style.getText().setText(feature.get('p_name'));
-            return style;
-        },
+        style: styleJE,
     });
+
+    document.getElementById('seeResults').classList.toggle("active");
+    document.getElementById('seeResults').nextElementSibling.style.display = "block";
 
     //Initialize Sliders
     //SLIDERS
-    
-
-
     let containerSlider = document.getElementById("containerSlider");
     var sliderOne = document.createElement("input");
     sliderOne.id = "slider-1";
@@ -824,6 +829,8 @@ else if (doc_source == "jornal_map"){
         map.addLayer(eBoundaryL);
         console.log("addition of eBoundary complete");
     };
+
+
     
     /*
     //This should be dynamically updatesa call to exploreFilters.
@@ -1033,6 +1040,7 @@ function defineVSource(mapFilter){
             xhr.onerror = onError;
             xhr.onloadend = function() {
                 removeSkeleton();
+                
             }
             xhr.onload = function() {
                 if (xhr.status == 200){
@@ -1072,6 +1080,45 @@ function defineVSource(mapFilter){
     return vSource;
 };
 
+function bubblefy(val, level){
+    console.log("bubblefy(",val,",",level,")");
+    var bubbleArea = document.getElementById('bubbleArea');
+    var newBubble = document.createElement('div');
+    newBubble.className = "bubble";
+    if (level == "inst"){
+        newBubble.classList.add('instLevel');
+    }
+    newBubble.innerHTML = val;
+    bubbleArea.appendChild(newBubble);
+};
+
+function textDate(){
+    let monthA = ["jan", "fev","mar","abr","maio","jun","jul","ago","set","out","nov","dez"];
+    let output;
+    console.log("textDate(",arguments,")");
+
+    if (arguments.length > 1){
+        if (arguments[1].getFullYear() === arguments[0].getFullYear()){
+            if (arguments[1].getMonth() === arguments[0].getMonth()){
+                if (arguments[1].getDate() === arguments[0].getDate()){ //If the same dates
+                    output = "dia "+arguments[1].getDate+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+                } else { //If same months
+                    output = "dias "+arguments[0].getDate()+" e "+arguments[1].getDate()+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+                }
+            } else {//If same years
+                output = "dias "+arguments[0].getDate()+" de "+monthA[arguments[0].getMonth()]+" e "+arguments[1].getDate()+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+            }
+        } else {
+            output = "dias "+ arguments[0].getDate()+" de "+monthA[arguments[0].getMonth()]+", "+arguments[0].getFullYear()+" e "+arguments[1].getDate()+" de "+monthA[arguments[1].getMonth()]+", "+arguments[1].getFullYear();
+        }
+    } else {
+        output = "dia "+arguments[0].getDate()+" de "+monthA[arguments[0].getMonth()]+", "+arguments[0].getFullYear();
+    }
+    
+    console.log("output of textDate: ",output);
+    return output
+};
+
 function filterAllVals(){
     console.log("Entering filterAllVals");
     console.log("allFilters: ",allFilters);
@@ -1080,6 +1127,82 @@ function filterAllVals(){
     currentLayers = map.getLayers();
     map.removeLayer(vectorLayer);
     vSource.clear();
+    /* PREPPING BUBBLES */
+    var bubbleArea = document.getElementById("bubbleArea");
+    if (bubbleArea.hasChildNodes()){
+        var first = bubbleArea.firstElementChild;
+        while(first){
+            first.remove();
+            first = bubbleArea.firstElementChild;
+        };
+    }
+    
+    //Determinging publication range
+    let text;
+    if (allFilters["pubDateR1"] == pubDate1){
+        if (allFilters["pubDateR2"]== pubDate2){ //If all filters are maxed
+            text = "Todas datas de publicação";
+            bubblefy(val = text, level = "story");
+        } else { //If pub filter range is min to x
+            text = "Publicadas antes do "+textDate(allFilters["pubDateR2"]);
+            bubblefy(val = text, level = "story");
+        }
+    } else if (allFilters["pubDateR2"] == pubDate2){//If pub filter range is x to max
+        text = "Publicada depois o "+textDate(allFilters["pubDateR1"]);
+        bubblefy(val = text, level="story");
+    } else {
+        text = "Publicadas entre "+textDate(allFilters["pubDateR1"],allFilters["pubDateR2"]);
+        console.log("text: ",text);
+        bubblefy(val = text, level="story");
+    };
+    //Basic filters. Do story then instance
+    const sFilters = ["Tags", "Sections", "Authors", "Publications"];
+    const iFilters = ["T_types","P_types", "E_names"];
+    for (element in allFilters){
+        if (sFilters.includes(element)){
+            console.log(element," in sFilters");
+            if (allFilters[element].length > 0){
+                for (var i=0; i<allFilters[element].length; i++){
+                    bubblefy(val = allFilters[element][i], level = "story");
+                };
+            };
+        } else if (iFilters.includes(element)){
+            console.log(element," in iFilters");
+            if (allFilters[element].length>0){
+                for (var i=0; i<allFilters[element].length; i++){
+                    bubblefy(val = allFilters[element][i], level = "inst");
+                };
+            };
+        } else {
+            console.log(element," not in easy filters");
+        }
+    }
+    if (allFilters["pNameSearch"].length > 0){
+        bubblefy(val = allFilters["pNameSearch"], level = "inst");
+    };
+    // Determining instance date range
+    if (allFilters["iDateFilter"]==true){
+        text = "Eventos acontecendos entre do "+textDate(allFilters["iDateR1"],allFilters["iDateR2"]);
+        bubblefy(val = text, level="inst");
+    };
+
+    // Determining number of drawn boundaries
+    if (allFilters["boundaryPolys"].length > 0){
+        text = "Área(s) desenhada(s) applicada(s)";
+        bubblefy(val=text, level = "inst");
+    };
+    
+    //Replace human readable terms for data consistency
+    for (i = 0; i<allFilters["T_types"].length; i++){
+        if (allFilters["T_types"][i] == "contextual"){
+            allFilters["T_types"][i] = "allday_p";
+        } else if (allFilters["T_types"][i] == "data"){
+            allFilters["T_types"][i] = "allday_y";
+        } else {
+            allFilters["T_types"][i] = "allday_n";
+        };
+    };
+
     bodyContent = JSON.stringify(allFilters);
     fetch(`${window.origin}/${publication.p_name}/mapa`, {
         method: "POST",
@@ -1146,6 +1269,7 @@ function refreshStoryCards(stories){
     prevStoryCards.forEach(card => {
         card.remove();
     });
+
     //Preparing new story cards
     for(i=0; i<stories.length; i++){
         var sID = stories[i]["s_id"];
@@ -1306,5 +1430,28 @@ coll[c_index].addEventListener("click", function() {
 });
 };
 
-document.getElementById('instRoundupButton').classList.toggle("active");
-document.getElementById('instRoundupButton').nextElementSibling.style.display = "block";
+
+function sectionFilter(value){
+    console.log("value: ",value);
+    if (value.toLowerCase() === ""){
+         allFilters["Sections"] = [];
+         console.log("all sections selected");
+    } else {
+        allFilters["Sections"] = [value.toLowerCase()];
+    }
+    document.getElementById("moreSections").style.display="none";
+    filterAllVals();
+}
+
+function showMoreSections(){
+    let toShow = false;
+    if (document.getElementById("moreSections").style.display==="none"){
+        toShow = true;
+    }
+    if (toShow){
+        document.getElementById("moreSections").style.display="block";
+    } else {
+        document.getElementById("moreSections").style.display="none";
+    }
+};
+

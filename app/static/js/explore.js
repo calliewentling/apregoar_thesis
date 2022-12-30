@@ -896,7 +896,7 @@ function filterAllVals(){
     currentLayers = map.getLayers();
     map.removeLayer(filteredLayer);
     map.removeLayer(drawVector);
-    if (allFilters["boundaryPolys"].length>0){
+    if (allFilters["boundaryPolys"].length>0){bubbleArea
         map.addLayer(drawVector);
     }
     filteredSource.clear();

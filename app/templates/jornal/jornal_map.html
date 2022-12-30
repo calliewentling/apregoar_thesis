@@ -14,41 +14,99 @@
     <div class="seeSections">
         {% for i in bigSections %}
             {% set name = i %}
-             <button class="sectionB" value="{{ name }}">{{ name }}</button> 
+             <button class="sectionB" value="{{ name }}" onclick="sectionFilter(value)">{{ name }}</button> 
         {% endfor %}
-        <button class="maisB">Mais</button>
+        <div class="dropdownSections">
+            <button class="maisB" onclick="showMoreSections()">Mais</button>
+            <div id="moreSections" class="dropdownSections-content" style="display:none;">
+                <button class="sectionM" value = "" onclick="sectionFilter(value)">Todas</button>
+                {% for j in jVals.sections %}
+                    {% if not j|lower in bigSections|lower %}
+                        {% set name = j %}
+                        <button class="sectionM" value="{{ name }}" onclick="sectionFilter(value)">{{ name }}</button>
+                    {% endif %}
+                {% endfor %} 
+            </div>
+        </div>
+        
     </div>
 </div>
+
+<div id="bubbleArea" class="bubbleFilterArea"></div>
+
 
 
 <div class="bigCenter">
     <div class="centerArea">
-        
-        <div class="seeFilters">
-            <div class="seeAuthors">
-                <select id="checksAuthors">
-                    {% for i in jVals.authors %}
-                        {% set name = i %}
-                        {% set count = jVals.authors[i]["total_a"] %}
-                        <option value="{{ name }}">{{ name }} ({{ count }})</option>
-                    {% endfor %}
-                </select>
+        <div class="listArea">
+            <!-- FILTER AREA -->
+            <button id="seeFilters" type="button" class="collapsible collapsibleJ collapsibleJE">
+                <div class="row_local">
+                    <p>Filtros</p>
+                </div>
+            </button>
+            <div class="contentCollapse contentCollapseJ">
+                <div id="filterArea">
+                    <div class="seeAuthors">
+                        <select id="checksAuthors">
+                            {% for i in jVals.authors %}
+                                {% set name = i %}
+                                {% set count = jVals.authors[i]["total_a"] %}
+                                <option value="{{ name }}">{{ name }} ({{ count }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="seeTags">
+                        <select id="checksTags">
+                            {% for i in jVals.tags %}
+                                {% set name = i %}
+                                {% set count = jVals.tags[i]["total_t"] %}
+                                <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="timeAdjust" class="timeArea">
+                        <div class="wrapperSlider">
+                            <div class="valuesSlider">
+                                <span id="range1">{{ jVals.dates.idate1}}</span>
+                                <span> &dash; </span>
+                                <span id="range2">{{ jVals.dates.idate2 }}</span>
+                            </div>
+                            <div id = "containerSlider" class="containerSlider">
+                                <div class="slider-track"></div>
+                                <!--
+                                <input type="range" min="{{ jVals.dates.pubdate1}}" max="{{ jVals.dates.pubdate2}}" value="{{ jVals.dates.pubdate1}}" id="slider-1" oninput="slideOne()">
+                                <input type="range" min="{{ jVals.dates.pubdate1}}" max="{{ jVals.dates.pubdate2}}" value="{{ jVals.dates.pubdate2}}" id="slider-2" oninput="slideTwo()">
+                                -->
+                            </div>
+                            <!-- <input type="checkbox" id="ifromforever" name="ifromforever" value="ifromforever" oninput="adjustRange()">
+                            <label for="ifromforever">Só inclui instâncias dentro um ano</label> -->
+                        </div>
+                    </div>
+
+                    <br>
+                    <div class="filterReady">
+                        <button class="maisB filtrarB" onclick="filterAllVals()">Atualizar</button>
+                    </div>
+                </div>
             </div>
-            <div class="seeTags">
-                <select id="checksTags">
-                    {% for i in jVals.tags %}
-                        {% set name = i %}
-                        {% set count = jVals.tags[i]["total_t"] %}
-                        <option value="{{ name }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <br>
-            <div class="filterReady">
-                <button class="maisB filtrarB">Atualizar</button>
-            </div>
-            <div class="bubbleFilters"></div>
+            <!-- RESULTS AREA -->
+            <button id="seeResults" type="button" class="collapsible collapsibleJ collapsibleJE">
+                <div class="row_local">
+                    <p>Resultados</p>
+                </div>
+            </button>
+            <div class="contentCollapse contentCollapseJ">
+                <div id="resultsArea" class="resultsArea">
+                    <div id="storyArea" class="cardArea">
+                        <div id="storyCount" class="cardCount"></div>
+                        <div class="resultsStory" id="resultsStory"></div>
+                    </div>
+                </div>
+            </div> 
         </div>
+        
         <div class="mapArea">
             <div class="wrapper">
                 <div id="map" class="mapAll"></div>
@@ -68,42 +126,7 @@
             </div>
         </div>
     </div>
-    <div id="timeAdjust" class="timeArea">
-        <div class="wrapperSlider">
-            <div class="valuesSlider">
-                <span>Datas das instáncias:</span>
-                <span id="range1">{{ jVals.dates.idate1}}</span>
-                <span> &dash; </span>
-                <span id="range2">{{ jVals.dates.idate2 }}</span>
-            </div>
-            <div id = "containerSlider" class="containerSlider">
-                <div class="slider-track"></div>
-                <!--
-                <input type="range" min="{{ jVals.dates.pubdate1}}" max="{{ jVals.dates.pubdate2}}" value="{{ jVals.dates.pubdate1}}" id="slider-1" oninput="slideOne()">
-                <input type="range" min="{{ jVals.dates.pubdate1}}" max="{{ jVals.dates.pubdate2}}" value="{{ jVals.dates.pubdate2}}" id="slider-2" oninput="slideTwo()">
-                -->
-            </div>
-            <!-- <input type="checkbox" id="ifromforever" name="ifromforever" value="ifromforever" oninput="adjustRange()">
-            <label for="ifromforever">Só inclui instâncias dentro um ano</label> -->
-        </div>
-    </div>
 </div>
-
-
-
-
- 
-
-
-<div id="resultsArea" class="resultsArea">
-    <div id="storyArea" class="cardArea">
-        <div id="storyCount" class="cardCount"></div>
-        <div class="resultsStory" id="resultsStory"></div>
-    </div>
-</div>
-
-
-
 
 <script>
     const p_name = '{{ publication.p_name }}';
