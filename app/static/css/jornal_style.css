@@ -308,7 +308,7 @@ body {
 .dropdownSections-content {
     position:absolute;
     box-shadow: var(--shadow-dim) var(--shadow-color);
-    height: 400px;
+    height: min(fit-content,400px);
     width: max(fit-content, 200px);
     white-space: wrap;
     overflow-y:auto;
@@ -360,7 +360,7 @@ body {
     overflow-y: auto;
 }
 
-.seeAuthors, .seeTags {
+.seeAuthors, .seeTags, .searchTerm {
     left: 0;
     width: 100%;
     padding: 10px;
@@ -684,19 +684,20 @@ input[type="range"]:active::-webkit-slider-thumb{
 
 /* Filter Bubbles*/
 .bubbleFilterArea {
+
     position: absolute;
     width: 100%;
     top: 120px;
-    bottom: calc(var(--windowHeight)-170px);
+    height: 80px;
     padding: 10px;
-    background-color:red;
     white-space: nowrap;
     overflow-x:auto;
     overflow-y:hidden;
 }
 
 .bubble {
-    margin: 5%;
+    display: inline-block;
+    margin-right: 10px;
     font-size: 12px;
     bottom: 0px;
     box-shadow: -5px 10px 5px var(--shadow-color);
@@ -710,7 +711,6 @@ input[type="range"]:active::-webkit-slider-thumb{
     color: white;
     text-align: center;
     padding: 10px;
-    margin: 10px;
     width: fit-content;
 }
 

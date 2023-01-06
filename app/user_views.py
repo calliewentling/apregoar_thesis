@@ -102,6 +102,11 @@ def sign_upU(login_source):
                                     print("Print successfully refreshed ")
                                     cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
                                     print("Refreshed geonoticias materialized view")
+                                    cur.execute(
+                                        "CREATE MATERIALIZED VIEW IF NOT EXISTS apregoar.geonoticias_%(publication_id)s AS SELECT * FROM apregoar.geonoticias WHERE %(publication_id)s = ANY(publication_id) WITH DATA;",
+                                        {'publication_id': p_id}
+                                    )
+                                    print("successfully created new pub-specific geonoticias materialized view for publication id: ",p_id)
                         except:
                             print("error adding new publication")
                             con.rollback()

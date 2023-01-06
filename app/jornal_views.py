@@ -275,6 +275,7 @@ def pub_map(publication):
             print("success extracting publication information")
             for row in result:
                 p_id = row["publication_id"]
+                tablename = "apregoar.geonoticias_"+str(p_id)
                                 
                 publication = {
                     "p_id": p_id,
@@ -318,7 +319,7 @@ def pub_map(publication):
             for i in big_section:
                 big_section2.append(i.upper())
         
-        return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, e_name = e_name, jVals = jVals,bigSections = big_section2)
+        return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, e_name = e_name, jVals = jVals,bigSections = big_section2, tablename = tablename)
     #return render_template("explore/explore_map.html")
     
 
@@ -326,10 +327,12 @@ def pub_map(publication):
 def prepare_exploreJ(p_id):
     print("entering prepare_explore(p_id = ",p_id,")")
     print("type(p_id): ",type(p_id))
+    tablename = "apregoar.geonoticias_"+str(p_id)
     try:
         with engine.connect() as conn:
-            SQL = text("SELECT s_id, i_id, pub_date, section, section_id, author, author_id, publication, publication_id, t_begin, t_end, t_type, p_id, e_ids FROM apregoar.geonoticias WHERE :x = ANY(publication_id )")
-            SQL = SQL.bindparams(x=p_id)
+            #SQL = text("SELECT s_id, i_id, pub_date, section, section_id, author, author_id, publication, publication_id, t_begin, t_end, t_type, p_id, e_ids FROM apregoar.geonoticias WHERE :x = ANY(publication_id )")
+            SQL = text("SELECT s_id, i_id, pub_date, section, section_id, author, author_id, publication, publication_id, t_begin, t_end, t_type, p_id, e_ids FROM "+tablename+";")
+            #SQL = SQL.bindparams(x=p_id)
             result = conn.execute(SQL)
     except: 
         conn.close()

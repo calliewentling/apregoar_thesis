@@ -100,10 +100,11 @@
 </div>
 
 <script>
-    const publicationInfo = JSON.parse('{{ publication_info|tojson|safe }}');
+    var publicationInfo = JSON.parse('{{ publication_info|tojson|safe }}');
     console.log("publicationInfo: ",publicationInfo);
     var pubInput = document.getElementById("publication");
     
+
 
     var authorInput = document.getElementById("author");
     console.log("authorInput: ",authorInput);

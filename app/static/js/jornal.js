@@ -675,27 +675,7 @@ else if (doc_source == "jornal_map"){
         "e_ids": [],
     };
     var allFilters = baseFilters;
-    if (eID > 0){
-        var bubbleFilterArea = document.getElementById("bubbleFilterArea");
-        var bubbleFilter = document.createElement('div');
-        bubbleFilter.className = 'buffleFilter';
-        bubbleFilterArea.appendChild(bubbleFilter);
-
-        var eName = document.createElement('div');
-        eName.className = 'bubble bubbleEgaz';
-        eName.id = "eID_"+eID;
-        eName.innerHTML = e_name;
-        bubbleFilter.appendChild(eName);
-        eName.onmouseenter = function(){
-            map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001)); //What does this number mean??
-        };
- 
-
-        //Elsewhere, when filtering the eName element should be removed if no longer applicable
-        allFilters["e_ids"] = [eID];
-        eBounds = true;
-
-    }
+    
     console.log("allFilters: ",allFilters);
     vSource = new ol.source.Vector();
     vectorLayer = new ol.layer.Vector({
@@ -812,10 +792,13 @@ else if (doc_source == "jornal_map"){
     }
 
     resultsStory = document.getElementById("resultsStory"); 
-
-    
+    if (eID>0){
+        allFilters["e_ids"] = [eID];
+        eBounds = true;
+    }
     filterAllVals();
     if (eID > 0){
+        //ADDING EID TO MAP
         console.log("add eBoundary to map");
         defineEBoundary(eID = eID);
         eBoundaryL = new ol.layer.Vector({
@@ -828,7 +811,9 @@ else if (doc_source == "jornal_map"){
         });
         map.addLayer(eBoundaryL);
         console.log("addition of eBoundary complete");
-    };
+        allFilters["e_ids"] = [];
+        eBounds = false;
+    }
 
 
     
@@ -1127,6 +1112,14 @@ function filterAllVals(){
     currentLayers = map.getLayers();
     map.removeLayer(vectorLayer);
     vSource.clear();
+    allFilters["pNameSearch"] = document.getElementById('pNameSearch').value;
+    // REMOVING ANY PREVIOUS EBOUNDARIES
+    try {
+        eBoundary.clear();
+    } catch {
+        console.log("No eBoundary to clear");
+    }
+
     /* PREPPING BUBBLES */
     var bubbleArea = document.getElementById("bubbleArea");
     if (bubbleArea.hasChildNodes()){
@@ -1134,6 +1127,19 @@ function filterAllVals(){
         while(first){
             first.remove();
             first = bubbleArea.firstElementChild;
+        };
+    }
+
+    //existing search area bubble
+    if (allFilters["e_ids"].length > 0){
+        var newBubble = document.createElement('div');
+        newBubble.className = "bubble bubbleEgaz";
+        newBubble.innerHTML = e_name;
+        newBubble.id = "eID_"+eID;
+        bubbleArea.appendChild(newBubble);
+
+        newBubble.onmouseenter = function(){
+            map.getView().fit(ol.extent.buffer(eBoundary.getExtent(), .001));
         };
     }
     
@@ -1156,7 +1162,7 @@ function filterAllVals(){
         bubblefy(val = text, level="story");
     };
     //Basic filters. Do story then instance
-    const sFilters = ["Tags", "Sections", "Authors", "Publications"];
+    const sFilters = ["Tags", "Sections", "Authors"]; //NOT DOING PUBLICATION as that is implied
     const iFilters = ["T_types","P_types", "E_names"];
     for (element in allFilters){
         if (sFilters.includes(element)){
@@ -1203,6 +1209,8 @@ function filterAllVals(){
         };
     };
 
+    
+
     bodyContent = JSON.stringify(allFilters);
     fetch(`${window.origin}/${publication.p_name}/mapa`, {
         method: "POST",
@@ -1221,11 +1229,22 @@ function filterAllVals(){
         }
         response.json().then(function(resp){
             console.log("response: ",resp);
-            stories = resp["stories"];
-            instances = resp["instances"];
-            iIDs = resp["iIDs"];
+            let noResults
+            if (resp.hasOwnProperty('comments')){
+                alert(resp["comments"]);
+                noResults = true;
+            }
+            if (resp["stories"] == null){
+                stories = [];
+                document.getElementById('zoomAllResults').style.display="none";
+            } else{
+                stories = resp["stories"];
+                document.getElementById('zoomAllResults').style.display="block";
+                
+            }
             refreshStoryCards(stories=stories);
-            if (instances.length > 0){
+            iIDs = resp["iIDs"];
+            if (iIDs.length > 0){
                 iIDFilter = "i_id IN ("+iIDs+")";
                 cqlFilter = iIDFilter.replace(/%/gi,"%25").replace(/'/gi,"%27").replace(/ /gi,"%20");
                 vSource = defineVSource(mapFilter = cqlFilter);
@@ -1455,3 +1474,6 @@ function showMoreSections(){
     }
 };
 
+function zoomAllResults(){
+    map.getView().fit(ol.extent.buffer(vSource.getExtent(), .001));
+}

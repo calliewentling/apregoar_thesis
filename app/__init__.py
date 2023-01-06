@@ -14,6 +14,7 @@ from sqlalchemy.orm import *
 from geoalchemy2 import *
 
 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:thesis2021@localhost/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemyF(app)

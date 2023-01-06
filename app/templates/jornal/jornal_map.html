@@ -65,8 +65,11 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="searchTerm">
+                        <input type="text" id="pNameSearch" placeholder="Pesquisar">
+                    </div>
 
-                    <div id="timeAdjust" class="timeArea">
+                    <div id="timeAdjust" style="display:none;" class="timeArea">
                         <div class="wrapperSlider">
                             <div class="valuesSlider">
                                 <span id="range1">{{ jVals.dates.idate1}}</span>
@@ -105,6 +108,7 @@
                     </div>
                 </div>
             </div> 
+            <button id="zoomAllResults" type="button" class="maisB filtrarB" onclick="zoomAllResults()">Zoom</button>
         </div>
         
         <div class="mapArea">
@@ -130,6 +134,8 @@
 
 <script>
     const p_name = '{{ publication.p_name }}';
+    const tablename = '{{ tablename }}';
+    console.log("tablename: ",tablename);
     eID = '{{ e_id|int }}';
     e_name = '{{ e_name }}';
     console.log("e_name: ",e_name);

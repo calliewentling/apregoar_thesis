@@ -31,6 +31,9 @@ from shapely.geometry import Polygon, MultiPolygon
 from flask import request, redirect, jsonify, make_response, render_template, session as fsession, redirect, url_for
 from app import engine, session, text
 from werkzeug.utils import secure_filename
+
+
+
 #import geopandas as gpd
 #import geojson
 
@@ -52,30 +55,56 @@ def delete_i_derivs(delete_inst, con):
     print("Entering instance derivative delete sequence for: ", delete_inst)
     result_val = ""
     try:
-        with con:
-            with con.cursor() as cur:
-                cur.execute("DELETE FROM apregoar.instance_ugaz WHERE i_id = ANY (%s);", (delete_inst,))
-                print("Passed delete from instance_ugaz")
-                cur.execute("DELETE FROM apregoar.instance_egaz WHERE i_id = ANY (%s);", (delete_inst,))
-                print("Passed delete from instance_egaz")
-                cur.execute("DELETE FROM apregoar.instance_ngaz WHERE i_id = ANY (%s);",(delete_inst,))
-                print("Passed delete from instance_ngaz")        
-                cur.execute("DELETE FROM apregoar.instances WHERE i_id = ANY (%s);", (delete_inst,))
-                print("Passed delete from instances")
-                cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
-                print("Refreshed publication_info materialized view")
-                cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
-                print("Refreshed geonoticias materialized view")
-    except psycopg2.Error as e:
-        print("e.pgerror:  ",e.pgerror)
-        print("e.diag.message_primary: ", e.diag.message_primary)
-        print("Error in deleting instance derivatives")
-        con.rollback()
-        result_val = "failure"
+        with engine.connect() as conn:
+            SQL = text("SELECT publication_id FROM apregoar.geonoticias WHERE i_id = :x")
+            SQL = SQL.bindparams(x=delete_inst[0])
+            result = conn.execute(SQL)
+    except:
+        print("Error extracting publication_id for instancse")
     else:
-        con.commit()
-        print("success!")
-        result_val = "success"
+        publication_ids = []
+        if result:
+            for i in result:
+                publication_ids = i["publication_id"]
+        if len(publication_ids) > 0:
+            pub_queries = []
+            for id in publication_ids:
+                print("id: ",id)
+                pub_query = "REFRESH MATERIALIZED VIEW apregoar.geonoticias_"+str(id)+";"
+                pub_queries.append(pub_query)
+            try:
+                with con:
+                    with con.cursor() as cur:
+                        cur.execute("DELETE FROM apregoar.instance_ugaz WHERE i_id = ANY (%s);", (delete_inst,))
+                        print("Passed delete from instance_ugaz")
+                        cur.execute("DELETE FROM apregoar.instance_egaz WHERE i_id = ANY (%s);", (delete_inst,))
+                        print("Passed delete from instance_egaz")
+                        cur.execute("DELETE FROM apregoar.instance_ngaz WHERE i_id = ANY (%s);",(delete_inst,))
+                        print("Passed delete from instance_ngaz")        
+                        cur.execute("DELETE FROM apregoar.instances WHERE i_id = ANY (%s);", (delete_inst,))
+                        print("Passed delete from instances")
+                        cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                        print("Refreshed publication_info materialized view")
+                        cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                        print("Refreshed geonoticias materialized view")
+                        for q in pub_queries:
+                            cur.execute(q)
+                            print("Success: ",q)
+            except psycopg2.Error as e:
+                print("e.pgerror:  ",e.pgerror)
+                print("e.diag.message_primary: ", e.diag.message_primary)
+                print("Error in deleting instance derivatives")
+                con.rollback()
+                result_val = "failure"
+            else:
+                con.commit()
+                print("success!")
+                result_val = "success"
+        else:
+            print("No publication associated")
+            return
+        
+    
     print("result_val inside instance: ",result_val)
     return result_val
 
@@ -358,12 +387,13 @@ def addstory():
         for row in result:
             #print("row['authors']",row["authors"])
             authors = row["authors"]
+            print("authors (prepop): ",authors)
             try:
                 authors.pop("1")
                 print("{1: '*sem valor'} removed")
             except:
                 print("no need to remove {1: '*sem valor'}")
-            #print("authors: ",authors)
+            print("authors (postpop): ",authors)
             pub_info = {
                 "publication_name": row["publication_name"],
                 "sections": row["main_sections"],
@@ -408,46 +438,73 @@ def review_e(s_id):
                     delete_i = []
                     #INSTANCES FOUND
                     if result:
-                        print("It appears that there are instances")
+                        print("Result returned")
                         for i in result:
-                            #print("i: ",i)
+                            print("i: ",i)
                             delete_i.append(i["i_id"])
                         print("Related instances: ", delete_i, " Totalling: ", len(delete_i))
-                        result_val = delete_i_derivs(delete_i, con)
-                        print("Status of deleting instance and derivatives: ",result_val)
+                        if len(delete_i)>0:
+                            print("It appears that there are instances")
+                            result_val = delete_i_derivs(delete_i, con)
+                            print("Status of deleting instance and derivatives: ",result_val)
+                        else:
+                            print("Result returned but no instances")
                     #NO INSTANCES FOUND
                     else: 
                         print("It appears there are no instances")
-                    #DELETE STORY
                     try:
-                        with con:
-                            with con.cursor() as cur:
-                                cur.execute("DELETE FROM apregoar.sectioning WHERE story_id = %s;", (s_id,))
-                                print("Passed delete from sectioning")
-                                cur.execute("DELETE FROM apregoar.tagging WHERE story_id = %s;", (s_id,))
-                                print("Passed delete from tagging")
-                                cur.execute("DELETE FROM apregoar.publicationing WHERE story_id = %s;", (s_id,))
-                                print("Passed delete from publicationing")
-                                cur.execute("DELETE FROM apregoar.authoring WHERE story_id = %s;", (s_id,))
-                                print("Passed delete from authoring")
-                                cur.execute("DELETE FROM apregoar.stories WHERE s_id = %s;", (s_id,))
-                                print("Story ",s_id," prepped for deletion")
-                                cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
-                                print("Refreshed publication_info materialized view")
-                                cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
-                                print("Refreshed geonoticias materialized view")
+                        with engine.connect() as conn:
+                            SQL2 = text("SELECT p_id FROM apregoar.publicationing WHERE story_id = :x")
+                            SQL2 = SQL2.bindparams(x=s_id)
+                            result2 = conn.execute(SQL2)
                     except: 
-                        con.rollback()
-                        #con.close()
-                        print("Error deleting story")
-                        return redirect(url_for("publisher_dashboard"))
+                        print("Error in extracting publication id")
                     else:
-                        con.commit()
-                        
-                        con.close()
-                        print("Successfully deleted story and ",len(delete_i),"associated instances")
-                        #We should go to the next scenario
-                        return redirect(url_for("publisher_dashboard")) 
+                        if result2:
+                            print("result2 returned")
+                            print("result2: ",result2)
+                            for j in result2:
+                                print("i: ",j)
+                                publication_id = j["p_id"]
+                                print("publication_id = ",publication_id)
+                                pub_query = "REFRESH MATERIALIZED VIEW apregoar.geonoticias_"+str(publication_id)+";"
+                                print("pub_query: ",pub_query)
+                                
+                        else:
+                            print("No result2 returned")
+                        #DELETE STORY                                                                             
+                        try:
+                            with con:
+                                with con.cursor() as cur:
+                                    cur.execute("DELETE FROM apregoar.sectioning WHERE story_id = %s;", (s_id,))
+                                    print("Passed delete from sectioning")
+                                    cur.execute("DELETE FROM apregoar.tagging WHERE story_id = %s;", (s_id,))
+                                    print("Passed delete from tagging")
+                                    cur.execute("DELETE FROM apregoar.publicationing WHERE story_id = %s;", (s_id,))
+                                    print("Passed delete from publicationing")
+                                    cur.execute("DELETE FROM apregoar.authoring WHERE story_id = %s;", (s_id,))
+                                    print("Passed delete from authoring")
+                                    cur.execute("DELETE FROM apregoar.stories WHERE s_id = %s;", (s_id,))
+                                    print("Story ",s_id," prepped for deletion")
+                                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                                    print("Refreshed publication_info materialized view")
+                                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                                    print("Refreshed geonoticias materialized view")
+                                    print("pub_query: ",pub_query)                                
+                                    cur.execute(pub_query)
+                                    print("Refreshed MATERIALIZED VIEW of publication ",publication_id)
+                        except: 
+                            con.rollback()
+                            #con.close()
+                            print("Error deleting story")
+                            return redirect(url_for("publisher_dashboard"))
+                        else:
+                            con.commit()
+                            
+                            con.close()
+                            print("Successfully deleted story and ",len(delete_i),"associated instances")
+                            #We should go to the next scenario
+                            return redirect(url_for("publisher_dashboard")) 
                 
             else: #ASSUMING ONLY DELETING SPECIFIC INSTANCES
                 if "instance" in key:
@@ -478,6 +535,7 @@ def review_e(s_id):
         instances = []
         story = {}
         for row in result:
+            print("row: ",row)
             if row["i_id"] != None: 
                 if row["t_begin"] is None:
                     instance = {
@@ -515,6 +573,7 @@ def review_e(s_id):
 
 def coalesce(*values, valType):
     #Return the first non-None value or None if all values are None
+    print("values: ",values)
     if valType == "str":
         defaultVal = ""
     if valType == "int":
@@ -547,6 +606,10 @@ def review():
             for row in result:
                 existing_urls.append(row["web_link"])
             #print(existing_urls)
+            if "section" in request.form.keys():
+                sections = coalesce(request.form["section"].lower(),valType="str")
+            else:
+                sections = ""
             story = {
                 ##Required
                 "title": request.form["title"],
@@ -555,8 +618,7 @@ def review():
                 "publication": request.form["publication"].lower(),
                 ##Optional 
                 "summary": request.form["summary"],
-                    #Move these to review?
-                "section" : coalesce(request.form["section"].lower(),valType="str"),
+                "section" : sections, 
                 "tags": request.form["tags"].lower(),
                 "author": coalesce(request.form["author"].lower(),valType="str"),
             }
@@ -596,6 +658,7 @@ def review():
                 if story["tags"]:
                     tags = story["tags"].split(",")
                     for tag in tags:
+                        tag=tag.strip()
                         if tag == "":
                             tags.remove(tag)
                         if tag == " ":
@@ -612,6 +675,7 @@ def review():
                 if story["author"]:
                     authors = story["author"].split(",")
                     for author in authors:
+                        author = author.strip()
                         if author == "":
                             authors.remove(author)
                         if author == " ":
@@ -627,6 +691,7 @@ def review():
                 #Saving Sections
                 if story["section"]:
                     section = story["section"]
+                    section = section.strip()
                     if section == "":
                         emptyAttribute(attr="section", s_id = s_id, con=con)
                     elif section == " ":
@@ -641,16 +706,15 @@ def review():
                 if story["publication"]:
                     publication = story["publication"]
                     if publication == "":
-                        emptyAttribute(attr="publication", s_id = s_id, con=con)
+                        publication_id = emptyAttribute(attr="publication", s_id = s_id, con=con)
                     elif publication == " ":
-                        emptyAttribute(attr="publication", s_id = s_id, con=con)
+                        publication_id = emptyAttribute(attr="publication", s_id = s_id, con=con)
                     else:
-                        savingAttributes(attr = "publication",s_id=s_id,con=con,attr_vals=[publication])
-                        
+                        publication_id = savingAttributes(attr = "publication",s_id=s_id,con=con,attr_vals=[publication])
+                    pub_query = "REFRESH MATERIALIZED VIEW apregoar.geonoticias_"+str(publication_id)+";"
                 else:  
-                    print("No authors associated")
+                    print("No publications associated")
                     emptyAttribute(attr="publication", s_id = s_id, con=con)
-                #RETURN HERE TO REFRESH VIEW: cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
                 try:
                     with con:
                         with con.cursor() as cur:
@@ -658,8 +722,10 @@ def review():
                             print("successful refresh of publiction_info materialized view")
                             cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
                             print("Refreshed geonoticias materialized view")
+                            cur.execute(pub_query)
+                            print(pub_query)
                 except:
-                    print("Unsuccessful refresh of publication_info and/or geonoticias materialized view")
+                    print("Unsuccessful refresh of materialized views")
                 con.commit()                   
                 con.close()
                 return redirect(url_for("review_e", s_id = s_id))
@@ -726,7 +792,7 @@ def savingAttributes(attr,s_id,con,attr_vals):
                 #return render_template("publisher/create.html")
             else:
                 print("Successful association to existing "+attr+"!")
-    return
+    return id #This is to help with publication ids to refresh the correct materialized view
 
 
 def emptyAttribute(attr,s_id,con):
@@ -760,7 +826,7 @@ def emptyAttribute(attr,s_id,con):
         #return render_template("publisher/create.html") #
     else:
         print("Successful association to '*sem valor' of "+attr)
-    return
+    return attr_id_val
 
 
 #########################
@@ -1371,14 +1437,27 @@ def save_instance(s_id):
     else:
         #Commit all additions to database
         try:
+            with engine.connect() as conn:
+                SQL = text("SELECT p_id FROM apregoar.publicationing WHERE story_id = :x")
+                SQL = SQL.bindparams(x=s_id)
+                print("SQL: ",SQL)
+                result = conn.execute(SQL)
+                if result:
+                    print("Result returned")
+                    for i in result:
+                        publication_id = i["p_id"]
+                        pub_query = "REFRESH MATERIALIZED VIEW apregoar.geonoticias_"+str(publication_id)+";"
+                        print("pub_query: ",pub_query)
             with con:
                 with con.cursor() as cur:
                     cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
                     print("Print successfully refreshed ")
                     cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
                     print("Refreshed geonoticias materialized view")
+                    cur.execute(pub_query)
+                    print(pub_query)
         except:
-            print("unsuccessful refresh of materialized view")
+            print("unsuccessful refresh of materialized views")
         else:
             con.commit()
             con.close()

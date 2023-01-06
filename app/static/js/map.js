@@ -263,29 +263,32 @@ fetch(wfs_url).then(function (response) {
 .then(function (json) {
     const features = new ol.format.GeoJSON().readFeatures(json);
     console.log("Features: ",features);
-    if (features[0]["A"]["st_astext"]) {
-        console.log("Arrival to add features and future zoom")
-        vectorSource.addFeatures(features);
-        layerExtent = vectorSource.getExtent();
-        isInfinite = false;
-        for (coord in layerExtent){
-            if (!isFinite(layerExtent[coord])){
-                console.log("coord is infinite");
-                isInfinite = true;
-            } else {
-                console.log("coord is finite");
-            }
-        };
-        if (isInfinite == false){
-            console.log("layerExtent: ",layerExtent);
-            const currentExtent = ol.extent.getIntersection(layerExtent,maxExtent);
-            console.log("currentExtent: ",currentExtent);
-            map.getView().fit(currentExtent); //What does this number mean??
-        } 
-        //map.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
-        //spinner.setAttribute('hidden', '');
-        document.getElementById("map").classList.remove("skeleton");
-    }   
+    if (features.length>0){
+        if (features[0]["A"]["st_astext"]) {
+            console.log("Arrival to add features and future zoom")
+            vectorSource.addFeatures(features);
+            layerExtent = vectorSource.getExtent();
+            isInfinite = false;
+            for (coord in layerExtent){
+                if (!isFinite(layerExtent[coord])){
+                    console.log("coord is infinite");
+                    isInfinite = true;
+                } else {
+                    console.log("coord is finite");
+                }
+            };
+            if (isInfinite == false){
+                console.log("layerExtent: ",layerExtent);
+                const currentExtent = ol.extent.getIntersection(layerExtent,maxExtent);
+                console.log("currentExtent: ",currentExtent);
+                map.getView().fit(currentExtent); //What does this number mean??
+            } 
+            //map.getView().fit(ol.extent.buffer(layerExtent, .01)); //What does this number mean??
+            //spinner.setAttribute('hidden', '');
+            document.getElementById("map").classList.remove("skeleton");
+        }  
+    }
+     
 });
 ///
 
