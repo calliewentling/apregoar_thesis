@@ -536,6 +536,7 @@ def review_e(s_id):
         story = {}
         for row in result:
             print("row: ",row)
+            story = row
             if row["i_id"] != None: 
                 if row["t_begin"] is None:
                     instance = {
@@ -561,7 +562,7 @@ def review_e(s_id):
                 instances.append(instance)
             else:
                 break
-        story = row
+        
         print("story: ",story)
         print("instances: ",instances)
         return render_template("publisher/review.html", story=story, sID = s_id, instances=instances) #
@@ -610,6 +611,10 @@ def review():
                 sections = coalesce(request.form["section"].lower(),valType="str")
             else:
                 sections = ""
+            if "author" in request.form.keys():
+                author = coalesce(request.form["author"].lower(),valType="str")
+            else:
+                author = ""
             story = {
                 ##Required
                 "title": request.form["title"],
@@ -620,7 +625,7 @@ def review():
                 "summary": request.form["summary"],
                 "section" : sections, 
                 "tags": request.form["tags"].lower(),
-                "author": coalesce(request.form["author"].lower(),valType="str"),
+                "author": author,
             }
 
             if story["web_link"] in existing_urls:

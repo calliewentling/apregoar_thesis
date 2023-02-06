@@ -264,7 +264,7 @@ def pub_map(publication):
         
         try:
             with engine.connect() as conn:
-                SQL = text("SELECT publication_id, publication_name, colors, main_sec FROM apregoar.publications WHERE publication_name LIKE :x")
+                SQL = text("SELECT publication_id, publication_name, colors, main_sec FROM apregoar.publications WHERE publication_name iLIKE :x")
                 SQL = SQL.bindparams(x=publication.lower().replace("_"," "))
                 result = conn.execute(SQL)
         except:
@@ -273,7 +273,10 @@ def pub_map(publication):
             return render_template("explore/explore_map.html")
         else:
             print("success extracting publication information")
+            print("result: ",result)
+            p_sections = []
             for row in result:
+                print("row: ",row)
                 p_id = row["publication_id"]
                 tablename = "apregoar.geonoticias_"+str(p_id)
                                 
@@ -283,41 +286,57 @@ def pub_map(publication):
                     "p_colors": row["colors"],
                 }
                 jVals = prepare_exploreJ(p_id)
+                if row["main_sec"] is not None:
+                    p_sections = row["main_sec"]
             #Determining main sections for jornal
-            counter = 0
-            counterMax = 5
-            big_section = []
-            p_sections = row["main_sec"]
-            print("p_sections: ",p_sections, type(p_sections))
-            if len(p_sections) > 1:
-                if len(p_sections) < counterMax:
-                    counterMax = len(p_sections)
+            big_section2 = []
+            if "sections" in jVals.keys():
+                """allVals = {
+                    "tags": tags,
+                    "sections": sections,
+                    "authors": authors,
+                    "p_types": p_types,
+                    "t_types": t_types,
+                    "e_names": e_names,
+                    "pub_dates": pub_dates,
+                    "i_range": i_range, 
+                    "pub_date_range": pub_date_range, 
+                    "dates": dates
+                }"""
+                counter = 0
+                counterMax = 5
+                big_section = []
                 
-                for section in p_sections:
-                    if section in jVals["sections"]:
+                print("p_sections: ",p_sections, type(p_sections))
+                if len(p_sections) > 1:
+                    if len(p_sections) < counterMax:
+                        counterMax = len(p_sections)
+                    
+                    for section in p_sections:
+                        if section in jVals["sections"]:
+                            big_section.append(section)
+                            if (counter == counterMax):
+                                break
+                            counter += 1
+                    if counter < counterMax:
+                        for section in jVals["sections"]:
+                            if section not in big_section:
+                                big_section.append(section)
+                            if (counter == counterMax):
+                                break
+                            counter += 1
+                else:
+                    if len(jVals["sections"]) < counterMax:
+                        counterMax = len(jVals["sections"])
+                    for section in jVals["sections"]:
                         big_section.append(section)
                         if (counter == counterMax):
-                            break
+                                break
                         counter += 1
-                if counter < counterMax:
-                    for section in jVals["sections"]:
-                        if section not in big_section:
-                            big_section.append(section)
-                        if (counter == counterMax):
-                            break
-                        counter += 1
-            else:
-                if len(jVals["sections"]) < counterMax:
-                    counterMax = len(jVals["sections"])
-                for section in jVals["sections"]:
-                    big_section.append(section)
-                    if (counter == counterMax):
-                            break
-                    counter += 1
-            print("counterMax = ",counterMax,". counter: ",counter)
-            big_section2 = []
-            for i in big_section:
-                big_section2.append(i.upper())
+                print("counterMax = ",counterMax,". counter: ",counter)
+                
+                for i in big_section:
+                    big_section2.append(i.upper())
         
         return render_template("jornal/jornal_map.html", publication = publication ,e_id=e_id, e_name = e_name, jVals = jVals,bigSections = big_section2, tablename = tablename)
     #return render_template("explore/explore_map.html")
