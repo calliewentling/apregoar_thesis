@@ -2,8 +2,10 @@ from app import app
 from datetime import datetime
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
-from flask import Flask, g, render_template, request, flash, jsonify, make_response, json, request, jsonify, make_response, render_template, session as fsession, redirect, url_for
+from flask import Blueprint, Flask, g, render_template, request, flash, jsonify, make_response, json, request, jsonify, make_response, render_template, session as fsession, redirect, url_for
 import psycopg2
+import functools
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import engine, session, text
 
@@ -21,6 +23,8 @@ def sign_upU(login_source):
     if request.method == "POST":
         req = request.form
         missing = list()
+
+        
 
         newPub = request.form.get("createNewPub")
         print("newPub: ",newPub)
@@ -40,7 +44,7 @@ def sign_upU(login_source):
             return render_template("user/sign_up.html", publications = publications, feedback=feedback)
         
         username = request.form.get("username")
-        password = request.form.get("password")
+        password = generate_password_hash(request.form.get("password"))
         email = request.form.get("email")
         organization = request.form.get("affiliation").lower()
 
@@ -191,17 +195,22 @@ def sign_inU(login_source):
         print("Entered password: ", password)
         try:
             with engine.connect() as conn:
-                SQL = text("SELECT users.u_id, users.organization, users.username, users.email, array_agg(user_affil.p_id) AS p_ids FROM apregoar.users LEFT JOIN apregoar.user_affil ON users.u_id = user_affil.u_id WHERE username = :x and password = :y GROUP BY users.u_id, organization, username, email")
-                SQL = SQL.bindparams(x=username, y=password)
+                SQL = text("SELECT users.u_id, users.password, users.organization, users.username, users.email, array_agg(user_affil.p_id) AS p_ids FROM apregoar.users LEFT JOIN apregoar.user_affil ON users.u_id = user_affil.u_id WHERE username = :x GROUP BY users.u_id, organization, username, email")
+                SQL = SQL.bindparams(x=username)
                 print(SQL)
                 result = conn.execute(SQL)   
                 print("SQL executed")
         except:
-            print("Error in validating username password combo")
+            print("Error in validating username")
             feedback = f"Erro"
         else:
             user = {}
             for row in result:
+                if not check_password_hash(row["password"],password):
+                    print("Incorrect password")
+                    print("Combo not found")
+                    feedback = f"Username/password combination not found. Please try again."
+                    return render_template("user/sign_in.html", feedback=feedback)
                 user = {
                     username: {
                         "username": row['username'],

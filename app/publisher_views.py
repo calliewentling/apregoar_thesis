@@ -342,6 +342,7 @@ def publisher_dashboard():
                     print("Error in identifying stories from user publication")            
                 else:
                     org_stories = []
+                    pub_name = ""
                     for row in result:
                         pub_name = row["publication_name"]
                         #print("pub_name: ",pub_name)
@@ -353,7 +354,7 @@ def publisher_dashboard():
                         }
                         #print("o_story: ",o_story)
                         org_stories.append(o_story)
-                    all_org_stories[row["publication_name"]] = org_stories
+                    all_org_stories[pub_name] = org_stories
                 print("all_org_stories: ",all_org_stories)
             return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories, allOrgStories = all_org_stories)
         return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories)    
