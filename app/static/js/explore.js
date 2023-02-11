@@ -1207,12 +1207,56 @@ var mapStory = new ol.Map({
 mapStory.addLayer(backDrop);
 
 let relations = {};
-function loadStoryDeets(card){
+function loadStoryDeets(input){
     console.log("Entering loadStoryDeets");
     closeDeets();
     removeHighlights(itsTime = true);
-    console.log("card: ",card);
+    console.log("input: ",input);
+    var sID = 0;
+    if(typeof input["path"]==="undefined"){
+        console.log("source", input["srcElement"]["parentNode"]["id"]);
+        card = input["srcElement"]["parentNode"];
+        sID = parseInt(card["id"].substring(4),10);
+    } else {
+        console.log("input['path']",input["path"]);
+        card = input;
+        for (i=0; i<card["path"].length; i++){
+            console.log(card["path"][i].className);
+            //if(card["path"][i].className == "story-card"){
+            if(card["path"][i].classList.contains("story-card")==true){
+                card["path"][i].classList.add('brightlight');
+                console.log("great success!")
+                console.log(card["path"][i].className);
+                sID = parseInt(card["path"][i].id.substring(4),10);
+                console.log("sID: ",sID);
+                break;
+            } 
+        }
+    }
     stopVar = "unkown";
+    cardD = {};
+    for (j=0;j<stories.length;j++){
+        if (stories[j]["s_id"]==sID){
+            cardD = stories[j];
+            console.log("cardD Story: ",cardD);
+            stopVar = "story";
+            relations={}
+            relations["instances_all"] = cardD["instances_all"];
+            relations["instances_no"] = cardD["instances_no"];
+            relations["instances_yes"] = cardD["instances_yes"];
+            console.log("relations: ",relations);
+            updateMapHighlights(sourceID = sID, type = "sCard", relations = relations);
+            for (iH in cardD["instances_yes"]){ //highlight associated instances
+                iHigh = cardD["instances_yes"][iH];
+                document.getElementById("iID_"+iHigh).classList.add("highlight");
+            };
+        }
+    };
+    renderDeets(cardD = cardD);
+    console.log("Leaving loadStoryDeets");
+    
+    
+    /*stopVar = "unkown";
     cardD = {};
     for (i=0; i<card["path"].length; i++){
         console.log(card["path"][i].className);
@@ -1244,46 +1288,54 @@ function loadStoryDeets(card){
         }
     }
     renderDeets(cardD = cardD);
-    console.log("Leaving loadStoryDeets");
+    console.log("Leaving loadStoryDeets");*/
 };
 
-function loadInstanceDeets(card){
+function loadInstanceDeets(input){
     console.log("Entering loadInstanceDeets");
     closeDeets();
     removeHighlights(itsTime = true);
     document.documentElement.style.setProperty('--arrow-color', 'var(--apr-color2)');
     stopVar = "unkown";
     cardD = {};
+    var iID;
 
-    for (k=0; k<card["path"].length; k++){
-        console.log("card['path'][k].classList: ",card["path"][k].classList);
-        if(card["path"][k].classList.contains("instance-card")==true){
-        //if(card["path"][k].className == "instance-card"){
-            card["path"][k].classList.add('brightlight');
-            iID = parseInt(card["path"][k].id.substring(4),10);
-            console.log("iID: ",iID);
-            for (j=0; j<instances.length;j++){
-                if (instances[j]["i_id"]==iID){
-                    cardD = instances[j];
-                    console.log("cardD Instnace: ",cardD);
-                    stopVar = "instance";
-                    relations={}
-                    relations["instances_all"] = cardD["instances_all"];
-                    relations["instances_no"] = cardD["instances_no"];
-                    relations["instances_yes"] = cardD["instances_yes"];
-                    updateMapHighlights(sourceID = iID, type = "iCard", relations = relations);
-                    //Updated related story and instances to highlight
-                    sID = cardD["s_id"];
-                    document.getElementById("sID_"+sID).classList.add("highlight"); //highlight associated story
-                    for (iH in cardD["instances_yes"]){ //highlight associated instances
-                        iHigh = cardD["instances_yes"][iH];
-                        document.getElementById("iID_"+iHigh).classList.add("highlight");
-                    };
-                }
+    console.log("input: ",input);
+
+    if(typeof input["path"] === "undefined"){
+        console.log("source: ", input["srcElement"]["parentNode"]["id"]);
+        iID = parseInt(input["srcElement"]["parentNode"]["id"].substring(4),10);
+    } else {
+        for (k=0; k<card["path"].length; k++){
+            console.log("card['path'][k].classList: ",card["path"][k].classList);
+            if(card["path"][k].classList.contains("instance-card")==true){
+            //if(card["path"][k].className == "instance-card"){
+                card["path"][k].classList.add('brightlight');
+                iID = parseInt(card["path"][k].id.substring(4),10);
+                break;
             }
-            break;
         }
+    }
 
+    console.log("iID: ",iID);
+    for (j=0; j<instances.length;j++){
+        if (instances[j]["i_id"]==iID){
+            cardD = instances[j];
+            console.log("cardD Instnace: ",cardD);
+            stopVar = "instance";
+            relations={}
+            relations["instances_all"] = cardD["instances_all"];
+            relations["instances_no"] = cardD["instances_no"];
+            relations["instances_yes"] = cardD["instances_yes"];
+            updateMapHighlights(sourceID = iID, type = "iCard", relations = relations);
+            //Updated related story and instances to highlight
+            sID = cardD["s_id"];
+            document.getElementById("sID_"+sID).classList.add("highlight"); //highlight associated story
+            for (iH in cardD["instances_yes"]){ //highlight associated instances
+                iHigh = cardD["instances_yes"][iH];
+                document.getElementById("iID_"+iHigh).classList.add("highlight");
+            };
+        }
     }
     renderDeets(cardD = cardD);
     refresh=false;
@@ -1504,19 +1556,30 @@ function subInstance(dParent, instance, lightLevel){
 
 function changeFocus(input){
     console.log("entering changeFocus");
+    console.log("input: ",input);
+    var iID, sID, brightID, brightLightID;
     if (input instanceof PointerEvent){
         popupContainer.style.display="none";
         //var iID = parseInt(input["path"][0].id.substring(8),10);
-        console.log("input path: ",input["path"]);
-        var iID = parseInt(input["path"][1].id.substring(2),10);
-        var sID = parseInt(input["path"][2].id.substring(7),10);
+        if(typeof input["path"]==="undefined"){
+            const parent = input["srcElement"]["parentElement"];
+            console.log("parent: ",parent);
+            iID = parseInt(parent["id"].substring(2),10);
+            sID = parseInt(parent["parentElement"]["id"].substring(7),10);
+            brightID = parent.id;
+
+        } else {
+            console.log("input path: ",input["path"]);
+            iID = parseInt(input["path"][1].id.substring(2),10);
+            sID = parseInt(input["path"][2].id.substring(7),10);
+            console.log(input["path"]);
+            brightID = input["path"][1].id;
+        }
+        
         console.log("sID: ",sID);
         console.log("iID: ",iID);
-        console.log(input["path"]);
         //console.log(input["path"].getElementsByClassName("dStory"));
-        
-        var brightID = input["path"][1].id;
-        var brightLightID = document.getElementById(brightID);
+        brightLightID = document.getElementById(brightID);
         type="iCard";
 
     } else {
@@ -1524,7 +1587,7 @@ function changeFocus(input){
         sID = input["s_id"];
         iID = input["i_id"];
         brightID = "i_"+iID;
-        var brightLightID = document.getElementById(brightID);
+        brightLightID = document.getElementById(brightID);
         type="map";
     }
    
