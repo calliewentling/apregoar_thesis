@@ -1578,6 +1578,7 @@ function changeFocus(input){
         
         console.log("sID: ",sID);
         console.log("iID: ",iID);
+        console.log("brightID: ",brightID);
         //console.log(input["path"].getElementsByClassName("dStory"));
         brightLightID = document.getElementById(brightID);
         type="iCard";
@@ -1591,6 +1592,7 @@ function changeFocus(input){
         type="map";
     }
    
+    console.log("brightLightID: ",brightLightID);
 
     var iNoFocus = document.querySelectorAll('.dO-instance');
     iNoFocus.forEach(i => {
