@@ -17,6 +17,7 @@ def index():
 #########################
 ###### User login
 #########################
+#I will be adding more types of users
 
 @app.route("/<login_source>/sign_up", methods=["GET","POST"])
 def sign_upU(login_source):
