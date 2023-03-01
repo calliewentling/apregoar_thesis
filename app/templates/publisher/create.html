@@ -31,9 +31,11 @@
                         </span>
                     </div>
                 </div>
-                
-                <form name="addStory" id="formAddStory" action="{{ url_for('review') }}" method="post">
-                    
+                {% if channel == "commmunity" %}
+                <form name="addStory" id="formAddStory" action="{{ url_for('reviewC') }}" method="post">
+                {% else %}
+                <form name="addStory" id="formAddStory" action="{{ url_for('reviewP') }}" method="post">
+                {% endif %}
                     <!-- Required fields -->
                     <div class="row_local">
                         <label class="rigid" for="title">Título: </label>

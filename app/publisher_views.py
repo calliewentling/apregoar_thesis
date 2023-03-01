@@ -300,62 +300,70 @@ def sign_out():
 ###### Dashboard and Profile
 #########################
 
+def get_user_stories():
+    print("User recognized")
+    print("user: ",fsession["username"])
+    print("p_ids: ",fsession["p_ids"], type(fsession["p_ids"]))
+
+    try:
+        with engine.connect() as conn:
+            SQL = text("SELECT * FROM apregoar.stories WHERE u_id = :x ORDER BY pub_date DESC")
+            SQL = SQL.bindparams(x=fsession["u_id"])
+            result = conn.execute(SQL)
+    except:
+        print("Error in identifying stories from user")
+        feedback = f"Erro no login"
+        #return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"])
+        user_stories = []
+    else:
+        user_stories = []
+        for row in result:
+            u_story = {
+                row["s_id"] : {
+                    "title": row["title"],                            
+                    "date": row["pub_date"]
+                } 
+            }
+            user_stories.append(u_story)
+    finally: conn.close()
+    return user_stories
+
+def get_publisher_stories():
+    all_org_stories = {}
+    for p_id in fsession["p_ids"]:
+        print("p_id: ",p_id)
+        try:
+            with engine.connect() as conn:
+                SQL = text("SELECT * FROM apregoar.stories LEFT JOIN apregoar.publicationing ON stories.s_id = publicationing.story_id LEFT JOIN apregoar.publications ON publicationing.p_id = publications.publication_id WHERE p_id = :y")
+                SQL = SQL.bindparams(y=p_id)
+                result = conn.execute(SQL)
+        except:
+            print("Error in identifying stories from user publication")            
+        else:
+            org_stories = []
+            pub_name = ""
+            for row in result:
+                pub_name = row["publication_name"]
+                #print("pub_name: ",pub_name)
+                o_story = {
+                    row["s_id"] : {
+                        "title": row["title"],
+                        "date": row["pub_date"]
+                    }
+                }
+                #print("o_story: ",o_story)
+                org_stories.append(o_story)
+            all_org_stories[pub_name] = org_stories
+        print("all_org_stories: ",all_org_stories)
+    return all_org_stories
+
+
 @app.route("/publisher/dashboard")
 def publisher_dashboard():
     if not fsession.get("username") is None:
-        print("User recognized")
-        print("user: ",fsession["username"])
-        print("p_ids: ",fsession["p_ids"], type(fsession["p_ids"]))
-
-        try:
-            with engine.connect() as conn:
-                #SQL = text("SELECT * FROM apregoar.stories WHERE u_id = :x AND publication = :y")
-                SQL = text("SELECT * FROM apregoar.stories WHERE u_id = :x ORDER BY pub_date DESC")
-                SQL = SQL.bindparams(x=fsession["u_id"])
-                result = conn.execute(SQL)
-        except:
-            print("Error in identifying stories from user")
-            feedback = f"Erro no login"
-            return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"])
-        else:
-            user_stories = []
-            for row in result:
-                u_story = {
-                    row["s_id"] : {
-                        "title": row["title"],                            
-                        "date": row["pub_date"]
-                    } 
-                }
-                user_stories.append(u_story)
-        finally: conn.close()
-
+        user_stories = get_user_stories()
         if len(fsession["p_ids"]) > 0:
-            all_org_stories = {}
-            for p_id in fsession["p_ids"]:
-                print("p_id: ",p_id)
-                try:
-                    with engine.connect() as conn:
-                        SQL = text("SELECT * FROM apregoar.stories LEFT JOIN apregoar.publicationing ON stories.s_id = publicationing.story_id LEFT JOIN apregoar.publications ON publicationing.p_id = publications.publication_id WHERE p_id = :y")
-                        SQL = SQL.bindparams(y=p_id)
-                        result = conn.execute(SQL)
-                except:
-                    print("Error in identifying stories from user publication")            
-                else:
-                    org_stories = []
-                    pub_name = ""
-                    for row in result:
-                        pub_name = row["publication_name"]
-                        #print("pub_name: ",pub_name)
-                        o_story = {
-                            row["s_id"] : {
-                                "title": row["title"],
-                                "date": row["pub_date"]
-                            }
-                        }
-                        #print("o_story: ",o_story)
-                        org_stories.append(o_story)
-                    all_org_stories[pub_name] = org_stories
-                print("all_org_stories: ",all_org_stories)
+            all_org_stories = get_publisher_stories()
             return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories, allOrgStories = all_org_stories)
         return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"], userStories = user_stories)    
     else:
@@ -372,6 +380,31 @@ def publisher_profile():
 ###### New Story
 #########################
 
+
+def prep_story_vals(pre_pub_info):
+    publication_info = {}
+    for row in pre_pub_info:
+        #print("row['authors']",row["authors"])
+        authors = row["authors"]
+        print("authors (prepop): ",authors)
+        try:
+            authors.pop("1")
+            print("{1: '*sem valor'} removed")
+        except:
+            print("no need to remove {1: '*sem valor'}")
+        print("authors (postpop): ",authors)
+        pub_info = {
+            "publication_name": row["publication_name"],
+            "sections": row["main_sections"],
+            "tags": row["tags"],
+            "authors": authors,                        
+        }
+        publication_info[row["publication_id"]] = pub_info
+        #publication_info.append(pub_info)
+    print("publication_info: ",publication_info)
+    return publication_info
+
+
 @app.route("/publisher/addstory")
 def addstory():
     #Add selection of relevant values here: publication options, sections, authors, and tags
@@ -384,29 +417,10 @@ def addstory():
         print("Error in loading publisher info")
         return render_template("publisher/dashboard.html", username=fsession["username"], uID = fsession["u_id"], organization=fsession["org"])
     else:
-        publication_info = {}
-        for row in result:
-            #print("row['authors']",row["authors"])
-            authors = row["authors"]
-            print("authors (prepop): ",authors)
-            try:
-                authors.pop("1")
-                print("{1: '*sem valor'} removed")
-            except:
-                print("no need to remove {1: '*sem valor'}")
-            print("authors (postpop): ",authors)
-            pub_info = {
-                "publication_name": row["publication_name"],
-                "sections": row["main_sections"],
-                "tags": row["tags"],
-                "authors": authors,                        
-            }
-            publication_info[row["publication_id"]] = pub_info
-            #publication_info.append(pub_info)
-        print("publication_info: ",publication_info)
+        publication_info = prep_story_vals(result)
     finally: conn.close()
 
-    return render_template("publisher/create.html", publication_info = publication_info)
+    return render_template("publisher/create.html", publication_info = publication_info, formValue = "create_story", channel = "publish")
 
 @app.route("/publisher/<s_id>/review", methods=["GET","POST"])
 def review_e(s_id):
@@ -584,13 +598,9 @@ def coalesce(*values, valType):
         defaultVal = None
     return next((v for v in values if v is not None),defaultVal)
 
-@app.route("/publisher/review", methods=['POST'])
-def review():
-    print()
+def review(request):
     print("current user is: ",fsession["username"])
     print("current user id is: ",fsession["u_id"]) 
-    print()
-
     print("formType: ",request.form["formType"])
     print("request form: ",request.form)
     if request.form["formType"] == "create_story":
@@ -734,7 +744,12 @@ def review():
                     print("Unsuccessful refresh of materialized views")
                 con.commit()                   
                 con.close()
-                return redirect(url_for("review_e", s_id = s_id))
+                return s_id
+##Working here in publisher and community/review. Refactor existing review to "check_valid" and "save" functions". apply to both publish and community
+@app.route("/publisher/review", methods=['POST'])
+def reviewP():
+    s_id = review(request)
+    return redirect(url_for("review_e", s_id = s_id))
                 #return render_template("publisher/review.html", story=story, sID = s_id, instances = [])
     return render_template("publisher/dashboard.html")
 
