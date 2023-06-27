@@ -30,7 +30,7 @@ from shapely.geometry import Polygon, MultiPolygon
 from flask import request, redirect, jsonify, make_response, render_template, session as fsession, redirect, url_for
 from app import engine, session, text
 from werkzeug.utils import secure_filename
-from .publisher_views import get_user_stories, prep_story_vals
+from .publisher_views import get_user_stories, prep_story_vals, save_story, check_unique_url
 
 @app.route("/community/dashboard")
 def community_dashboard():
@@ -58,4 +58,7 @@ def addstoryC():
 
 @app.route("/community/review", methods=["GET","POST"])
 def reviewC():
-    return "We made it to reviewC!"
+    journey = "community"
+    check_unique_url(request,journey)
+    s_id = save_story(request, journey)
+    return redirect(url_for("review_eC",s_id=s_id))

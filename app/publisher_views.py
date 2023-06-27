@@ -598,11 +598,8 @@ def coalesce(*values, valType):
         defaultVal = None
     return next((v for v in values if v is not None),defaultVal)
 
-def review(request):
-    print("current user is: ",fsession["username"])
-    print("current user id is: ",fsession["u_id"]) 
-    print("formType: ",request.form["formType"])
-    print("request form: ",request.form)
+def check_unique_url(request, journey):
+    print("webLink: ",request.form["webLink"])
     if request.form["formType"] == "create_story":
         try:
             with engine.connect() as conn:
@@ -617,140 +614,153 @@ def review(request):
             existing_urls = []
             for row in result:
                 existing_urls.append(row["web_link"])
-            #print(existing_urls)
-            if "section" in request.form.keys():
-                sections = coalesce(request.form["section"].lower(),valType="str")
-            else:
-                sections = ""
-            if "author" in request.form.keys():
-                author = coalesce(request.form["author"].lower(),valType="str")
-            else:
-                author = ""
-            story = {
-                ##Required
-                "title": request.form["title"],
-                "pub_date": request.form["pubDate"],
-                "web_link": request.form["webLink"],
-                "publication": request.form["publication"].lower(),
-                ##Optional 
-                "summary": request.form["summary"],
-                "section" : sections, 
-                "tags": request.form["tags"].lower(),
-                "author": author,
-            }
+        if request.form["webLink"] in existing_urls:
+            print("URL already associated with another story")
+            if journey == "community":
+                return redirect(url_for("addstoryC"))                
+            return redirect(url_for("addstory"))
+        return
+        
+def save_story(request, journey):
+    print("current user is: ",fsession["username"])
+    print("current user id is: ",fsession["u_id"]) 
+    print("formType: ",request.form["formType"])
+    print("request form: ",request.form)
+    
+    #print(existing_urls)
+    if "section" in request.form.keys():
+        sections = coalesce(request.form["section"].lower(),valType="str")
+    else:
+        sections = ""
+    if "author" in request.form.keys():
+        author = coalesce(request.form["author"].lower(),valType="str")
+    else:
+        author = ""
+    story = {
+        ##Required
+        "title": request.form["title"],
+        "pub_date": request.form["pubDate"],
+        "web_link": request.form["webLink"],
+        "publication": request.form["publication"].lower(),
+        ##Optional 
+        "summary": request.form["summary"],
+        "section" : sections, 
+        "tags": request.form["tags"].lower(),
+        "author": author,
+    }
 
-            if story["web_link"] in existing_urls:
-                print("URL already associated with another story")                
-                return redirect(url_for("addstory"))
-
-            #Prepare & Submit
-            con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
-            try:
-                with con:
-                    with con.cursor() as cur:
-                        cur.execute("""
-                            INSERT INTO apregoar.stories (title, summary, pub_date, web_link, section, tags, author, publication, u_id, created, edited)
-                            VALUES (%(title)s,%(summary)s,%(pub_date)s,%(web_link)s,%(section)s, %(tags)s, %(author)s,%(publication)s,%(u_id)s, NOW(), NOW())
-                            RETURNING s_id
-                            ;""",
-                            {'title':story["title"],'summary':story["summary"], 'pub_date':story["pub_date"], 'web_link': story["web_link"], 'section': story["section"], 'tags': story["tags"], 'author': story["author"], 'publication':story["publication"], 'u_id':fsession["u_id"]}
-                        )
-                        s_id = cur.fetchone()[0]
-                        print("Story added to database. s_id: ",s_id)
-                        
-            except psycopg2.Error as e:
-                #If not submitted, attempt to create again
-                print(e.pgerror)
-                print(e.diag.message_primary)
-                feedback = f"Excepção: a história não ficou guardada. Erro: "+e.pgerror+", "+e.diag.message_primary
-                flash(feedback, "danger")
-                con.rollback()
-                con.close()
-                return redirect(url_for("addstory"))
-                #return render_template("publisher/create.html")
+    #Prepare & Submit
+    con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+    try:
+        with con:
+            with con.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO apregoar.stories (title, summary, pub_date, web_link, section, tags, author, publication, u_id, created, edited)
+                    VALUES (%(title)s,%(summary)s,%(pub_date)s,%(web_link)s,%(section)s, %(tags)s, %(author)s,%(publication)s,%(u_id)s, NOW(), NOW())
+                    RETURNING s_id
+                    ;""",
+                    {'title':story["title"],'summary':story["summary"], 'pub_date':story["pub_date"], 'web_link': story["web_link"], 'section': story["section"], 'tags': story["tags"], 'author': story["author"], 'publication':story["publication"], 'u_id':fsession["u_id"]}
+                )
+                s_id = cur.fetchone()[0]
+                print("Story added to database. s_id: ",s_id)
+                
+    except psycopg2.Error as e:
+        #If not submitted, attempt to create again
+        print(e.pgerror)
+        print(e.diag.message_primary)
+        feedback = f"Excepção: a história não ficou guardada. Erro: "+e.pgerror+", "+e.diag.message_primary
+        flash(feedback, "danger")
+        con.rollback()
+        con.close()
+        if journey == "community":
+            return redirect(url_for("addstoryC"))
+        return redirect(url_for("addstory"))
+        #return render_template("publisher/create.html")
+    else:
+        story["s_id"] = s_id
+        #Saving Tags
+        if story["tags"]:
+            tags = story["tags"].split(",")
+            for tag in tags:
+                tag=tag.strip()
+                if tag == "":
+                    tags.remove(tag)
+                if tag == " ":
+                    tags.remove(tag)
+            if len(tags)>0:
+                savingAttributes(attr = "tag",s_id=s_id,con=con,attr_vals=tags)
             else:
-                story["s_id"] = s_id
-                #Saving Tags
-                if story["tags"]:
-                    tags = story["tags"].split(",")
-                    for tag in tags:
-                        tag=tag.strip()
-                        if tag == "":
-                            tags.remove(tag)
-                        if tag == " ":
-                            tags.remove(tag)
-                    if len(tags)>0:
-                        savingAttributes(attr = "tag",s_id=s_id,con=con,attr_vals=tags)
-                    else:
-                        print("Actually, no real tags associated")
-                        emptyAttribute(attr="tag", s_id = s_id, con=con)
-                else:  
-                    print("No tags associated")
-                    emptyAttribute(attr="tag", s_id = s_id, con=con) 
-                #Saving Authors
-                if story["author"]:
-                    authors = story["author"].split(",")
-                    for author in authors:
-                        author = author.strip()
-                        if author == "":
-                            authors.remove(author)
-                        if author == " ":
-                            authors.remove(author)
-                    if len(authors)>0:
-                        savingAttributes(attr = "author",s_id=s_id,con=con,attr_vals=authors)
-                    else:
-                        print("Actually, no real authors associated")
-                        emptyAttribute(attr="author", s_id = s_id, con=con)
-                else:  
-                    print("No authors associated")
-                    emptyAttribute(attr="author", s_id = s_id, con=con)
-                #Saving Sections
-                if story["section"]:
-                    section = story["section"]
-                    section = section.strip()
-                    if section == "":
-                        emptyAttribute(attr="section", s_id = s_id, con=con)
-                    elif section == " ":
-                        emptyAttribute(attr="section", s_id = s_id, con=con)
-                    else:
-                        savingAttributes(attr = "section",s_id=s_id,con=con,attr_vals=[section])
-                        
-                else:  
-                    print("No authors associated")
-                    emptyAttribute(attr="section", s_id = s_id, con=con)
-                #Saving Publication
-                if story["publication"]:
-                    publication = story["publication"]
-                    if publication == "":
-                        publication_id = emptyAttribute(attr="publication", s_id = s_id, con=con)
-                    elif publication == " ":
-                        publication_id = emptyAttribute(attr="publication", s_id = s_id, con=con)
-                    else:
-                        publication_id = savingAttributes(attr = "publication",s_id=s_id,con=con,attr_vals=[publication])
-                    pub_query = "REFRESH MATERIALIZED VIEW apregoar.geonoticias_"+str(publication_id)+";"
-                else:  
-                    print("No publications associated")
-                    emptyAttribute(attr="publication", s_id = s_id, con=con)
-                try:
-                    with con:
-                        with con.cursor() as cur:
-                            cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
-                            print("successful refresh of publiction_info materialized view")
-                            cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
-                            print("Refreshed geonoticias materialized view")
-                            cur.execute(pub_query)
-                            print(pub_query)
-                except:
-                    print("Unsuccessful refresh of materialized views")
-                con.commit()                   
-                con.close()
-                return s_id
+                print("Actually, no real tags associated")
+                emptyAttribute(attr="tag", s_id = s_id, con=con)
+        else:  
+            print("No tags associated")
+            emptyAttribute(attr="tag", s_id = s_id, con=con) 
+        #Saving Authors
+        if story["author"]:
+            authors = story["author"].split(",")
+            for author in authors:
+                author = author.strip()
+                if author == "":
+                    authors.remove(author)
+                if author == " ":
+                    authors.remove(author)
+            if len(authors)>0:
+                savingAttributes(attr = "author",s_id=s_id,con=con,attr_vals=authors)
+            else:
+                print("Actually, no real authors associated")
+                emptyAttribute(attr="author", s_id = s_id, con=con)
+        else:  
+            print("No authors associated")
+            emptyAttribute(attr="author", s_id = s_id, con=con)
+        #Saving Sections
+        if story["section"]:
+            section = story["section"]
+            section = section.strip()
+            if section == "":
+                emptyAttribute(attr="section", s_id = s_id, con=con)
+            elif section == " ":
+                emptyAttribute(attr="section", s_id = s_id, con=con)
+            else:
+                savingAttributes(attr = "section",s_id=s_id,con=con,attr_vals=[section])
+                
+        else:  
+            print("No authors associated")
+            emptyAttribute(attr="section", s_id = s_id, con=con)
+        #Saving Publication
+        if story["publication"]:
+            publication = story["publication"]
+            if publication == "":
+                publication_id = emptyAttribute(attr="publication", s_id = s_id, con=con)
+            elif publication == " ":
+                publication_id = emptyAttribute(attr="publication", s_id = s_id, con=con)
+            else:
+                publication_id = savingAttributes(attr = "publication",s_id=s_id,con=con,attr_vals=[publication])
+            pub_query = "REFRESH MATERIALIZED VIEW apregoar.geonoticias_"+str(publication_id)+";"
+        else:  
+            print("No publications associated")
+            emptyAttribute(attr="publication", s_id = s_id, con=con)
+        try:
+            with con:
+                with con.cursor() as cur:
+                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.publication_info")
+                    print("successful refresh of publiction_info materialized view")
+                    cur.execute("REFRESH MATERIALIZED VIEW apregoar.geonoticias")
+                    print("Refreshed geonoticias materialized view")
+                    cur.execute(pub_query)
+                    print(pub_query)
+        except:
+            print("Unsuccessful refresh of materialized views")
+        con.commit()                   
+        con.close()
+        return s_id
 ##Working here in publisher and community/review. Refactor existing review to "check_valid" and "save" functions". apply to both publish and community
 @app.route("/publisher/review", methods=['POST'])
 def reviewP():
-    s_id = review(request)
+    journey = "publisher"
+    check_unique_url(request,journey)
+    s_id = save_story(request,journey)
     return redirect(url_for("review_e", s_id = s_id))
-                #return render_template("publisher/review.html", story=story, sID = s_id, instances = [])
+    #return render_template("publisher/review.html", story=story, sID = s_id, instances = [])
     return render_template("publisher/dashboard.html")
 
 def savingAttributes(attr,s_id,con,attr_vals):
