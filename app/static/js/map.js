@@ -264,7 +264,8 @@ fetch(wfs_url).then(function (response) {
     const features = new ol.format.GeoJSON().readFeatures(json);
     console.log("Features: ",features);
     if (features.length>0){
-        if (features[0]["A"]["st_astext"]) {
+        console.log("features[0]['A']['all_gaz_text']: ",features[0]['A']['all_gaz_text']);
+        if (features[0]["A"]["all_gaz_text"]) {
             console.log("Arrival to add features and future zoom")
             vectorSource.addFeatures(features);
             layerExtent = vectorSource.getExtent();

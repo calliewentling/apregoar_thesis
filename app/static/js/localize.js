@@ -179,7 +179,7 @@ fetch(wfs_url_story).then(function (response) {
 .then(function (jsonS) {
     const featuresS = new ol.format.GeoJSON().readFeatures(jsonS);
     console.log("Features: ",featuresS);
-    if (featuresS[0]["A"]["st_astext"]) {
+    if (featuresS[0]["A"]["all_gaz_text"]) {
         vectorSourceStories.addFeatures(featuresS);
         layerExtent = zoomGaz(vectorSource = vectorSourceStories);
     }

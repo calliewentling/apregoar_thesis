@@ -548,6 +548,7 @@ function loadSourceToExplore(wfs_url, loadType) {
             url = wfs_url;
             var xhr = new XMLHttpRequest();
             xhr.open('GET',url);
+            //xhr.setRequestHeader("Content-Type","text/html");
             var onError = function() {
                 console.log("Error in loading vector source");
                 tempSource.removeLoadedExtent(extent);
@@ -1361,13 +1362,28 @@ function removeHighlights(itsTime){
     //return true;
 };
 
+function isEmpty(obj){
+    for (const prop in obj){
+        if (Object.hasOwn(obj,prop)){
+            return false;
+        }
+    }
+    return true;
+}
+
+
 function renderDeets(cardD){
     console.log("Entering renderDeets w cardD: ",cardD);
     console.log("noDeets: ",document.getElementById("noDeets"));
-
     document.getElementById("noDeets").style.display="none";
+
+    if (isEmpty(cardD)==true){
+        console.log("no cardD")
+        return
+    }
         
     var deetsAll = document.getElementById('deetsAll');
+    console.log("deetsAll: ", deetsAll);
     console.log("deetsOverlay: ",deetsOverlay);
 
     var deetsOverlay = document.createElement('div');
