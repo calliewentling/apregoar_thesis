@@ -186,7 +186,7 @@ def sign_up():
                 count += 1
             print(count)
             if count == 0:
-                con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+                con = psycopg2.connect("dbname=postgres user=postgres password=thesis21") #previous password: thesis2021
                 try:
                     with con:
                         with con.cursor() as cur:
@@ -417,7 +417,7 @@ def review_e(s_id):
         print(delete_req)
         delete_inst = []
         delete_story = []
-        con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+        con = psycopg2.connect("dbname=postgres user=postgres password=thesis21") #previous password: thesis2021
         for key in delete_req.keys():
             #Deleting a story and all instances
             if "deleteStory" in key:
@@ -634,7 +634,7 @@ def review():
                 return redirect(url_for("addstory"))
 
             #Prepare & Submit
-            con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+            con = psycopg2.connect("dbname=postgres user=postgres password=thesis21") #previous password: thesis2021
             try:
                 with con:
                     with con.cursor() as cur:
@@ -1186,7 +1186,7 @@ def save_instance(s_id):
     print("p_ids: ",p_ids)
 
     #Define connection
-    con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+    con = psycopg2.connect("dbname=postgres user=postgres password=thesis21") #previous password: thesis2021
     
     #BEGIN EDITS
     try:

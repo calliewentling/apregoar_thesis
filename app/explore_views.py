@@ -38,7 +38,7 @@ from app import engine, session, text
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-engine = create_engine('postgresql+psycopg2://postgres:thesis2021@localhost/postgres', convert_unicode=True)
+engine = create_engine('postgresql+psycopg2://postgres:thesis21@localhost/postgres', convert_unicode=True) #previous password: thesis2021
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))

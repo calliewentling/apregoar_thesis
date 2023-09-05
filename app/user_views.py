@@ -64,7 +64,7 @@ def sign_upU(login_source):
                 count += 1
             print(count)
             if count == 0:
-                con = psycopg2.connect("dbname=postgres user=postgres password=thesis2021")
+                con = psycopg2.connect("dbname=postgres user=postgres password=thesis21")#previous password: thesis2021
                 try:
                     with con:
                         with con.cursor() as cur:

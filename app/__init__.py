@@ -15,7 +15,7 @@ from geoalchemy2 import *
 
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:thesis2021@localhost/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:thesis21@localhost/postgres' #previous password: thesis2021
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemyF(app)
 
@@ -25,7 +25,9 @@ try:
 except OSError:
     pass
 
-engine = create_engine('postgresql://postgres:thesis2021@localhost/postgres', echo=False)
+
+engine = create_engine('postgresql://postgres:thesis21@localhost/postgres', echo=False) #previous password: thesis2021
+
 #Session = sessionmaker(bind=engine)
 Session = sessionmaker(engine) #as per https://docs.sqlalchemy.org/en/14/orm/session_basics.html#basics-of-using-a-session
 session = Session()
@@ -46,9 +48,7 @@ def shutdown_session(response_or_exc):
     flask.g.session.commit()
     flask.g.session.close()
 
-from app import user_views
 from app import publisher_views
 from app import jornal_views
 from app import explore_views
-
-
+from app import user_views
