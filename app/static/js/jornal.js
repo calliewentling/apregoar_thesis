@@ -1477,3 +1477,5 @@ function showMoreSections(){
 function zoomAllResults(){
     map.getView().fit(ol.extent.buffer(vSource.getExtent(), .001));
 }
+
+badIFrame();

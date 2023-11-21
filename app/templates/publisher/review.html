@@ -40,16 +40,16 @@
         <div class="card">
           <div class = "card-body">
             <div class="row_local">
-              <h2>Instâncias</h2>
+              <h2>Localizações</h2>
               <div class="toolTipL">
                   <i class="material-icons">info_outline</i>
                   <span class="tooltiptext">
-                    <p>Instâncias descrevem os aspetos spaciais e temporais dos conteudos das instâncias.</p><br>
+                    <p>Localizações ajudam com a contextualização dos leitores, bem como o seu próprio geração dos conteúdos em espaço.</p><br>
                     <p>Podem descrever os eventos, no futuro ou passado, ou ajuda com a contextualização da história.</p><br>
-                    <p>Pode associar zero, um, ou algumas instâncias à notícia.</p><br>
-                    <p>O mapa mostra as instâncias já associadas com a notícia.</p><br>
-                    <p>Para remover uma ou mais instâncias, seleciona as instâncias e carrega "Eliminar".</p><br>
-                    <p>Para remover a notícia completa, seleciona "Eliminar notícia e todas as instâncias associadas" e carrega "Eliminar".</p><br>
+                    <p>Pode associar zero, um, ou algumas localizações à notícia.</p><br>
+                    <p>O mapa mostra as localizações já associadas com a notícia.</p><br>
+                    <p>Para remover uma ou mais localizações, seleciona os nomes e carrega "Eliminar".</p><br>
+                    <p>Para remover a notícia completa, seleciona "Eliminar notícia e todas as localizações associadas" e carrega "Eliminar".</p><br>
                     <p>Acções de eliminação não podem ser desfeitas.</p>
                   </span>
               </div>
@@ -169,7 +169,7 @@
     console.log(mapStoryFilter);
 
     var deleteStory = document.getElementById("deleteStoryArea");
-    deleteStoryArea.innerHTML = '<input id = '+deleteStoryID+' name = '+ deleteStoryID+' type="checkbox" onclick=temCerteza() class = "deleteStory"> Eliminar notícia e todas as instâncias associadas.';
+    deleteStoryArea.innerHTML = '<input id = '+deleteStoryID+' name = '+ deleteStoryID+' type="checkbox" onclick=temCerteza() class = "deleteStory"> Eliminar notícia e todas as localizações associadas.';
 
     function temCerteza(){
       console.log("Entered temCerteza")

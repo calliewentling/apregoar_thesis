@@ -193,10 +193,26 @@ var map = new ol.Map({
     view: view,
 });
 
-const backDrop = new ol.layer.Tile({
+const backDropX = new ol.layer.Tile({
     source: new ol.source.Stamen({
         layer: 'toner-lines',
     }),
+});
+
+const backDrop = new ol.layer.Tile({
+    // Configure an XYZ source
+    source: new ol.source.XYZ({
+        // See our style gallery for more: https://docs.stadiamaps.com/themes/
+        url: 'https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}@2x.png',
+        attributions: [
+          '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>',
+          '&copy; <a href="https://stamen.com/" target="_blank">Stamen Design</a>',  // Required for Stamen styles
+          '&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>',
+          '&copy; <a href="https://www.openstreetmap.org/about/" target="_blank">OpenStreetMap contributors</a>'
+        ],
+        tilePixelRatio: 2,  // Set to 2 for retina/hidpi tiles. Not supported by Stamen Watercolor.
+        maxZoom: 20  // Max zoom should be 16 for Stamen Watercolor
+    })
 });
 
 map.addLayer(backDrop);

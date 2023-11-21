@@ -77,12 +77,12 @@
         <hr>
 
         <div class="row_local">
-            <p>Definir uma instância (tempo e sítio) da notícia </p>
+            <p>Definir um tempo e local da notícia </p>
             <div class="toolTipL">
                 <i class="material-icons">info_outline</i>
                 <span class="tooltiptext">
-                    <p>Cada instância é uma oportunidade de elaborar onde e quando uma coisa está a acontacer.</p> <br>
-                    <p>Cada notícia pode ter algumas notícias, e cada instância pode ter alguns sítios (polígonos).</p> <br>
+                    <p>Cada localização é uma oportunidade de elaborar onde e quando um acontecimento.</p> <br>
+                    <p>Cada notícia pode ter algumas localizações, e cada localização pode ter alguns sítios (polígonos).</p> <br>
                     <p>Escreve um ou mas polígonos aqui, dar um nome (não precisa de ser oficial) e uma descrição. </p><br>
                     <p>Definir as datas do início e o fim, um tipo de interval temporal, e afinal um descrição.</p></span>
             </div>
@@ -90,11 +90,11 @@
         <form method="POST" action="review">
             <div class="card" id="eventInfo">
                 <div class="row_local">
-                    <h2>Descrever a instância</h2>
+                    <h2>Descrever a localização</h2>
                     <div class="toolTipL">
                         <i class="material-icons">info_outline</i>
                         <span class="tooltiptext">
-                            <p>Estas informaçoes ajudam com avaliação das instâncias e suas distribuições.</p><br>
+                            <p>Estas informaçoes ajudam com avaliação das localizações e as suas distribuições.</p><br>
                             <p>Podem ser visíveis nas vistas de exploração e monitorização.</p>
                         </span>
                     </div>
@@ -123,16 +123,16 @@
             <div class="card" id="temporal_dez">
                 <!-- TEMPORAL -->
                 <div class="row_local">
-                    <h2>Associar uma altura</h2>
+                    <h2>Associar dia e hora</h2>
                     <div class="toolTipL">
                         <i class="material-icons">info_outline</i>
                         <span class="tooltiptext">
-                            <p>As alturas ajuda com a filtração e organização das instâncias. </p><br>
+                            <p>As dias e horas ajuda com a filtração e organização dos artigos. </p><br>
                             <p>São visíveis nas vistas da contextualização, exploração, publicação, e monitorização.</p><br>
-                            <p>Quando será possível, define as alturas mais específicas.</p><br>
+                            <p>Quando será possível, define até as horas mais específicas.</p><br>
                             <p>No caso que não tem dias específicas, pode marcar "Persistente".</p><br>
-                            <p>A descrição pode dar mais contexto para a altura.</p><br>
-                            <p>No modo do contextualização, não vai associar uma altura.</p>
+                            <p>A descrição pode dar mais contexto para as dias e horas.</p><br>
+                            <p>No modo do contextualização, não vai associar nem um dia nem uma hora.</p>
                         </span>
                     </div>
                 </div>
@@ -161,7 +161,7 @@
                         </div>
                         <div class="row_local">
                             <label for="tDesc" style="flex:30%">Descrição temporal: </label>
-                            <input type="text" id="tDesc" name="tDesc" placeholder="Descrição da altura">
+                            <input type="text" id="tDesc" name="tDesc" placeholder="Descrição de dia e hora">
                         </div>
                         
                     </div>
@@ -170,25 +170,25 @@
 
             <div class="card">
                 <div class="row_local">
-                    <h2>Localizar a instância</h2>
+                    <h2>Localizar</h2>
                     <div class="toolTipL">
                         <i class="material-icons">info_outline</i>
                         <span class="tooltiptext">
                             <p>As localizações ajudam leitores de contextualizar a notícia.</p><br>
                             <p>Localizações são visíveis nas ferramentas de publicação, contextualização, exploração e monitorização</p><br>
                             <p>Cada sítio obriga pelo menos um localiação, mas pode definir mais. </p><br>
-                            <p>Pode reutilizar sítios já existentes nos gazetteers ou definir sítios novos. Pode utilizar uma mixtura dos existentes e novos a vontade.</p><br>
+                            <p>Pode reutilizar sítios já existentes ou definir sítios novos. Pode utilizar uma mixtura dos existentes e novos a vontade.</p><br>
                         </span>
                     </div>
                 </div>
                 <div id="selectName">
                     <div class="row_local">
-                        <label for="eDesc" style="flex:20%">Nome do locale:</label>
+                        <label for="eDesc" style="flex:20%">Nome do local:</label>
                         <input type="text" id="pName" name="pName" placeholder="Nome do sítio" required>
                         <span class="error" aria-live="polite"></span>
                     </div>
                     <div class="row_local">
-                        <label for="eDesc" style="flex:20%">Descrição do locale:</label>
+                        <label for="eDesc" style="flex:20%">Descrição do local:</label>
                         <!--<div id="selectDesc">-->
                         <input type="text" id="pDesc" name="pDesc" placeholder="Descrição do sítio">
                     </div>
@@ -199,17 +199,17 @@
                 <div class="card">
                     <button type="button"class="collapsible">
                         <div class="row_local">
-                            <h3>Pesquisar gazetteers</h3>
+                            <h3>Pesquisar locais</h3>
                             <div class="toolTipL">
                                 <i class="material-icons">info_outline</i>
                                 <span class="tooltiptext">
-                                    <p>Pode carregar gazetteers individualmente (nos butões "Carregar") ou pesquisar todas as gazetteers no mesmo tempo. Resultados são organizados por tipo.</p><br>
+                                    <p>Pode carregar locais individualmente (nos butões "Carregar") ou pesquisar todas as locais no mesmo tempo. Resultados são organizados por tipo.</p><br>
                                     <p>Para utilizar, selecionar pelo menos uma opção e carrega a butão "Prever" para visualizar no mapa.</p> <br>
                                     <p>Para selecionar mais de que uma opção no mesmo tempo, carrega "CTRL" enquanto está a selecionar.</p><br>
-                                    <p>Todos dos nomes dos gazetteers selectionados ficam no título da gazetteer.</p>
-                                    <p>Ver o número dos gazetteers selecionados na seccão "áreas desinhadas" abaixo do mapa.</p>
+                                    <p>Todos dos nomes dos locais selectionados ficam no título dos locais.</p>
+                                    <p>Ver o número dos locais selecionados na seccão "áreas desinhadas" abaixo do mapa.</p>
                                     <p>Para remover, deselecionar a área. </p><br>
-                                    <p>No momento de aguarda, todas as áreas desenhadas/selecionadas no mapa serão associadas à instância.</p>
+                                    <p>No momento de aguarda, todas as áreas desenhadas/selecionadas no mapa serão associadas à localização.</p>
                                 </span>
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                     <div class="contentCollapse">
                         <div class="row_local">
                             <div style="flex:70%">
-                                <input type="text" id="gazSearch" name="gazSearch" placeholder="Pesquisar todos dos sítios nos gazetteers">
+                                <input type="text" id="gazSearch" name="gazSearch" placeholder="Pesquisar todos dos locais">
                             </div>
                             <div style="flex:30%">
                                 <button type="button" class="btn btn-primary" onclick="searchGazPrev('gaz_prev')">Pesquisar</button>
@@ -289,7 +289,7 @@
                             </div>
                         </div>
                         <!-- Other gazetteer -->
-                        <button type="button" class="collapsible"><p>Gazetteers externais <span id="bOgazAll"></span><span id="sOgazAll"></span></p></button>
+                        <button type="button" class="collapsible"><p>Locais externais <span id="bOgazAll"></span><span id="sOgazAll"></span></p></button>
                         <div class="contentCollapse" style="display:none">
                             <button type="button" class="collapsible"><p>Open Street Map <span id="bOgazOsm"></span><span id="sOgazOsm"></span></p></button>
                             <div class="contentCollapse" style="display:none">
@@ -300,7 +300,7 @@
                             </div>
                         </div><br>
 
-                        <button type="button" class="btn btn-primary btn-big" onclick="initGaz(initSource='prever')">Prever</button>
+                        <button type="button" class="btn btn-primary btn-big" onclick="initGaz(initSource='prever')">Visualizar localização</button>
                         <br>
 
                     </div>
@@ -413,7 +413,7 @@
             </div>
             
             <div class="card">
-                <h2> Guardar instância</h2>
+                <h2> Guardar localização</h2>
                 <h3 id="validation" style="display:none">Validação</h3>
                 <div id="successAnnouncement">
                     <p>Se faz favor: assinar todos dos campos necesários</p>
